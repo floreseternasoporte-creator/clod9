@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test del Sistema de Detección de Intentos Duplicados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Nunito', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .test-case {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00A2FF;
+        }
+        
+        .test-case h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .test-case p {
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .steps {
+            background: #f0f7ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .steps ol {
+            margin-left: 20px;
+        }
+        
+        .steps li {
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .expected {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .debug-section {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .debug-line {
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #00A2FF;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0066CC;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 162, 255, 0.4);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        code {
+            background: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #00A2FF;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .info-box h4 {
+            color: #00A2FF;
+            margin-bottom: 5px;
+        }
+        
+        .info-box p {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        
+        .status-success {
+            background: #28a745;
+        }
+        
+        .status-error {
+            background: #dc3545;
+        }
+        
+        .status-warning {
+            background: #ffc107;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Test del Sistema de Detección de Intentos Duplicados</h1>
+        
+        <!-- Sección de Información -->
+        <div class="test-section">
+            <h2>ℹ️ Información del Sistema</h2>
+            <div class="info-box">
+                <h4>¿Cómo funciona?</h4>
+                <p>El sistema detecta cuando un usuario intenta enviar un correo de recuperación nuevamente después de:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Reiniciar la aplicación/navegador</li>
+                    <li>Dentro de 15 minutos del intento anterior</li>
+                    <li>Con el mismo correo electrónico</li>
+                </ul>
+                <p style="margin-top: 10px;">Si se detecta esto, se mostrará un CAPTCHA para verificar que es un humano.</p>
+            </div>
+        </div>
+        
+        <!-- Test Case 1 -->
+        <div class="test-section">
+            <h2>Test Case 1: Primer Intento (Sin CAPTCHA)</h2>
+            <div class="test-case">
+                <h3>📝 Escenario: Primer envío de correo de recuperación</h3>
+                <p><strong>Objetivo:</strong> Verificar que el primer intento no requiere CAPTCHA</p>
+                
+                <div class="steps">
+                    <ol>
+                        <li>Abre el navegador normalmente</li>
+                        <li>Ve a la pantalla de "¿Olvidaste tu contraseña?"</li>
+                        <li>Ingresa un email válido (ej: test@example.com)</li>
+                        <li>Haz click en "Enviar enlace"</li>
+                    </ol>
+                </div>
+                
+                <div class="expected">
+                    ✅ Esperado: El correo debe enviarse sin mostrar CAPTCHA
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="simulateFirstAttempt()">Simular Primer Intento</button>
+                    <button class="btn-warning" onclick="viewLocalStorage()">Ver localStorage</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test Case 2 -->
+        <div class="test-section">
+            <h2>Test Case 2: Intento Duplicado (Con CAPTCHA)</h2>
+            <div class="test-case">
+                <h3>🔄 Escenario: Reinicio del navegador y nuevo intento</h3>
+                <p><strong>Objetivo:</strong> Verificar que se muestra CAPTCHA para intentos duplicados</p>
+                
+                <div class="steps">
+                    <ol>
+                        <li>Realiza el Test Case 1 (primer intento)</li>
+                        <li>Recarga la página (F5 o Cmd+R)</li>
+                        <li>Repite los pasos 2-4 con el MISMO email</li>
+                    </ol>
+                </div>
+                
+                <div class="expected">
+                    ✅ Esperado: Debe aparecer el modal de CAPTCHA
+                </div>
+                
+                <div class="warning">
+                    ⚠️ Nota: El cambio de sesión se detecta automáticamente por el cambio de sessionId
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="simulateDuplicateAttempt()">Simular Intento Duplicado</button>
+                    <button class="btn-danger" onclick="clearLocalStorage()">Limpiar localStorage</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test Case 3 -->
+        <div class="test-section">
+            <h2>Test Case 3: Email Diferente (Sin CAPTCHA)</h2>
+            <div class="test-case">
+                <h3>📧 Escenario: Uso de email diferente</h3>
+                <p><strong>Objetivo:</strong> Verificar que emails diferentes no disparan CAPTCHA</p>
+                
+                <div class="steps">
+                    <ol>
+                        <li>Realiza el Test Case 1 (primer intento con email1@test.com)</li>
+                        <li>Recarga la página</li>
+                        <li>Intenta con diferente email (email2@test.com)</li>
+                    </ol>
+                </div>
+                
+                <div class="expected">
+                    ✅ Esperado: Debe enviar sin CAPTCHA porque es diferente email
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="simulateDifferentEmail()">Simular Email Diferente</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test Case 4 -->
+        <div class="test-section">
+            <h2>Test Case 4: Período de Espera (15 minutos)</h2>
+            <div class="test-case">
+                <h3>⏱️ Escenario: Verificar período de espera de 15 minutos</h3>
+                <p><strong>Objetivo:</strong> Verificar que después de 15 minutos se puede enviar sin CAPTCHA</p>
+                
+                <div class="steps">
+                    <ol>
+                        <li>Realiza el Test Case 1 (primer intento)</li>
+                        <li>Espera 15 minutos O usa el botón de prueba</li>
+                        <li>Intenta enviar el mismo email nuevamente</li>
+                    </ol>
+                </div>
+                
+                <div class="expected">
+                    ✅ Esperado: Debe permitir enviar sin CAPTCHA después de 15 min
+                </div>
+                
+                <div class="warning">
+                    ⚠️ Para pruebas rápidas: Usa el botón "Simular después de 15 min"
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="simulateAfter15Min()">Simular después de 15 min</button>
+                    <button class="btn-warning" onclick="viewAttemptData()">Ver datos del intento</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Debug Panel -->
+        <div class="test-section">
+            <h2>🐛 Panel de Debug</h2>
+            
+            <table>
+                <tr>
+                    <th>Variable</th>
+                    <th>Valor</th>
+                    <th>Descripción</th>
+                </tr>
+                <tr>
+                    <td><code>sessionId</code></td>
+                    <td id="debug-session" style="font-family: monospace; font-size: 11px;">-</td>
+                    <td>ID único de la sesión actual</td>
+                </tr>
+                <tr>
+                    <td><code>lastAttemptEmail</code></td>
+                    <td id="debug-email" style="font-family: monospace; font-size: 11px;">-</td>
+                    <td>Email del último intento</td>
+                </tr>
+                <tr>
+                    <td><code>lastAttemptTime</code></td>
+                    <td id="debug-time" style="font-family: monospace; font-size: 11px;">-</td>
+                    <td>Hora del último intento</td>
+                </tr>
+                <tr>
+                    <td><code>timeSinceLastAttempt</code></td>
+                    <td id="debug-elapsed" style="font-family: monospace; font-size: 11px;">-</td>
+                    <td>Tiempo transcurrido desde el último intento</td>
+                </tr>
+            </table>
+            
+            <div class="button-group">
+                <button class="btn-primary" onclick="updateDebugInfo()">Actualizar Debug Info</button>
+                <button class="btn-warning" onclick="exportDebugLog()">Exportar Reporte</button>
+                <button class="btn-danger" onclick="resetAllTests()">Resetear Todo</button>
+            </div>
+            
+            <div class="debug-section" id="debug-output">
+                <div class="debug-line">Logs aparecerán aquí...</div>
+            </div>
+        </div>
+        
+        <!-- Notas importantes -->
+        <div class="test-section">
+            <h2>📌 Notas Importantes</h2>
+            <ul style="margin-left: 20px; color: #333; line-height: 1.8;">
+                <li><strong>localStorage:</strong> Se guarda bajo la clave <code>recovery_attempt_data</code></li>
+                <li><strong>sessionStorage:</strong> Se usa para el <code>session_id</code> que cambia con cada recarga</li>
+                <li><strong>Período de espera:</strong> 15 minutos = 900,000 milisegundos</li>
+                <li><strong>CAPTCHA:</strong> Usa reCAPTCHA v3 o fallback a problema matemático</li>
+                <li><strong>Testing:</strong> Puedes limpiar localStorage para comenzar nuevas pruebas</li>
+                <li><strong>Firefox/Chrome DevTools:</strong> Abre Application > Storage para ver localStorage</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Funciones de utilidad para testing
+        
+        function addLog(message) {
+            const debugOutput = document.getElementById('debug-output');
+            const line = document.createElement('div');
+            line.className = 'debug-line';
+            const timestamp = new Date().toLocaleTimeString();
+            line.textContent = `[${timestamp}] ${message}`;
+            debugOutput.appendChild(line);
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+        }
+        
+        function simulateFirstAttempt() {
+            addLog('🔵 Iniciando Test Case 1: Primer Intento');
+            const email = 'test@example.com';
+            const sessionId = 'session_' + Date.now();
+            
+            const attemptData = {
+                email,
+                sessionId,
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('recovery_attempt_data', JSON.stringify(attemptData));
+            addLog(`✅ Intento registrado: ${email}`);
+            addLog(`📊 SessionID: ${sessionId}`);
+            updateDebugInfo();
+        }
+        
+        function simulateDuplicateAttempt() {
+            addLog('🔴 Iniciando Test Case 2: Intento Duplicado');
+            
+            const storedData = JSON.parse(localStorage.getItem('recovery_attempt_data'));
+            if (!storedData) {
+                addLog('⚠️ Primero realiza Test Case 1');
+                return;
+            }
+            
+            const newSessionId = 'session_' + Date.now();
+            const timeSince = Date.now() - storedData.timestamp;
+            
+            addLog(`📧 Email anterior: ${storedData.email}`);
+            addLog(`⏱️ Tiempo transcurrido: ${(timeSince / 1000).toFixed(2)}s`);
+            addLog(`📊 SessionID anterior: ${storedData.sessionId}`);
+            addLog(`📊 SessionID actual: ${newSessionId}`);
+            
+            if (storedData.email === 'test@example.com' && 
+                timeSince < 15 * 60 * 1000 && 
+                newSessionId !== storedData.sessionId) {
+                addLog('🚨 INTENTO DUPLICADO DETECTADO!');
+                addLog('🛡️ Debería mostrar CAPTCHA');
+            }
+            
+            updateDebugInfo();
+        }
+        
+        function simulateDifferentEmail() {
+            addLog('🟢 Iniciando Test Case 3: Email Diferente');
+            
+            const currentData = JSON.parse(localStorage.getItem('recovery_attempt_data'));
+            if (!currentData) {
+                addLog('⚠️ Primero realiza Test Case 1');
+                return;
+            }
+            
+            const newEmail = 'other@example.com';
+            addLog(`📧 Email anterior: ${currentData.email}`);
+            addLog(`📧 Email nuevo: ${newEmail}`);
+            addLog('✅ Emails diferentes - No requiere CAPTCHA');
+            
+            updateDebugInfo();
+        }
+        
+        function simulateAfter15Min() {
+            addLog('⏳ Simulando paso de 15 minutos');
+            
+            const storedData = JSON.parse(localStorage.getItem('recovery_attempt_data'));
+            if (!storedData) {
+                addLog('⚠️ Primero realiza Test Case 1');
+                return;
+            }
+            
+            // Restar 16 minutos del timestamp
+            const newData = {
+                ...storedData,
+                timestamp: Date.now() - (16 * 60 * 1000)
+            };
+            
+            localStorage.setItem('recovery_attempt_data', JSON.stringify(newData));
+            addLog('⏱️ Timestamp actualizado: -16 minutos');
+            addLog('✅ Ahora puede enviar sin CAPTCHA');
+            updateDebugInfo();
+        }
+        
+        function viewLocalStorage() {
+            addLog('📂 Contenido de localStorage:');
+            const data = JSON.parse(localStorage.getItem('recovery_attempt_data') || '{}');
+            addLog(JSON.stringify(data, null, 2));
+        }
+        
+        function viewAttemptData() {
+            addLog('🔍 Datos del intento actual:');
+            const data = JSON.parse(localStorage.getItem('recovery_attempt_data'));
+            if (!data) {
+                addLog('❌ No hay datos. Realiza primero un intento.');
+                return;
+            }
+            
+            const date = new Date(data.timestamp);
+            addLog(`📧 Email: ${data.email}`);
+            addLog(`📊 SessionID: ${data.sessionId}`);
+            addLog(`⏱️ Timestamp: ${date.toLocaleString()}`);
+            addLog(`📍 Hace: ${((Date.now() - data.timestamp) / 1000).toFixed(2)}s`);
+        }
+        
+        function updateDebugInfo() {
+            const sessionId = 'session_' + Date.now();
+            const data = JSON.parse(localStorage.getItem('recovery_attempt_data') || '{}');
+            
+            document.getElementById('debug-session').textContent = sessionId.substring(0, 20) + '...';
+            document.getElementById('debug-email').textContent = data.email || '-';
+            document.getElementById('debug-time').textContent = data.timestamp ? 
+                new Date(data.timestamp).toLocaleTimeString() : '-';
+            document.getElementById('debug-elapsed').textContent = data.timestamp ? 
+                `${((Date.now() - data.timestamp) / 1000).toFixed(2)}s` : '-';
+        }
+        
+        function clearLocalStorage() {
+            if (confirm('¿Estás seguro de que quieres limpiar localStorage?')) {
+                localStorage.removeItem('recovery_attempt_data');
+                addLog('🧹 localStorage limpiado');
+                updateDebugInfo();
+            }
+        }
+        
+        function exportDebugLog() {
+            const debugOutput = document.getElementById('debug-output').innerText;
+            const timestamp = new Date().toISOString();
+            const report = `Reporte de Debug\nFecha: ${timestamp}\n\n${debugOutput}`;
+            
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `debug-report-${timestamp}.txt`;
+            a.click();
+            
+            addLog('📥 Reporte exportado');
+        }
+        
+        function resetAllTests() {
+            if (confirm('¿Resetear todos los datos de test? Esta acción no se puede deshacer.')) {
+                localStorage.removeItem('recovery_attempt_data');
+                sessionStorage.clear();
+                document.getElementById('debug-output').innerHTML = 
+                    '<div class="debug-line">Logs aparecerán aquí...</div>';
+                updateDebugInfo();
+                addLog('🔄 Todos los datos de test han sido resetados');
+            }
+        }
+        
+        // Inicializar
+        updateDebugInfo();
+        addLog('✅ Panel de test cargado correctamente');
+    </script>
+</body>
+</html>
