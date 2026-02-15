@@ -2430,13 +2430,30 @@ setInterval(checkScheduledChapters, 60000);
       <p id="user-email-display" class="text-sm text-gray-600 mb-6"></p>
       
       <form id="authForm" class="space-y-4" onsubmit="event.preventDefault(); handleAuthSubmit();">
-        <input
-          id="passwordInput"
-          type="password"
-          placeholder="Contraseña"
-          class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition"
-          required
-        >
+        <div class="relative">
+          <input
+            id="passwordInput"
+            type="password"
+            placeholder="Contraseña"
+            class="w-full p-4 pr-14 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition"
+            required
+          >
+          <button
+            id="togglePasswordVisibility"
+            type="button"
+            class="absolute inset-y-0 right-0 flex items-center justify-center px-4 text-gray-500 hover:text-gray-900 transition"
+            aria-label="Mostrar contraseña"
+            aria-pressed="false"
+          >
+            <svg id="eyeOpenIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z"/>
+            </svg>
+            <svg id="eyeClosedIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.964 9.964 0 012.042-3.362M6.223 6.223A9.963 9.963 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.965 9.965 0 01-4.132 5.411M15 12a3 3 0 00-3-3m0 0a2.99 2.99 0 00-2.12.879M12 9l-8 8m16-16L4 20"/>
+            </svg>
+          </button>
+        </div>
         <button
           id="submitButton"
           type="submit"
@@ -11108,6 +11125,9 @@ async function likeNote(noteId) {
   const authForm = document.getElementById('authForm');
   const emailInput = document.getElementById('emailInput');
   const passwordInput = document.getElementById('passwordInput');
+  const togglePasswordVisibilityButton = document.getElementById('togglePasswordVisibility');
+  const eyeOpenIcon = document.getElementById('eyeOpenIcon');
+  const eyeClosedIcon = document.getElementById('eyeClosedIcon');
   const submitButton = document.getElementById('submitButton');
   const toggleAuth = document.getElementById('toggleAuth');
   const authError = document.getElementById('authErrorEmail');
@@ -11121,6 +11141,8 @@ async function likeNote(noteId) {
   let liveBroadcasterId = null;
   let currentChapterEditId = null;
   let currentLanguage = 'es';
+  let emailCheckTimeout = null;
+  let emailCheckRequestId = 0;
 
   function closeSearch() {
     document.getElementById('search-view').classList.add('hidden');
@@ -11517,7 +11539,7 @@ async function likeNote(noteId) {
     document.getElementById('auth-form').style.display = 'flex';
   }
   
-  function showPasswordStep() {
+  async function showPasswordStep() {
     const email = document.getElementById('emailInput').value.trim();
     const emailError = document.getElementById('authErrorEmail');
 
@@ -11529,7 +11551,15 @@ async function likeNote(noteId) {
       return;
     }
 
-    if (emailError) emailError.classList.add('hidden');
+    if (isLogin) {
+      const emailExists = await checkEmailExistsInAuth(email, true);
+      if (!emailExists) {
+        return;
+      }
+    } else if (emailError) {
+      emailError.classList.add('hidden');
+    }
+
     document.getElementById('user-email-display').textContent = email;
     document.getElementById('email-form').classList.add('hidden');
     document.getElementById('password-form').classList.remove('hidden');
@@ -12034,6 +12064,75 @@ async function likeNote(noteId) {
     }
   }
   
+  function setEmailError(message) {
+    if (!authError) return;
+    authError.textContent = message;
+    authError.classList.remove('hidden');
+  }
+
+  function clearEmailError() {
+    if (!authError) return;
+    authError.classList.add('hidden');
+    authError.textContent = '';
+  }
+
+  async function checkEmailExistsInAuth(email, showError = false) {
+    if (!email || !email.includes('@')) {
+      if (showError) {
+        setEmailError('Ingresa un correo válido');
+      }
+      return false;
+    }
+
+    try {
+      const methods = await firebase.auth().fetchSignInMethodsForEmail(email);
+      const exists = Array.isArray(methods) && methods.length > 0;
+
+      if (!exists && showError) {
+        setEmailError('Este usuario no existe o no está registrado');
+      } else if (exists) {
+        clearEmailError();
+      }
+
+      return exists;
+    } catch (error) {
+      console.warn('No se pudo validar el correo en tiempo real:', error);
+      if (showError) {
+        setEmailError('No se pudo validar el usuario. Intenta de nuevo.');
+      }
+      return false;
+    }
+  }
+
+  if (emailInput) {
+    emailInput.addEventListener('input', () => {
+      if (emailCheckTimeout) {
+        clearTimeout(emailCheckTimeout);
+      }
+
+      clearEmailError();
+
+      const email = emailInput.value.trim();
+      if (!isLogin || !email || !email.includes('@')) {
+        return;
+      }
+
+      const currentRequestId = ++emailCheckRequestId;
+      emailCheckTimeout = setTimeout(async () => {
+        const exists = await checkEmailExistsInAuth(email, false);
+        if (currentRequestId !== emailCheckRequestId || !isLogin) {
+          return;
+        }
+
+        if (!exists) {
+          setEmailError('Este usuario no existe o no está registrado');
+        } else {
+          clearEmailError();
+        }
+      }, 450);
+    });
+  }
+
   if (toggleAuth) {
     toggleAuth.addEventListener('click', () => {
     isLogin = !isLogin;
@@ -12041,7 +12140,27 @@ async function likeNote(noteId) {
     submitButton.textContent = isLogin ? 'Continuar' : 'Crear cuenta';
     authTitle.textContent = isLogin ? 'Iniciar sesión' : 'Crear cuenta';
     toggleAuth.textContent = isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión';
+    clearEmailError();
   });
+  }
+
+  function setPasswordVisibility(isVisible) {
+    if (!passwordInput || !togglePasswordVisibilityButton || !eyeOpenIcon || !eyeClosedIcon) {
+      return;
+    }
+
+    passwordInput.type = isVisible ? 'text' : 'password';
+    eyeOpenIcon.classList.toggle('hidden', isVisible);
+    eyeClosedIcon.classList.toggle('hidden', !isVisible);
+    togglePasswordVisibilityButton.setAttribute('aria-label', isVisible ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    togglePasswordVisibilityButton.setAttribute('aria-pressed', isVisible ? 'true' : 'false');
+  }
+
+  if (togglePasswordVisibilityButton) {
+    togglePasswordVisibilityButton.addEventListener('click', () => {
+      const isVisible = passwordInput?.type === 'text';
+      setPasswordVisibility(!isVisible);
+    });
   }
 
   async function syncUserProfileToAWS(user, profileOverrides = {}) {
