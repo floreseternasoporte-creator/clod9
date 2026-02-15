@@ -12,6 +12,11 @@ function handleSearchInput() {
 
   if (typeof window.performRealTimeSearch === 'function') {
     window.performRealTimeSearch();
+    if (query.length > 0) {
+      searchInfoContent(query);
+    } else {
+      renderSearchInfoList([]);
+    }
     if (!query.length) {
       clearSearchResults();
       loadPopularStories();
@@ -21,6 +26,7 @@ function handleSearchInput() {
 
   if (query.length > 0) {
     searchContent(query);
+    searchInfoContent(query);
   } else {
     clearSearchResults();
     loadPopularStories();
@@ -37,6 +43,111 @@ function clearSearchInput() {
 function clearSearchResults() {
   document.getElementById('search-books-carousel').innerHTML = '';
   document.getElementById('search-authors-list').innerHTML = '';
+  const infoList = document.getElementById('search-info-list');
+  if (infoList) infoList.innerHTML = '';
+}
+
+function detectWikipediaEntertainmentType(text) {
+  const normalized = (text || '').toLowerCase();
+
+  const seriesKeywords = ['serie', 'series', 'tv series', 'television series', 'temporada', 'episodio', 'anime'];
+  if (seriesKeywords.some(k => normalized.includes(k))) return 'Serie';
+
+  const movieKeywords = ['película', 'pelicula', 'film', 'movie', 'cine', 'largometraje'];
+  if (movieKeywords.some(k => normalized.includes(k))) return 'Película';
+
+  const bookKeywords = ['libro', 'novela', 'book', 'author', 'autor', 'escritor', 'literatura'];
+  if (bookKeywords.some(k => normalized.includes(k))) return 'Libro';
+
+  return null;
+}
+
+function renderSearchInfoList(items) {
+  const infoList = document.getElementById('search-info-list');
+  if (!infoList) return;
+
+  if (!items || items.length === 0) {
+    infoList.innerHTML = '<div class="text-center text-gray-500 py-8">Sin información relacionada a libros, películas o series.</div>';
+    return;
+  }
+
+  infoList.innerHTML = items.map(item => `
+    <article class="bg-white border border-[#e6e6e6] rounded-2xl p-4 shadow-sm">
+      <div class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide uppercase text-gray-500 mb-2">
+        <span class="w-2 h-2 rounded-full bg-[#111111]"></span>
+        Generado por IA
+      </div>
+      <h3 class="text-sm font-semibold text-[#111111] mb-1">${item.title} · ${item.type}</h3>
+      <p class="text-xs text-gray-600 leading-relaxed">${item.summary}</p>
+      <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-[#111111] hover:underline">Ver en Wikipedia</a>
+    </article>
+  `).join('');
+}
+
+async function searchInfoContent(query) {
+  const cleanQuery = (query || '').trim();
+  if (cleanQuery.length < 3) {
+    renderSearchInfoList([]);
+    return;
+  }
+
+  const languages = ['es', 'en'];
+  const variants = [
+    cleanQuery,
+    `${cleanQuery} serie`,
+    `${cleanQuery} película`,
+    `${cleanQuery} libro`
+  ];
+
+  const collected = [];
+  const seen = new Set();
+
+  for (const variant of variants) {
+    if (collected.length >= 3) break;
+
+    for (const lang of languages) {
+      if (collected.length >= 3) break;
+
+      try {
+        const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(variant)}&limit=3&namespace=0&format=json&origin=*`;
+        const openSearchResponse = await fetch(openSearchUrl);
+        if (!openSearchResponse.ok) continue;
+
+        const openSearchData = await openSearchResponse.json();
+        const titles = openSearchData?.[1] || [];
+
+        for (const title of titles) {
+          const key = (title || '').toLowerCase();
+          if (!title || seen.has(key)) continue;
+
+          const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
+          const summaryResponse = await fetch(summaryUrl);
+          if (!summaryResponse.ok) continue;
+
+          const summaryData = await summaryResponse.json();
+          const extract = summaryData?.extract || '';
+          const description = summaryData?.description || '';
+          const type = detectWikipediaEntertainmentType(`${description} ${extract}`);
+
+          if (!type || extract.length < 40) continue;
+
+          seen.add(key);
+          collected.push({
+            title: summaryData?.title || title,
+            type,
+            summary: extract.length > 190 ? `${extract.slice(0, 190)}...` : extract,
+            link: summaryData?.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title)}`
+          });
+
+          if (collected.length >= 3) break;
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+  }
+
+  renderSearchInfoList(collected);
 }
 
 async function getAllStories() {
