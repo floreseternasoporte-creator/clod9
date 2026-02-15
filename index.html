@@ -166,6 +166,28 @@ body {
   display: none;
 }
 
+/* Pantalla completa para estado sin internet y país restringido */
+#internet-status-overlay {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#internet-status-overlay.visible {
+  display: flex;
+}
+
+#internet-status-overlay .internet-status-full {
+  width: 100%;
+  max-width: 460px;
+  text-align: center;
+}
+
 /* MODAL DE CREACIÓN DE CAPÍTULO FULL SCREEN MODERNIZADO */
 #chapter-creation-modal {
   position: fixed;
@@ -797,16 +819,110 @@ body {
     function esDispositivoMovil() {
       return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
-    /*********************** MODO OFFLINE ***********************/
-    window.addEventListener('offline', function() {
-      document.body.innerHTML = `
-        <div id="offline-modal">
-          <img src="https://ideogram.ai/assets/image/lossless/response/ZL-_GzzNQdy7CzioYPtDHg" alt="Sin conexión">
-        </div>`;
-    });
-    window.addEventListener('online', function() {
-      location.reload();
-    });
+    /*********************** MODO OFFLINE + RESTRICCIÓN POR PAÍS ***********************/
+    let internetStatusInterval = null;
+    let blockedCountryName = null;
+    const restrictedCountries = {
+      MX: 'México',
+      CA: 'Canadá',
+      JP: 'Japón'
+    };
+
+    function setInternetOverlayVisible(visible) {
+      const overlay = document.getElementById('internet-status-overlay');
+      if (!overlay) return;
+      overlay.classList.toggle('visible', Boolean(visible));
+    }
+
+    function setStatusOverlayContent(mode, countryName = '') {
+      const title = document.getElementById('internet-status-title');
+      const message = document.getElementById('internet-status-message');
+      const retryButton = document.getElementById('internet-status-retry-btn');
+      if (!title || !message || !retryButton) return;
+
+      if (mode === 'country-block') {
+        title.textContent = 'Plataforma no disponible en tu país';
+        message.textContent = `Actualmente esta plataforma no está disponible en ${countryName}.`;
+        retryButton.classList.add('hidden');
+      } else {
+        title.textContent = 'Ups, no tienes internet';
+        message.textContent = 'Esta plataforma funciona con internet. Revisa tu WiFi e intenta reiniciar tu router.';
+        retryButton.classList.remove('hidden');
+      }
+    }
+
+    async function detectCountryRestriction() {
+      try {
+        const response = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+        if (!response.ok) return false;
+        const locationData = await response.json();
+        const countryCode = (locationData?.country_code || '').toUpperCase();
+
+        if (restrictedCountries[countryCode]) {
+          blockedCountryName = restrictedCountries[countryCode];
+          setStatusOverlayContent('country-block', blockedCountryName);
+          setInternetOverlayVisible(true);
+          return true;
+        }
+
+        blockedCountryName = null;
+        return false;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    async function verifyInternetConnection() {
+      if (blockedCountryName) {
+        setStatusOverlayContent('country-block', blockedCountryName);
+        setInternetOverlayVisible(true);
+        return false;
+      }
+
+      if (!navigator.onLine) {
+        setStatusOverlayContent('offline');
+        setInternetOverlayVisible(true);
+        return false;
+      }
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        await fetch('https://www.gstatic.com/generate_204', {
+          method: 'GET',
+          mode: 'no-cors',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        setInternetOverlayVisible(false);
+        return true;
+      } catch (error) {
+        setStatusOverlayContent('offline');
+        setInternetOverlayVisible(true);
+        return false;
+      }
+    }
+
+    async function startInternetStatusWatcher() {
+      await detectCountryRestriction();
+      await verifyInternetConnection();
+      if (internetStatusInterval) clearInterval(internetStatusInterval);
+      internetStatusInterval = setInterval(verifyInternetConnection, 12000);
+      window.addEventListener('offline', () => {
+        if (!blockedCountryName) {
+          setStatusOverlayContent('offline');
+          setInternetOverlayVisible(true);
+        }
+      });
+      window.addEventListener('online', verifyInternetConnection);
+      document.addEventListener('visibilitychange', async () => {
+        if (!document.hidden) {
+          if (!blockedCountryName) await detectCountryRestriction();
+          verifyInternetConnection();
+        }
+      });
+    }
     /* TEMA PERMANENTE EN MODO CLARO */
     function setLightTheme() {
       const bg = "#f6f6f6";
@@ -2261,6 +2377,16 @@ setInterval(checkScheduledChapters, 60000);
 </script>
 
 <body class="bg-white font-sans text-[#393B3D]" style="overflow: hidden;">
+  <div id="internet-status-overlay" role="alert" aria-live="assertive">
+    <div class="internet-status-full">
+      <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-black text-white flex items-center justify-center">
+        <i class="fas fa-wifi text-2xl"></i>
+      </div>
+      <h2 id="internet-status-title" class="text-2xl font-bold text-gray-900 mb-3">Ups, no tienes internet</h2>
+      <p id="internet-status-message" class="text-base text-gray-600 leading-relaxed mb-6">Esta plataforma funciona con internet. Revisa tu WiFi e intenta reiniciar tu router.</p>
+      <button id="internet-status-retry-btn" onclick="verifyInternetConnection()" class="w-full py-3 rounded-full bg-black text-white font-semibold">Reintentar conexión</button>
+    </div>
+  </div>
   
   <div id="auth-form" class="w-full h-screen flex flex-col bg-white" style="display: none; opacity: 0;">
     <!-- Header con nombre de la app -->
@@ -2934,38 +3060,38 @@ firebase.auth().onAuthStateChanged(user => {
     </section>
   </div>
 
-  <!-- BOTTOM NAVIGATION MINIMALISTA -->
-  <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 transition-all duration-300 z-[100]">
-    <div class="grid grid-cols-5 px-2 py-2">
-      <button id="nav-home" data-section="home" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200 active">
+  <!-- BOTTOM NAVIGATION ESTILO UBER -->
+  <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-uber-line transition-all duration-300 z-[100] shadow-uber-header">
+    <div class="grid grid-cols-5 px-2 py-2 gap-1">
+      <button id="nav-home" data-section="home" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200 active">
         <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
           <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
         </svg>
         <span class="text-xs font-medium">Inicio</span>
       </button>
-      <button id="nav-search" data-section="search" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200">
+      <button id="nav-search" data-section="search" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
         <span class="text-xs font-medium">Buscar</span>
       </button>
-      <button id="nav-create" data-section="create" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200">
-        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mb-1">
+      <button id="nav-create" data-section="create" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
+        <div class="w-8 h-8 bg-uber-black rounded-full flex items-center justify-center mb-1 shadow-uber-chip">
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
         </div>
         <span class="text-xs font-medium">Crear</span>
       </button>
-      <button id="nav-community" data-section="community" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200">
+      <button id="nav-community" data-section="community" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
           <circle cx="9" cy="7" r="4" />
         </svg>
         <span class="text-xs font-medium">Comunidad</span>
       </button>
-      <button id="nav-profile" data-section="profile" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200">
+      <button id="nav-profile" data-section="profile" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
         <img id="bottom-nav-profile-pic" src="https://via.placeholder.com/150" class="w-6 h-6 rounded-full object-cover mb-1" alt="Perfil">
         <span class="text-xs font-medium">Perfil</span>
       </button>
@@ -2976,19 +3102,20 @@ firebase.auth().onAuthStateChanged(user => {
     .nav-button {
       color: #6b7280;
     }
-    
+
     .nav-button.active {
-      color: #3b82f6;
-    }
-    
-    .nav-button:hover {
+      color: #111111;
       background-color: #f3f4f6;
     }
-    
-    .nav-button.active:hover {
-      background-color: #dbeafe;
+
+    .nav-button:hover {
+      background-color: #f7f7f7;
     }
-    
+
+    .nav-button.active:hover {
+      background-color: #eeeeee;
+    }
+
     #bottom-nav.hide {
       transform: translateY(100%);
     }
@@ -4114,85 +4241,99 @@ function escapeHtml(text) {
 }
 </script>
 
-<!-- VISTA CREATOR HUB ESTILO ROBLOX -->
-<div id="creator-hub-view" class="fixed inset-0 bg-white text-black hidden z-50 overflow-hidden">
+<!-- VISTA CREATOR HUB -->
+<div id="creator-hub-view" class="fixed inset-0 bg-uber-surface text-uber-black hidden z-50 overflow-hidden">
   <div class="h-full flex flex-col">
-    <!-- Header Roblox -->
-    <div class="flex-shrink-0 p-4 flex items-center justify-between bg-white border-b border-gray-200">
-      <button onclick="closeCreatorHub()" class="text-gray-700 hover:text-blue-500 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <h1 class="text-lg font-semibold text-gray-900">Crear</h1>
-      <button onclick="openZenvioChat()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-        <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="h-7 w-7 rounded-full">
-      </button>
+    <div class="sticky top-0 bg-white border-b border-uber-line px-4 pt-3 pb-4 z-10 shadow-uber-header">
+      <div class="flex items-center justify-between mb-3">
+        <button onclick="closeCreatorHub()" class="w-10 h-10 rounded-full border border-uber-line bg-white text-uber-black flex items-center justify-center active:scale-95 transition" aria-label="Cerrar Creator Hub">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <button onclick="openZenvioChat()" class="w-10 h-10 rounded-full border border-uber-line bg-white flex items-center justify-center active:scale-95 transition" aria-label="Abrir Baro">
+          <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="h-7 w-7 rounded-full">
+        </button>
+      </div>
+
+      <div>
+        <p class="text-[11px] uppercase tracking-wide text-uber-muted font-semibold">Atenis Studio</p>
+        <h1 class="text-2xl font-semibold text-uber-black leading-tight">Creator Hub</h1>
+        <p class="text-sm text-uber-muted mt-1">Publica contenido de forma rápida y ordenada.</p>
+      </div>
     </div>
 
-    <!-- Contenido -->
-    <div class="flex-1 overflow-y-auto bg-gray-50 p-6">
-      <!-- Grid principal 2x2 -->
-      <div class="grid grid-cols-2 gap-6">
-        <!-- Historia -->
-        <div onclick="openStoryCreation()" class="bg-white rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all border border-gray-200 text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-gray-200">
-            <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Historia" class="w-10 h-10 rounded-full">
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <button onclick="openStoryCreation()" class="w-full text-left bg-uber-black text-white rounded-3xl p-5 shadow-uber-header active:scale-[0.99] transition">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+              <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Historia" class="w-8 h-8 rounded-full">
+            </div>
+            <div>
+              <h3 class="text-base font-semibold">Crear historia</h3>
+              <p class="text-xs text-white/80 mt-0.5">Publicación larga y completa</p>
+            </div>
           </div>
-          <h3 class="text-lg font-bold text-[#00A2FF] mb-2">Historia</h3>
-          <p class="text-sm text-gray-500">Crear historia larga</p>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
         </div>
+      </button>
 
-        <!-- En Vivo -->
-        <div onclick="openLiveStreamModal()" class="bg-white rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all border border-gray-200 text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-gray-200">
-            <img src="https://i.ibb.co/G39hzrnn/IMG-7704.png" alt="Live" class="w-10 h-10 rounded-full">
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="openLiveStreamModal()" class="text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip active:scale-[0.99] transition">
+          <div class="w-11 h-11 rounded-2xl bg-uber-field border border-uber-line flex items-center justify-center mb-3">
+            <img src="https://i.ibb.co/G39hzrnn/IMG-7704.png" alt="Live" class="w-7 h-7 rounded-full">
           </div>
-          <h3 class="text-lg font-bold text-[#00A2FF] mb-2">En Vivo</h3>
-          <p class="text-sm text-gray-500">Transmitir ahora</p>
-        </div>
+          <h3 class="text-sm font-semibold text-uber-black">En vivo</h3>
+          <p class="text-xs text-uber-muted mt-1">Inicia transmisión ahora</p>
+        </button>
 
-        <!-- Relato -->
-        <div onclick="document.getElementById('add-story-btn').click()" class="bg-white rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all border border-gray-200 text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-gray-200">
-            <img src="https://i.ibb.co/WpF2kzkt/IMG-7708.png" alt="Relato" class="w-10 h-10 rounded-full">
+        <button onclick="document.getElementById('add-story-btn').click()" class="text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip active:scale-[0.99] transition">
+          <div class="w-11 h-11 rounded-2xl bg-uber-field border border-uber-line flex items-center justify-center mb-3">
+            <img src="https://i.ibb.co/WpF2kzkt/IMG-7708.png" alt="Relato" class="w-7 h-7 rounded-full">
           </div>
-          <h3 class="text-lg font-bold text-[#00A2FF] mb-2">Relato</h3>
-          <p class="text-sm text-gray-500">Historia de 24h</p>
-        </div>
+          <h3 class="text-sm font-semibold text-uber-black">Relato</h3>
+          <p class="text-xs text-uber-muted mt-1">Historia de 24 horas</p>
+        </button>
 
-        <!-- Imagen IA -->
-        <div onclick="document.getElementById('image-generator-modal').style.display='block'" class="bg-white rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all border border-gray-200 text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-gray-200">
-            <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-10 h-10 rounded-full">
+        <button onclick="document.getElementById('image-generator-modal').style.display='block'" class="col-span-2 text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip active:scale-[0.99] transition">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-uber-field border border-uber-line flex items-center justify-center">
+              <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-7 h-7 rounded-full">
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-uber-black">Imagen IA</h3>
+              <p class="text-xs text-uber-muted mt-1">Genera portada con Baro IA</p>
+            </div>
+            <span class="text-[11px] px-2.5 py-1 rounded-full border border-uber-line text-uber-muted font-semibold">IA</span>
           </div>
-          <h3 class="text-lg font-bold text-[#00A2FF] mb-2">Imagen IA</h3>
-          <p class="text-sm text-gray-500">Generar con AI</p>
-        </div>
+        </button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Community View - Estilo Twitter/X -->
-<div id="community-view" class="fixed inset-0 bg-white overflow-y-auto hidden z-50">
+<div id="community-view" class="fixed inset-0 bg-uber-surface overflow-y-auto hidden z-50">
   <!-- Header Simple -->
-  <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
+  <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-bold">Comunidad</h1>
-      <button onclick="openNoteCreation()" class="bg-[#00A2FF] text-white px-4 py-2 rounded-full font-semibold hover:bg-[#0066CC] transition-colors">
+      <button onclick="openNoteCreation()" class="bg-uber-black text-white px-4 py-2 rounded-full font-semibold hover:bg-[#222222] transition-colors">
         Publicar
       </button>
     </div>
   </div>
 
   <!-- Tabs Simples -->
-  <div class="bg-white border-b border-gray-200">
+  <div class="bg-white border-b border-uber-line">
     <div class="flex">
-      <button onclick="switchCommunityTab('feed')" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-[#00A2FF]" id="feed-tab">
+      <button onclick="switchCommunityTab('feed')" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-uber-black text-uber-black" id="feed-tab">
         Para ti
       </button>
-      <button onclick="switchCommunityTab('photos'); loadPhotos();" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:bg-gray-50" id="photos-tab">
+      <button onclick="switchCommunityTab('photos'); loadPhotos();" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-uber-muted hover:bg-uber-field" id="photos-tab">
         Fotos
       </button>
     </div>
@@ -4200,21 +4341,21 @@ function escapeHtml(text) {
     
   <!-- Content -->
   <div class="flex-1">
-    <div id="notes-feed" class="divide-y divide-gray-200"></div>
+    <div id="notes-feed" class="divide-y divide-uber-line"></div>
     <div id="photos-feed" class="hidden p-1">
       <div class="grid grid-cols-3 gap-1" id="photos-grid"></div>
     </div>
 
     <!-- Modal de Creación Estilo Twitter -->
     <div id="add-note-form" class="hidden bg-white">
-      <div class="flex items-center justify-between p-3 border-b border-gray-200">
-        <button onclick="switchCommunityTab('feed')" class="text-sm font-medium text-gray-600">Cancelar</button>
+      <div class="flex items-center justify-between p-3 border-b border-uber-line">
+        <button onclick="switchCommunityTab('feed')" class="text-sm font-medium text-uber-muted">Cancelar</button>
         <h2 class="text-base font-semibold">Nueva publicación</h2>
-        <button onclick="publishNote()" class="bg-[#00A2FF] text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-[#0066CC]">Publicar</button>
+        <button onclick="publishNote()" class="bg-uber-black text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-[#222222]">Publicar</button>
       </div>
       
       <div class="p-4">
-        <textarea id="note-content" placeholder="¿Qué está pasando?" maxlength="280" class="w-full border-0 resize-none focus:outline-none text-base" rows="4"></textarea>
+        <textarea id="note-content" placeholder="¿Qué está pasando?" maxlength="280" class="w-full border-0 resize-none focus:outline-none text-base bg-transparent" rows="4"></textarea>
         
         <div id="image-preview" class="hidden mt-3">
           <div class="relative inline-block">
@@ -4225,18 +4366,18 @@ function escapeHtml(text) {
           </div>
         </div>
         
-        <div id="char-counter" class="text-xs text-gray-400 mt-2">0/280</div>
+        <div id="char-counter" class="text-xs text-uber-muted mt-2">0/280</div>
       </div>
       
-      <div class="border-t border-gray-200 p-3">
+      <div class="border-t border-uber-line p-3">
         <div class="flex items-center space-x-4">
-          <label class="cursor-pointer text-[#00A2FF] hover:bg-blue-50 p-2 rounded-full transition">
+          <label class="cursor-pointer text-uber-black hover:bg-uber-field p-2 rounded-full transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <input type="file" id="note-image" accept="image/*" class="hidden" onchange="handleNoteImagePreview(event)">
           </label>
-          <button onclick="document.getElementById('image-generator-modal').style.display='block'" class="text-[#00A2FF] hover:bg-blue-50 p-2 rounded-full transition">
+          <button onclick="document.getElementById('image-generator-modal').style.display='block'" class="text-uber-black hover:bg-uber-field p-2 rounded-full transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -4614,21 +4755,65 @@ window.renderSearchInfoList = function(items) {
   if (!infoList) return;
 
   if (!items || items.length === 0) {
-    infoList.innerHTML = '<div class="text-center text-uber-muted py-8">Sin información relacionada a libros, películas o series.</div>';
+    infoList.innerHTML = '<div class="text-center text-uber-muted py-8">Escribe algo para que Baro te responda con información precisa.</div>';
     return;
   }
 
-  infoList.innerHTML = items.map(item => `
+  const item = items[0];
+  infoList.innerHTML = `
     <article class="bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip">
-      <div class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide uppercase text-uber-muted mb-2">
-        <span class="w-2 h-2 rounded-full bg-uber-black"></span>
-        Generado por IA
+      <div class="flex items-start gap-3">
+        <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-9 h-9 rounded-full flex-shrink-0">
+        <div class="min-w-0 w-full">
+          <p class="text-[11px] font-semibold tracking-wide uppercase text-uber-muted mb-2">Respuesta de IA</p>
+          <p id="search-info-typed-text" class="text-sm text-uber-black leading-relaxed"></p>
+          <div class="mt-3 pt-3 border-t border-uber-line/70 flex items-center gap-2">
+            <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-4 h-4 rounded-full">
+            <span class="text-[11px] text-uber-muted">Generado por Baro</span>
+          </div>
+        </div>
       </div>
-      <h3 class="text-sm font-semibold text-uber-black mb-1">${item.title} · ${item.type}</h3>
-      <p class="text-xs text-uber-muted leading-relaxed">${item.summary}</p>
-      <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-uber-black hover:underline">Ver en Wikipedia</a>
     </article>
-  `).join('');
+  `;
+
+  const typedText = document.getElementById('search-info-typed-text');
+  if (!typedText) return;
+
+  const fullText = item.summary || '';
+  let charIndex = 0;
+
+  return new Promise(resolve => {
+    const typeInterval = setInterval(() => {
+      charIndex += 1;
+      typedText.textContent = fullText.slice(0, charIndex);
+
+      if (charIndex >= fullText.length) {
+        clearInterval(typeInterval);
+        resolve();
+      }
+    }, 18);
+  });
+}
+
+window.renderSearchInfoLoading = function() {
+  const infoList = document.getElementById('search-info-list');
+  if (!infoList) return;
+
+  infoList.innerHTML = `
+    <article class="bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip">
+      <div class="flex items-center gap-3">
+        <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-9 h-9 rounded-full flex-shrink-0">
+        <div class="w-full">
+          <p class="text-[11px] font-semibold tracking-wide uppercase text-uber-muted mb-2">Baro está pensando</p>
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-uber-muted/70 animate-bounce" style="animation-delay:0ms"></span>
+            <span class="w-2 h-2 rounded-full bg-uber-muted/70 animate-bounce" style="animation-delay:140ms"></span>
+            <span class="w-2 h-2 rounded-full bg-uber-muted/70 animate-bounce" style="animation-delay:280ms"></span>
+          </div>
+        </div>
+      </div>
+    </article>
+  `;
 }
 
 window.fetchSearchInfoFromWikipedia = async function(query) {
@@ -4638,62 +4823,45 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     return;
   }
 
+  window.renderSearchInfoLoading();
+
   const languages = ['es', 'en'];
-  const variants = [
-    cleanQuery,
-    `${cleanQuery} serie`,
-    `${cleanQuery} película`,
-    `${cleanQuery} libro`
-  ];
+  let selectedResult = null;
 
-  const collected = [];
-  const seenTitles = new Set();
+  for (const lang of languages) {
+    try {
+      const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cleanQuery)}&limit=1&namespace=0&format=json&origin=*`;
+      const openSearchResponse = await fetch(openSearchUrl);
+      if (!openSearchResponse.ok) continue;
 
-  for (const variant of variants) {
-    if (collected.length >= 3) break;
+      const openSearchData = await openSearchResponse.json();
+      const bestTitle = openSearchData?.[1]?.[0];
+      if (!bestTitle) continue;
 
-    for (const lang of languages) {
-      if (collected.length >= 3) break;
+      const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`;
+      const summaryResponse = await fetch(summaryUrl);
+      if (!summaryResponse.ok) continue;
 
-      try {
-        const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(variant)}&limit=3&namespace=0&format=json&origin=*`;
-        const openSearchResponse = await fetch(openSearchUrl);
-        if (!openSearchResponse.ok) continue;
+      const summaryData = await summaryResponse.json();
+      const extract = (summaryData?.extract || '').trim();
+      if (extract.length < 40) continue;
 
-        const openSearchData = await openSearchResponse.json();
-        const titles = openSearchData?.[1] || [];
-
-        for (const bestTitle of titles) {
-          if (!bestTitle || seenTitles.has(bestTitle.toLowerCase())) continue;
-
-          const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`;
-          const summaryResponse = await fetch(summaryUrl);
-          if (!summaryResponse.ok) continue;
-
-          const summaryData = await summaryResponse.json();
-          const extract = summaryData?.extract || '';
-          const description = summaryData?.description || '';
-          const detectedType = window.detectWikipediaEntertainmentType(`${description} ${extract}`);
-
-          if (!detectedType || extract.length < 40) continue;
-
-          seenTitles.add(bestTitle.toLowerCase());
-          collected.push({
-            title: summaryData?.title || bestTitle,
-            type: detectedType,
-            summary: extract.length > 190 ? `${extract.slice(0, 190)}...` : extract,
-            link: summaryData?.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(bestTitle)}`
-          });
-
-          if (collected.length >= 3) break;
-        }
-      } catch (error) {
-        continue;
-      }
+      selectedResult = {
+        title: summaryData?.title || bestTitle,
+        summary: extract.length > 280 ? `${extract.slice(0, 280)}...` : extract
+      };
+      break;
+    } catch (error) {
+      continue;
     }
   }
 
-  window.renderSearchInfoList(collected);
+  if (!selectedResult) {
+    window.renderSearchInfoList([{ summary: 'No encontré una respuesta clara en Wikipedia para esa búsqueda. Intenta con otro término más específico.' }]);
+    return;
+  }
+
+  await window.renderSearchInfoList([selectedResult]);
 }
 
 // Funciones generales para manejar botones X en campos de búsqueda
@@ -5948,7 +6116,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
   <!-- Vista móvil -->
   <div class="block lg:hidden">
     <!-- Header limpio -->
-    <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
+    <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
       <div class="flex items-center justify-between">
         <button onclick="openHome()" class="p-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -17126,5 +17294,12 @@ firebase.auth().onAuthStateChanged(user => {
 <script src="stories.js"></script>
 <script src="community-firebase.js"></script>
 <script src="search-firebase.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof startInternetStatusWatcher === 'function') {
+      startInternetStatusWatcher();
+    }
+  });
+</script>
 </body>
 </html>
