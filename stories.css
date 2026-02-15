@@ -67,13 +67,13 @@
 }
 
 .add-story .image-container {
-    background: #fafafa;
+    background: #f7f7f7;
     border: 1px dashed #dbdbdb;
 }
 
 .add-story .image-container i {
     font-size: 24px;
-    color: #262626;
+    color: #111111;
 }
 
 #story-viewer {
@@ -105,7 +105,7 @@
     .story-content {
         max-width: 400px;
         max-height: 90vh;
-        border-radius: 8px;
+        border-radius: 9999px;
     }
 }
 
@@ -246,7 +246,7 @@
     width: 100%;
     padding: 20px;
     background: transparent;
-    color: #262626;
+    color: #111111;
     border: none;
     text-align: center;
     cursor: pointer;
@@ -326,7 +326,7 @@
 }
 
 .story-upload-content h2 {
-    color: #262626;
+    color: #111111;
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 16px;
@@ -349,7 +349,7 @@
     height: 100%;
     max-height: 60vh;
     object-fit: contain;
-    background: #f5f5f5;
+    background: #f0f0f0;
 }
 
 .file-input-wrapper {
@@ -369,32 +369,32 @@
     width: 100%;
     flex-grow: 1;
     min-height: 300px;
-    border: 2px dashed #dbdbdb;
+    border: 2px dashed #d1d5db;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: #fafafa;
+    background: #f7f7f7;
 }
 
 .file-input-label:hover {
-    border-color: #FE2C55;
+    border-color: #111111;
     background: #fff;
 }
 
 .file-input-label i {
     font-size: 48px;
-    color: #FE2C55;
+    color: #111111;
     margin-bottom: 12px;
 }
 
 .file-input-label span {
-    color: #262626;
+    color: #111111;
     font-size: 16px;
     font-weight: 500;
 }
 
 .file-input-label .file-hint {
-    color: #8e8e8e;
+    color: #6b7280;
     font-size: 14px;
     margin-top: 8px;
 }
@@ -406,10 +406,10 @@
 #story-upload-form button[type="submit"] {
     width: 100%;
     padding: 14px;
-    background: #FE2C55;
+    background: #111111;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 9999px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -418,7 +418,7 @@
 }
 
 #story-upload-form button[type="submit"]:hover:not(:disabled) {
-    background: #e02849;
+    background: #222222;
     transform: scale(1.02);
 }
 
@@ -433,7 +433,7 @@
     justify-content: space-between;
     margin-bottom: 16px;
     padding-bottom: 16px;
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid #e6e6e6;
     flex-shrink: 0;
 }
 
@@ -441,7 +441,7 @@
     background: none;
     border: none;
     font-size: 24px;
-    color: #262626;
+    color: #111111;
     cursor: pointer;
     padding: 8px;
     display: flex;
@@ -453,7 +453,7 @@
 }
 
 .story-upload-header .back-btn:hover {
-    background: #f5f5f5;
+    background: #f0f0f0;
     border-radius: 50%;
 }
 
@@ -473,13 +473,13 @@
 
 .progress-bar {
     height: 100%;
-    background: #FE2C55;
+    background: #111111;
     width: 0%;
     transition: width 0.3s ease;
 }
 
 .progress-text {
-    color: #8e8e8e;
+    color: #6b7280;
     font-size: 14px;
     text-align: center;
 }
