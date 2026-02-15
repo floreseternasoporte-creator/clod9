@@ -166,6 +166,28 @@ body {
   display: none;
 }
 
+/* Pantalla completa para estado sin internet y país restringido */
+#internet-status-overlay {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#internet-status-overlay.visible {
+  display: flex;
+}
+
+#internet-status-overlay .internet-status-full {
+  width: 100%;
+  max-width: 460px;
+  text-align: center;
+}
+
 /* MODAL DE CREACIÓN DE CAPÍTULO FULL SCREEN MODERNIZADO */
 #chapter-creation-modal {
   position: fixed;
@@ -797,16 +819,110 @@ body {
     function esDispositivoMovil() {
       return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
-    /*********************** MODO OFFLINE ***********************/
-    window.addEventListener('offline', function() {
-      document.body.innerHTML = `
-        <div id="offline-modal">
-          <img src="https://ideogram.ai/assets/image/lossless/response/ZL-_GzzNQdy7CzioYPtDHg" alt="Sin conexión">
-        </div>`;
-    });
-    window.addEventListener('online', function() {
-      location.reload();
-    });
+    /*********************** MODO OFFLINE + RESTRICCIÓN POR PAÍS ***********************/
+    let internetStatusInterval = null;
+    let blockedCountryName = null;
+    const restrictedCountries = {
+      MX: 'México',
+      CA: 'Canadá',
+      JP: 'Japón'
+    };
+
+    function setInternetOverlayVisible(visible) {
+      const overlay = document.getElementById('internet-status-overlay');
+      if (!overlay) return;
+      overlay.classList.toggle('visible', Boolean(visible));
+    }
+
+    function setStatusOverlayContent(mode, countryName = '') {
+      const title = document.getElementById('internet-status-title');
+      const message = document.getElementById('internet-status-message');
+      const retryButton = document.getElementById('internet-status-retry-btn');
+      if (!title || !message || !retryButton) return;
+
+      if (mode === 'country-block') {
+        title.textContent = 'Plataforma no disponible en tu país';
+        message.textContent = `Actualmente esta plataforma no está disponible en ${countryName}.`;
+        retryButton.classList.add('hidden');
+      } else {
+        title.textContent = 'Ups, no tienes internet';
+        message.textContent = 'Esta plataforma funciona con internet. Revisa tu WiFi e intenta reiniciar tu router.';
+        retryButton.classList.remove('hidden');
+      }
+    }
+
+    async function detectCountryRestriction() {
+      try {
+        const response = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+        if (!response.ok) return false;
+        const locationData = await response.json();
+        const countryCode = (locationData?.country_code || '').toUpperCase();
+
+        if (restrictedCountries[countryCode]) {
+          blockedCountryName = restrictedCountries[countryCode];
+          setStatusOverlayContent('country-block', blockedCountryName);
+          setInternetOverlayVisible(true);
+          return true;
+        }
+
+        blockedCountryName = null;
+        return false;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    async function verifyInternetConnection() {
+      if (blockedCountryName) {
+        setStatusOverlayContent('country-block', blockedCountryName);
+        setInternetOverlayVisible(true);
+        return false;
+      }
+
+      if (!navigator.onLine) {
+        setStatusOverlayContent('offline');
+        setInternetOverlayVisible(true);
+        return false;
+      }
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        await fetch('https://www.gstatic.com/generate_204', {
+          method: 'GET',
+          mode: 'no-cors',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        setInternetOverlayVisible(false);
+        return true;
+      } catch (error) {
+        setStatusOverlayContent('offline');
+        setInternetOverlayVisible(true);
+        return false;
+      }
+    }
+
+    async function startInternetStatusWatcher() {
+      await detectCountryRestriction();
+      await verifyInternetConnection();
+      if (internetStatusInterval) clearInterval(internetStatusInterval);
+      internetStatusInterval = setInterval(verifyInternetConnection, 12000);
+      window.addEventListener('offline', () => {
+        if (!blockedCountryName) {
+          setStatusOverlayContent('offline');
+          setInternetOverlayVisible(true);
+        }
+      });
+      window.addEventListener('online', verifyInternetConnection);
+      document.addEventListener('visibilitychange', async () => {
+        if (!document.hidden) {
+          if (!blockedCountryName) await detectCountryRestriction();
+          verifyInternetConnection();
+        }
+      });
+    }
     /* TEMA PERMANENTE EN MODO CLARO */
     function setLightTheme() {
       const bg = "#f6f6f6";
@@ -2261,6 +2377,16 @@ setInterval(checkScheduledChapters, 60000);
 </script>
 
 <body class="bg-white font-sans text-[#393B3D]" style="overflow: hidden;">
+  <div id="internet-status-overlay" role="alert" aria-live="assertive">
+    <div class="internet-status-full">
+      <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-black text-white flex items-center justify-center">
+        <i class="fas fa-wifi text-2xl"></i>
+      </div>
+      <h2 id="internet-status-title" class="text-2xl font-bold text-gray-900 mb-3">Ups, no tienes internet</h2>
+      <p id="internet-status-message" class="text-base text-gray-600 leading-relaxed mb-6">Esta plataforma funciona con internet. Revisa tu WiFi e intenta reiniciar tu router.</p>
+      <button id="internet-status-retry-btn" onclick="verifyInternetConnection()" class="w-full py-3 rounded-full bg-black text-white font-semibold">Reintentar conexión</button>
+    </div>
+  </div>
   
   <div id="auth-form" class="w-full h-screen flex flex-col bg-white" style="display: none; opacity: 0;">
     <!-- Header con nombre de la app -->
@@ -4614,21 +4740,65 @@ window.renderSearchInfoList = function(items) {
   if (!infoList) return;
 
   if (!items || items.length === 0) {
-    infoList.innerHTML = '<div class="text-center text-uber-muted py-8">Sin información relacionada a libros, películas o series.</div>';
+    infoList.innerHTML = '<div class="text-center text-uber-muted py-8">Escribe algo para que Baro te responda con información precisa.</div>';
     return;
   }
 
-  infoList.innerHTML = items.map(item => `
+  const item = items[0];
+  infoList.innerHTML = `
     <article class="bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip">
-      <div class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide uppercase text-uber-muted mb-2">
-        <span class="w-2 h-2 rounded-full bg-uber-black"></span>
-        Generado por IA
+      <div class="flex items-start gap-3">
+        <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-9 h-9 rounded-full flex-shrink-0">
+        <div class="min-w-0 w-full">
+          <p class="text-[11px] font-semibold tracking-wide uppercase text-uber-muted mb-2">Respuesta de IA</p>
+          <p id="search-info-typed-text" class="text-sm text-uber-black leading-relaxed"></p>
+          <div class="mt-3 pt-3 border-t border-uber-line/70 flex items-center gap-2">
+            <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-4 h-4 rounded-full">
+            <span class="text-[11px] text-uber-muted">Generado por Baro</span>
+          </div>
+        </div>
       </div>
-      <h3 class="text-sm font-semibold text-uber-black mb-1">${item.title} · ${item.type}</h3>
-      <p class="text-xs text-uber-muted leading-relaxed">${item.summary}</p>
-      <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-uber-black hover:underline">Ver en Wikipedia</a>
     </article>
-  `).join('');
+  `;
+
+  const typedText = document.getElementById('search-info-typed-text');
+  if (!typedText) return;
+
+  const fullText = item.summary || '';
+  let charIndex = 0;
+
+  return new Promise(resolve => {
+    const typeInterval = setInterval(() => {
+      charIndex += 1;
+      typedText.textContent = fullText.slice(0, charIndex);
+
+      if (charIndex >= fullText.length) {
+        clearInterval(typeInterval);
+        resolve();
+      }
+    }, 18);
+  });
+}
+
+window.renderSearchInfoLoading = function() {
+  const infoList = document.getElementById('search-info-list');
+  if (!infoList) return;
+
+  infoList.innerHTML = `
+    <article class="bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip">
+      <div class="flex items-center gap-3">
+        <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-9 h-9 rounded-full flex-shrink-0">
+        <div class="w-full">
+          <p class="text-[11px] font-semibold tracking-wide uppercase text-uber-muted mb-2">Baro está pensando</p>
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-uber-muted/70 animate-bounce" style="animation-delay:0ms"></span>
+            <span class="w-2 h-2 rounded-full bg-uber-muted/70 animate-bounce" style="animation-delay:140ms"></span>
+            <span class="w-2 h-2 rounded-full bg-uber-muted/70 animate-bounce" style="animation-delay:280ms"></span>
+          </div>
+        </div>
+      </div>
+    </article>
+  `;
 }
 
 window.fetchSearchInfoFromWikipedia = async function(query) {
@@ -4638,62 +4808,45 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     return;
   }
 
+  window.renderSearchInfoLoading();
+
   const languages = ['es', 'en'];
-  const variants = [
-    cleanQuery,
-    `${cleanQuery} serie`,
-    `${cleanQuery} película`,
-    `${cleanQuery} libro`
-  ];
+  let selectedResult = null;
 
-  const collected = [];
-  const seenTitles = new Set();
+  for (const lang of languages) {
+    try {
+      const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cleanQuery)}&limit=1&namespace=0&format=json&origin=*`;
+      const openSearchResponse = await fetch(openSearchUrl);
+      if (!openSearchResponse.ok) continue;
 
-  for (const variant of variants) {
-    if (collected.length >= 3) break;
+      const openSearchData = await openSearchResponse.json();
+      const bestTitle = openSearchData?.[1]?.[0];
+      if (!bestTitle) continue;
 
-    for (const lang of languages) {
-      if (collected.length >= 3) break;
+      const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`;
+      const summaryResponse = await fetch(summaryUrl);
+      if (!summaryResponse.ok) continue;
 
-      try {
-        const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(variant)}&limit=3&namespace=0&format=json&origin=*`;
-        const openSearchResponse = await fetch(openSearchUrl);
-        if (!openSearchResponse.ok) continue;
+      const summaryData = await summaryResponse.json();
+      const extract = (summaryData?.extract || '').trim();
+      if (extract.length < 40) continue;
 
-        const openSearchData = await openSearchResponse.json();
-        const titles = openSearchData?.[1] || [];
-
-        for (const bestTitle of titles) {
-          if (!bestTitle || seenTitles.has(bestTitle.toLowerCase())) continue;
-
-          const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`;
-          const summaryResponse = await fetch(summaryUrl);
-          if (!summaryResponse.ok) continue;
-
-          const summaryData = await summaryResponse.json();
-          const extract = summaryData?.extract || '';
-          const description = summaryData?.description || '';
-          const detectedType = window.detectWikipediaEntertainmentType(`${description} ${extract}`);
-
-          if (!detectedType || extract.length < 40) continue;
-
-          seenTitles.add(bestTitle.toLowerCase());
-          collected.push({
-            title: summaryData?.title || bestTitle,
-            type: detectedType,
-            summary: extract.length > 190 ? `${extract.slice(0, 190)}...` : extract,
-            link: summaryData?.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(bestTitle)}`
-          });
-
-          if (collected.length >= 3) break;
-        }
-      } catch (error) {
-        continue;
-      }
+      selectedResult = {
+        title: summaryData?.title || bestTitle,
+        summary: extract.length > 280 ? `${extract.slice(0, 280)}...` : extract
+      };
+      break;
+    } catch (error) {
+      continue;
     }
   }
 
-  window.renderSearchInfoList(collected);
+  if (!selectedResult) {
+    window.renderSearchInfoList([{ summary: 'No encontré una respuesta clara en Wikipedia para esa búsqueda. Intenta con otro término más específico.' }]);
+    return;
+  }
+
+  await window.renderSearchInfoList([selectedResult]);
 }
 
 // Funciones generales para manejar botones X en campos de búsqueda
@@ -17126,5 +17279,12 @@ firebase.auth().onAuthStateChanged(user => {
 <script src="stories.js"></script>
 <script src="community-firebase.js"></script>
 <script src="search-firebase.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof startInternetStatusWatcher === 'function') {
+      startInternetStatusWatcher();
+    }
+  });
+</script>
 </body>
 </html>
