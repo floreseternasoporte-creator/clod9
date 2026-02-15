@@ -356,30 +356,17 @@ body {
   animation: pulse 2s infinite;
   pointer-events: none;
 }
-    /* Botón de iniciar transmisión: forma circular y sin texto */
-    #live-startBtn {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #111111, #2f2f2f);
-      box-shadow: 0 8px 25px rgba(17, 17, 17, 0.35);
+    /* Botones de transmisión estilo TikTok */
+    #live-startBtn,
+    #live-endBtn {
       border: none;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
     }
 
-    #live-startBtn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 12px 35px rgba(17, 17, 17, 0.4);
-    }
-
-    #live-startBtn svg {
-      width: 32px;
-      height: 32px;
-      color: white;
+    #live-startBtn:hover,
+    #live-endBtn:hover {
+      transform: translateX(-50%) scale(1.03);
     }
 
     /* Ocultar la cruz en el transmisor (se mantiene oculta) */
@@ -9143,12 +9130,15 @@ function showLiveNotification(message, type = 'info') {
       <div class="text-white text-lg">Preparándose para transmitir...</div>
     </div>
     
-    <!-- Botón para iniciar transmisión -->
-    <button id="live-startBtn" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#00A2FF] to-[#ff6b7a] text-white text-lg font-semibold rounded-full px-8 py-4 shadow-lg hover:shadow-xl transition-all">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-      Iniciar transmisión
+    <!-- Botón principal estilo TikTok para iniciar transmisión -->
+    <button id="live-startBtn" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-[#FE2C55] text-white text-sm font-bold rounded-full px-6 py-3 shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
+      <span class="inline-block w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
+      EN VIVO
+    </button>
+
+    <!-- Botón para finalizar transmisión -->
+    <button id="live-endBtn" class="hidden absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-sm text-white text-sm font-semibold rounded-full px-6 py-3 border border-white/20">
+      Finalizar transmisión
     </button>
 
     <!-- Spinner de carga -->
@@ -9213,20 +9203,7 @@ function showLiveNotification(message, type = 'info') {
       }
     }
   }
-  // Interceptar el clic en el botón de transmisión
-  const liveStartBtn = document.getElementById('live-startBtn');
-  if (liveStartBtn) {
-    liveStartBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      // Se remueve la verificación de restricciones:
-      const transmissionBlockModal = document.getElementById('transmission-block-modal');
-      const liveStreamModal = document.getElementById('live-stream-modal');
-      if (transmissionBlockModal) transmissionBlockModal.classList.add('hidden');
-      if (liveStreamModal) liveStreamModal.classList.remove('hidden');
-      setLiveStreamYouTubeView();
-      // Inicia la transmisión (llamada a la función correspondiente)
-    });
-  }
+  // Listener principal de transmisión se define en el bloque LIVE STREAMING.
 </script>
 
 <!-- MODAL DE VISUALIZACIÓN EN VIVO (Espectador) -->
@@ -10893,21 +10870,7 @@ async function likeNote(noteId) {
       video.play();
     }
   }
-  // Los event listeners para live se agregarán solo cuando se abra el modal
-  window.addEventListener('load', function() {
-    const liveStartBtn = document.getElementById('live-startBtn');
-    if (liveStartBtn) {
-      liveStartBtn.addEventListener('click', function() {
-        const spinner = document.getElementById('live-spinner');
-        if (spinner) spinner.classList.remove('hidden');
-        this.classList.add('hidden');
-        setTimeout(function() {
-          if (spinner) spinner.classList.add('hidden');
-          document.getElementById('live-overlay').classList.add('hidden');
-        }, 2000);
-      });
-    }
-  });
+  // Listener legacy desactivado: la lógica principal de transmisión se maneja en el bloque LIVE STREAMING.
 
   function startCountdown() {
     let countdownElement = document.getElementById('live-countdown');
@@ -14817,6 +14780,11 @@ async function likeNote(noteId) {
   let liveBroadcasting = false;
   let currentBroadcasterId = null;
   let giftListenerRef = null;
+  let liveStreamRef = null;
+  let broadcasterAnswerRef = null;
+  let broadcasterViewerCandidatesRef = null;
+  let viewerCandidatesRef = null;
+  let viewerDisconnectRef = null;
 
   function giftListenerCallback(snapshot) {
     let gift = snapshot.val();
@@ -14935,33 +14903,36 @@ async function likeNote(noteId) {
   function startLiveStreamProcess() {
     const user = firebase.auth().currentUser;
     currentBroadcasterId = user.uid;
-    let useCamera = confirm("¿Desea transmitir en vivo usando su cámara? Presione OK para cámara, Cancelar para video pregrabado.");
-    if (useCamera) {
-      document.getElementById('live-stream-modal').classList.remove('hidden');
-      navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: {
-            echoCancellation: true
-          }
-        })
-        .then(stream => {
-          liveLocalStream = stream;
-          document.getElementById('live-localVideo').srcObject = stream;
-          setTimeout(() => {
-            document.getElementById('live-spinner').style.display = "none";
-          }, 3000);
-        })
-        .catch(err => {
-          alert("Error al acceder a la cámara: " + err);
-        });
-    } else {
-      document.getElementById('live-video-input').click();
-    }
+    document.getElementById('live-stream-modal').classList.remove('hidden');
+    document.getElementById('live-overlay').classList.remove('hidden');
+    document.getElementById('live-startBtn').classList.remove('hidden');
+    document.getElementById('live-endBtn').classList.add('hidden');
+    document.getElementById('live-spinner').style.display = "flex";
+
+    navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true
+        }
+      })
+      .then(stream => {
+        liveLocalStream = stream;
+        document.getElementById('live-localVideo').srcObject = stream;
+        setTimeout(() => {
+          document.getElementById('live-spinner').style.display = "none";
+        }, 1200);
+      })
+      .catch(err => {
+        alert("Error al acceder a la cámara: " + err);
+        closeLiveStreamModal();
+      });
+
     const profileImg = document.getElementById('profile-image');
     if (profileImg) {
       profileImg.classList.add('live-border');
     }
-    document.getElementById('live-spinner').style.display = "flex";
+
     listenForComments(currentBroadcasterId);
     listenForGifts();
   }
@@ -15046,6 +15017,12 @@ async function likeNote(noteId) {
 
   function closeLiveStreamModal() {
     document.getElementById('live-stream-modal').classList.add('hidden');
+    const liveOverlay = document.getElementById('live-overlay');
+    if (liveOverlay) liveOverlay.classList.remove('hidden');
+    const liveStartBtn = document.getElementById('live-startBtn');
+    if (liveStartBtn) liveStartBtn.classList.remove('hidden');
+    const liveEndBtn = document.getElementById('live-endBtn');
+    if (liveEndBtn) liveEndBtn.classList.add('hidden');
     if (liveLocalStream) {
       liveLocalStream.getTracks().forEach(track => track.stop());
       liveLocalStream = null;
@@ -15081,41 +15058,81 @@ async function likeNote(noteId) {
   const liveStartBtnMain = document.getElementById('live-startBtn');
   if (liveStartBtnMain) {
     liveStartBtnMain.addEventListener('click', () => {
-      startLiveCountdown(10, () => {
+      startLiveCountdown(3, () => {
         const liveIndicator = document.getElementById('live-indicator');
         const liveStartBtn = document.getElementById('live-startBtn');
         const liveEndBtn = document.getElementById('live-endBtn');
         if (liveIndicator) liveIndicator.classList.remove('hidden');
         if (liveStartBtn) liveStartBtn.classList.add('hidden');
         if (liveEndBtn) liveEndBtn.classList.remove('hidden');
+        const liveOverlay = document.getElementById('live-overlay');
+        if (liveOverlay) liveOverlay.classList.add('hidden');
         startBroadcasting();
       });
     });
   }
 
   function startBroadcasting() {
+    if (!liveLocalStream || !currentBroadcasterId) {
+      alert('No se pudo iniciar la transmisión. Intenta nuevamente.');
+      return;
+    }
+
     livePeerConnection = new RTCPeerConnection();
     liveLocalStream.getTracks().forEach(track => {
       livePeerConnection.addTrack(track, liveLocalStream);
     });
     livePeerConnection.onicecandidate = event => {
       if (event.candidate) {
-        firebase.database().ref(`liveStreams/${currentBroadcasterId}/candidates`).push(event.candidate.toJSON());
+        firebase.database().ref(`liveStreams/${currentBroadcasterId}/broadcasterCandidates`).push(event.candidate.toJSON());
       }
     };
     livePeerConnection.createOffer().then(offer => {
       return livePeerConnection.setLocalDescription(offer).then(() => offer);
     }).then(offer => {
-      firebase.database().ref(`liveStreams/${currentBroadcasterId}`).set({
+      liveStreamRef = firebase.database().ref(`liveStreams/${currentBroadcasterId}`);
+      liveStreamRef.set({
         isLive: true,
         offer: offer,
-        views: 0
+        views: 0,
+        startedAt: Date.now(),
+        hostId: currentBroadcasterId
       });
+
+      if (liveStreamRef.onDisconnect) {
+        liveStreamRef.onDisconnect().remove();
+      }
+
       liveBroadcasting = true;
       firebase.database().ref(`liveStreams/${currentBroadcasterId}/views`).on('value', snapshot => {
         const views = snapshot.val() || 0;
-        document.getElementById('live-viewCount').textContent = views + " vistas";
+        const viewEl = document.getElementById('live-viewCount');
+        const viewText = viewEl ? viewEl.querySelector('span') : null;
+        if (viewText) viewText.textContent = `${views} viendo`;
       });
+
+      broadcasterAnswerRef = firebase.database().ref(`liveStreams/${currentBroadcasterId}/answer`);
+      broadcasterAnswerRef.on('value', async snapshot => {
+        const answer = snapshot.val();
+        if (!answer || !livePeerConnection || livePeerConnection.currentRemoteDescription) return;
+        try {
+          await livePeerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        } catch (error) {
+          console.error('Error applying viewer answer:', error);
+        }
+      });
+
+      broadcasterViewerCandidatesRef = firebase.database().ref(`liveStreams/${currentBroadcasterId}/viewerCandidates`);
+      broadcasterViewerCandidatesRef.on('child_added', async snapshot => {
+        const candidate = snapshot.val();
+        if (!candidate || !livePeerConnection) return;
+        try {
+          await livePeerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (error) {
+          console.error('Error adding viewer candidate:', error);
+        }
+      });
+
       listenForComments(currentBroadcasterId);
     });
   }
@@ -15125,6 +15142,15 @@ async function likeNote(noteId) {
       livePeerConnection.close();
       livePeerConnection = null;
     }
+    if (broadcasterAnswerRef) {
+      broadcasterAnswerRef.off();
+      broadcasterAnswerRef = null;
+    }
+    if (broadcasterViewerCandidatesRef) {
+      broadcasterViewerCandidatesRef.off();
+      broadcasterViewerCandidatesRef = null;
+    }
+
     firebase.database().ref(`liveStreams/${currentBroadcasterId}`).remove();
     liveBroadcasting = false;
     const profileImg = document.getElementById('profile-image');
@@ -15156,7 +15182,11 @@ async function likeNote(noteId) {
       const views = snapshot.val() || 0;
       document.getElementById('viewerCountLive').textContent = views;
     });
-    firebase.database().ref(`liveStreams/${broadcasterId}/views`).transaction(current => (current || 0) + 1);
+    const viewsRef = firebase.database().ref(`liveStreams/${broadcasterId}/views`);
+    viewsRef.transaction(current => (current || 0) + 1);
+
+    viewerDisconnectRef = viewsRef;
+
     const viewerPC = new RTCPeerConnection();
     viewerPC.onicecandidate = event => {
       if (event.candidate) {
@@ -15180,6 +15210,18 @@ async function likeNote(noteId) {
           firebase.database().ref(`liveStreams/${broadcasterId}/answer`).set(answer);
         });
     });
+
+    viewerCandidatesRef = firebase.database().ref(`liveStreams/${broadcasterId}/broadcasterCandidates`);
+    viewerCandidatesRef.on('child_added', async snapshot => {
+      const candidate = snapshot.val();
+      if (!candidate || !viewerPC) return;
+      try {
+        await viewerPC.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (error) {
+        console.error('Error adding broadcaster candidate:', error);
+      }
+    });
+
     firebase.database().ref(`liveStreams/${broadcasterId}`).on('value', snapshot => {
       if (!snapshot.exists()) {
         document.getElementById('live-endedMessage') && document.getElementById('live-endedMessage').classList.remove('hidden');
@@ -15200,6 +15242,16 @@ async function likeNote(noteId) {
     if (window.currentViewerPC) {
       window.currentViewerPC.close();
       window.currentViewerPC = null;
+    }
+
+    if (viewerCandidatesRef) {
+      viewerCandidatesRef.off();
+      viewerCandidatesRef = null;
+    }
+
+    if (viewerDisconnectRef && liveBroadcasterId) {
+      viewerDisconnectRef.transaction(current => Math.max((current || 1) - 1, 0));
+      viewerDisconnectRef = null;
     }
   }
   const giftBtn = document.getElementById('gift-btn');
