@@ -11141,6 +11141,8 @@ async function likeNote(noteId) {
   let liveBroadcasterId = null;
   let currentChapterEditId = null;
   let currentLanguage = 'es';
+  let emailCheckTimeout = null;
+  let emailCheckRequestId = 0;
 
   function closeSearch() {
     document.getElementById('search-view').classList.add('hidden');
@@ -11537,7 +11539,7 @@ async function likeNote(noteId) {
     document.getElementById('auth-form').style.display = 'flex';
   }
   
-  function showPasswordStep() {
+  async function showPasswordStep() {
     const email = document.getElementById('emailInput').value.trim();
     const emailError = document.getElementById('authErrorEmail');
 
@@ -11549,7 +11551,15 @@ async function likeNote(noteId) {
       return;
     }
 
-    if (emailError) emailError.classList.add('hidden');
+    if (isLogin) {
+      const emailExists = await checkEmailExistsInAuth(email, true);
+      if (!emailExists) {
+        return;
+      }
+    } else if (emailError) {
+      emailError.classList.add('hidden');
+    }
+
     document.getElementById('user-email-display').textContent = email;
     document.getElementById('email-form').classList.add('hidden');
     document.getElementById('password-form').classList.remove('hidden');
@@ -12054,6 +12064,75 @@ async function likeNote(noteId) {
     }
   }
   
+  function setEmailError(message) {
+    if (!authError) return;
+    authError.textContent = message;
+    authError.classList.remove('hidden');
+  }
+
+  function clearEmailError() {
+    if (!authError) return;
+    authError.classList.add('hidden');
+    authError.textContent = '';
+  }
+
+  async function checkEmailExistsInAuth(email, showError = false) {
+    if (!email || !email.includes('@')) {
+      if (showError) {
+        setEmailError('Ingresa un correo válido');
+      }
+      return false;
+    }
+
+    try {
+      const methods = await firebase.auth().fetchSignInMethodsForEmail(email);
+      const exists = Array.isArray(methods) && methods.length > 0;
+
+      if (!exists && showError) {
+        setEmailError('Este usuario no existe o no está registrado');
+      } else if (exists) {
+        clearEmailError();
+      }
+
+      return exists;
+    } catch (error) {
+      console.warn('No se pudo validar el correo en tiempo real:', error);
+      if (showError) {
+        setEmailError('No se pudo validar el usuario. Intenta de nuevo.');
+      }
+      return false;
+    }
+  }
+
+  if (emailInput) {
+    emailInput.addEventListener('input', () => {
+      if (emailCheckTimeout) {
+        clearTimeout(emailCheckTimeout);
+      }
+
+      clearEmailError();
+
+      const email = emailInput.value.trim();
+      if (!isLogin || !email || !email.includes('@')) {
+        return;
+      }
+
+      const currentRequestId = ++emailCheckRequestId;
+      emailCheckTimeout = setTimeout(async () => {
+        const exists = await checkEmailExistsInAuth(email, false);
+        if (currentRequestId !== emailCheckRequestId || !isLogin) {
+          return;
+        }
+
+        if (!exists) {
+          setEmailError('Este usuario no existe o no está registrado');
+        } else {
+          clearEmailError();
+        }
+      }, 450);
+    });
+  }
+
   if (toggleAuth) {
     toggleAuth.addEventListener('click', () => {
     isLogin = !isLogin;
@@ -12061,6 +12140,7 @@ async function likeNote(noteId) {
     submitButton.textContent = isLogin ? 'Continuar' : 'Crear cuenta';
     authTitle.textContent = isLogin ? 'Iniciar sesión' : 'Crear cuenta';
     toggleAuth.textContent = isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión';
+    clearEmailError();
   });
   }
 
