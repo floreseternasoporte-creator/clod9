@@ -7,7 +7,7 @@
   <title>Atenis - Historias y Relatos</title>
   
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4653147807800151" crossorigin="anonymous"></script>
-  <!-- reCAPTCHA v3 -->
+  <!-- reCAPTCHA API (v2 + v3) -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
@@ -2427,11 +2427,10 @@ setInterval(checkScheduledChapters, 60000);
     </div>
 
     <div class="flex-1 px-6 pt-8 max-w-md w-full mx-auto">
-      <p class="text-sm text-gray-600 mb-6 text-center">Antes de continuar con tu contraseña, confirma que no eres un bot.</p>
-      <div class="flex justify-center mb-4">
-        <div class="g-recaptcha" data-sitekey="6LcE02EsAAAAAJU8Y2vWQqvGLtBxWz4yhya3LU95" data-callback="onEmailCaptchaSuccess" data-expired-callback="onEmailCaptchaExpired"></div>
-      </div>
-      <div id="email-captcha-error" class="text-sm text-red-500 text-center mb-4 hidden">Completa el reCAPTCHA para continuar.</div>
+      <p class="text-sm text-gray-600 mb-2 text-center">Antes de continuar con tu contraseña, verificamos seguridad con reCAPTCHA v3.</p>
+      <p id="email-captcha-status" class="text-xs text-gray-500 mb-6 text-center">Verificando...</p>
+      <div id="email-captcha-error" class="text-sm text-red-500 text-center mb-4 hidden">No se pudo validar reCAPTCHA. Intenta de nuevo.</div>
+      <button id="email-captcha-retry-btn" type="button" onclick="runEmailRecaptchaV3()" class="w-full mb-3 border border-gray-300 text-gray-700 p-4 font-semibold rounded-2xl hover:bg-gray-50 transition hidden">Reintentar verificación</button>
       <button id="email-captcha-continue-btn" type="button" onclick="continueToPasswordAfterCaptcha()" class="w-full bg-[#111111] text-white p-4 font-semibold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>Continuar</button>
     </div>
   </div>
@@ -2737,17 +2736,6 @@ setInterval(checkScheduledChapters, 60000);
     .sms-modal-icon {
       background: #f2f2f2;
       color: #111111;
-    }
-
-    @keyframes smsCardUp {
-      from {
-        transform: translateY(16px) scale(0.98);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
     }
     
     /* Estilo especial para input de código SMS */
@@ -11559,7 +11547,47 @@ async function likeNote(noteId) {
     document.getElementById('auth-form').style.display = 'flex';
   }
   
+  const EMAIL_RECAPTCHA_V3_SITE_KEY = '6LcE02EsAAAAAJU8Y2vWQqvGLtBxWz4yhya3LU95';
   let emailCaptchaVerified = false;
+  let emailCaptchaV3Token = '';
+
+  async function runEmailRecaptchaV3() {
+    const continueBtn = document.getElementById('email-captcha-continue-btn');
+    const captchaError = document.getElementById('email-captcha-error');
+    const captchaStatus = document.getElementById('email-captcha-status');
+    const retryBtn = document.getElementById('email-captcha-retry-btn');
+
+    emailCaptchaVerified = false;
+    emailCaptchaV3Token = '';
+
+    if (continueBtn) continueBtn.disabled = true;
+    if (captchaError) captchaError.classList.add('hidden');
+    if (retryBtn) retryBtn.classList.add('hidden');
+    if (captchaStatus) captchaStatus.textContent = 'Verificando...';
+
+    try {
+      if (!window.grecaptcha) {
+        throw new Error('reCAPTCHA no está cargado');
+      }
+
+      await new Promise(resolve => window.grecaptcha.ready(resolve));
+      const token = await window.grecaptcha.execute(EMAIL_RECAPTCHA_V3_SITE_KEY, { action: 'email_continue' });
+
+      if (!token) {
+        throw new Error('No se recibió token de reCAPTCHA v3');
+      }
+
+      emailCaptchaV3Token = token;
+      emailCaptchaVerified = true;
+      if (continueBtn) continueBtn.disabled = false;
+      if (captchaStatus) captchaStatus.textContent = 'Verificación completada.';
+    } catch (error) {
+      console.error('Error en reCAPTCHA v3 (correo):', error);
+      if (captchaStatus) captchaStatus.textContent = 'Verificación pendiente.';
+      if (captchaError) captchaError.classList.remove('hidden');
+      if (retryBtn) retryBtn.classList.remove('hidden');
+    }
+  }
 
   function showPasswordStep() {
     const email = document.getElementById('emailInput').value.trim();
@@ -11574,38 +11602,9 @@ async function likeNote(noteId) {
     }
 
     if (emailError) emailError.classList.add('hidden');
-    emailCaptchaVerified = false;
-
-    const continueBtn = document.getElementById('email-captcha-continue-btn');
-    if (continueBtn) continueBtn.disabled = true;
-
-    const captchaError = document.getElementById('email-captcha-error');
-    if (captchaError) captchaError.classList.add('hidden');
-
-    if (window.grecaptcha) {
-      try {
-        window.grecaptcha.reset();
-      } catch (error) {
-        console.warn('No se pudo resetear reCAPTCHA de email:', error);
-      }
-    }
-
     document.getElementById('email-form').classList.add('hidden');
     document.getElementById('email-captcha-form').classList.remove('hidden');
-  }
-
-  function onEmailCaptchaSuccess() {
-    emailCaptchaVerified = true;
-    const continueBtn = document.getElementById('email-captcha-continue-btn');
-    if (continueBtn) continueBtn.disabled = false;
-    const captchaError = document.getElementById('email-captcha-error');
-    if (captchaError) captchaError.classList.add('hidden');
-  }
-
-  function onEmailCaptchaExpired() {
-    emailCaptchaVerified = false;
-    const continueBtn = document.getElementById('email-captcha-continue-btn');
-    if (continueBtn) continueBtn.disabled = true;
+    runEmailRecaptchaV3();
   }
 
   function backToEmailFromCaptcha() {
@@ -11614,7 +11613,7 @@ async function likeNote(noteId) {
   }
 
   function continueToPasswordAfterCaptcha() {
-    if (!emailCaptchaVerified) {
+    if (!emailCaptchaVerified || !emailCaptchaV3Token) {
       const captchaError = document.getElementById('email-captcha-error');
       if (captchaError) captchaError.classList.remove('hidden');
       return;
