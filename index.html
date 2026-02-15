@@ -9085,7 +9085,7 @@ function showLiveNotification(message, type = 'info') {
   }, 3000);
 }
 </script>
-<div id="live-stream-modal" class="fixed inset-0 bg-gradient-to-b from-[#393B3D] to-[#273852] z-[250] hidden">
+<div id="live-stream-modal" class="fixed inset-0 bg-gradient-to-b from-[#111111] to-[#1f1f1f] z-[250] hidden">
   <div class="relative w-full h-full">
     <!-- Header con información del stream -->
     <div class="absolute top-0 left-0 right-0 p-4 z-10">
@@ -9104,7 +9104,7 @@ function showLiveNotification(message, type = 'info') {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
-          <span>0 vistas</span>
+          <span>0 viendo</span>
         </div>
         
         <!-- Botón cerrar -->
@@ -9117,7 +9117,7 @@ function showLiveNotification(message, type = 'info') {
     </div>
     
     <!-- Contador de taps/corazones centrado -->
-    <div id="live-tapCount" class="absolute top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#00A2FF] to-[#ff6b7a] px-4 py-2 rounded-full text-white font-bold">
+    <div id="live-tapCount" class="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full text-white font-bold border border-white/15">
       ❤️ <span>0</span>
     </div>
     
@@ -9208,7 +9208,7 @@ function showLiveNotification(message, type = 'info') {
 
 <!-- MODAL DE VISUALIZACIÓN EN VIVO (Espectador) -->
 <div id="live-view-modal" class="fixed inset-0 z-[250] hidden">
-  <div class="live-container bg-gradient-to-b from-[#393B3D] to-[#273852]" id="liveContainer">
+  <div class="live-container bg-gradient-to-b from-[#111111] to-[#1f1f1f]" id="liveContainer">
     <!-- Top Bar -->
     <div class="top-bar">
       <div class="user-info">
@@ -9303,7 +9303,7 @@ function showLiveNotification(message, type = 'info') {
     </div>
 
     <!-- Contador de taps/corazones para el espectador -->
-    <div id="viewer-tapCount" class="absolute top-20 right-4 bg-gradient-to-r from-[#00A2FF] to-[#ff6b7a] px-3 py-1 rounded-full text-white font-semibold">
+    <div id="viewer-tapCount" class="absolute top-20 right-4 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full text-white font-semibold border border-white/15">
       ❤️ <span>0</span>
     </div>
 
@@ -10833,17 +10833,6 @@ async function likeNote(noteId) {
     document.getElementById("settings-fullscreen").classList.add("hidden");
   }
 
-  function closeLiveStreamModal() {
-    document.getElementById('live-stream-modal').classList.add('hidden');
-    const giftDrawer = document.getElementById('gift-drawer');
-    if (giftDrawer) giftDrawer.classList.remove('open');
-    setBottomNavVisible(true);
-  }
-
-  function closeLiveViewModal() {
-    document.getElementById('live-view-modal').classList.add('hidden');
-  }
-
   function expandPromoBanner() {
     document.getElementById('expanded-banner').classList.remove('translate-y-full');
   }
@@ -10852,43 +10841,7 @@ async function likeNote(noteId) {
     document.getElementById('expanded-banner').classList.add('translate-y-full');
   }
 
-  function sendGift(giftName) {
-    alert("Enviado regalo: " + giftName);
-    closeGiftDrawer();
-  }
-
-  function closeGiftDrawer() {
-    document.getElementById('gift-drawer').classList.remove('open');
-  }
-
-
-  function handleLiveVideoUpload(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const video = document.getElementById('live-localVideo');
-      video.src = URL.createObjectURL(file);
-      video.play();
-    }
-  }
   // Listener legacy desactivado: la lógica principal de transmisión se maneja en el bloque LIVE STREAMING.
-
-  function startCountdown() {
-    let countdownElement = document.getElementById('live-countdown');
-    let count = 3;
-    countdownElement.textContent = count;
-    let interval = setInterval(() => {
-      count--;
-      if (count > 0) {
-        countdownElement.textContent = count;
-      } else {
-        clearInterval(interval);
-        countdownElement.textContent = "¡En vivo!";
-        setTimeout(() => {
-          document.getElementById('live-overlay').classList.add('hidden');
-        }, 1000);
-      }
-    }, 1000);
-  }
   // -------------------------------
   // Nuevas Funcionalidades en Ajustes
   // -------------------------------
@@ -14785,6 +14738,8 @@ async function likeNote(noteId) {
   let broadcasterViewerCandidatesRef = null;
   let viewerCandidatesRef = null;
   let viewerDisconnectRef = null;
+  let viewerStreamStateRef = null;
+  let viewerViewsCountRef = null;
 
   function giftListenerCallback(snapshot) {
     let gift = snapshot.val();
@@ -15178,11 +15133,12 @@ async function likeNote(noteId) {
     });
     document.getElementById('live-view-modal').classList.remove('hidden');
     setBottomNavVisible(false);
-    firebase.database().ref(`liveStreams/${broadcasterId}/views`).on('value', snapshot => {
+    viewerViewsCountRef = firebase.database().ref(`liveStreams/${broadcasterId}/views`);
+    viewerViewsCountRef.on('value', snapshot => {
       const views = snapshot.val() || 0;
       document.getElementById('viewerCountLive').textContent = views;
     });
-    const viewsRef = firebase.database().ref(`liveStreams/${broadcasterId}/views`);
+    const viewsRef = viewerViewsCountRef;
     viewsRef.transaction(current => (current || 0) + 1);
 
     viewerDisconnectRef = viewsRef;
@@ -15222,7 +15178,8 @@ async function likeNote(noteId) {
       }
     });
 
-    firebase.database().ref(`liveStreams/${broadcasterId}`).on('value', snapshot => {
+    viewerStreamStateRef = firebase.database().ref(`liveStreams/${broadcasterId}`);
+    viewerStreamStateRef.on('value', snapshot => {
       if (!snapshot.exists()) {
         document.getElementById('live-endedMessage') && document.getElementById('live-endedMessage').classList.remove('hidden');
         setTimeout(closeLiveViewModal, 3000);
@@ -15247,6 +15204,16 @@ async function likeNote(noteId) {
     if (viewerCandidatesRef) {
       viewerCandidatesRef.off();
       viewerCandidatesRef = null;
+    }
+
+    if (viewerStreamStateRef) {
+      viewerStreamStateRef.off();
+      viewerStreamStateRef = null;
+    }
+
+    if (viewerViewsCountRef) {
+      viewerViewsCountRef.off();
+      viewerViewsCountRef = null;
     }
 
     if (viewerDisconnectRef && liveBroadcasterId) {
