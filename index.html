@@ -11552,7 +11552,7 @@ async function likeNote(noteId) {
     }
 
     if (isLogin) {
-      const emailExists = await checkEmailExistsInAuth(email, true);
+      const emailExists = await checkEmailExistsInDatabase(email, true);
       if (!emailExists) {
         return;
       }
@@ -12076,7 +12076,7 @@ async function likeNote(noteId) {
     authError.textContent = '';
   }
 
-  async function checkEmailExistsInAuth(email, showError = false) {
+  async function checkEmailExistsInDatabase(email, showError = false) {
     if (!email || !email.includes('@')) {
       if (showError) {
         setEmailError('Ingresa un correo válido');
@@ -12084,9 +12084,26 @@ async function likeNote(noteId) {
       return false;
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     try {
-      const methods = await firebase.auth().fetchSignInMethodsForEmail(email);
-      const exists = Array.isArray(methods) && methods.length > 0;
+      const usersRef = firebase.database().ref('users');
+      const snapshot = await usersRef
+        .orderByChild('email')
+        .equalTo(normalizedEmail)
+        .limitToFirst(1)
+        .once('value');
+
+      let exists = snapshot.exists();
+
+      if (!exists && normalizedEmail !== email.trim()) {
+        const fallbackSnapshot = await usersRef
+          .orderByChild('email')
+          .equalTo(email.trim())
+          .limitToFirst(1)
+          .once('value');
+        exists = fallbackSnapshot.exists();
+      }
 
       if (!exists && showError) {
         setEmailError('Este usuario no existe o no está registrado');
@@ -12096,7 +12113,7 @@ async function likeNote(noteId) {
 
       return exists;
     } catch (error) {
-      console.warn('No se pudo validar el correo en tiempo real:', error);
+      console.warn('No se pudo validar el correo en base de datos:', error);
       if (showError) {
         setEmailError('No se pudo validar el usuario. Intenta de nuevo.');
       }
@@ -12119,7 +12136,7 @@ async function likeNote(noteId) {
 
       const currentRequestId = ++emailCheckRequestId;
       emailCheckTimeout = setTimeout(async () => {
-        const exists = await checkEmailExistsInAuth(email, false);
+        const exists = await checkEmailExistsInDatabase(email, false);
         if (currentRequestId !== emailCheckRequestId || !isLogin) {
           return;
         }
@@ -12222,7 +12239,7 @@ async function likeNote(noteId) {
         isVerified,
         registrationTimestamp: Date.now(),
         founder: false,
-        email: user.email
+        email: (user.email || '').toLowerCase()
       };
 
       await firebase.database().ref('users/' + user.uid).set(userProfile);
