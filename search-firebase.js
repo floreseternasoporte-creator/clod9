@@ -67,21 +67,65 @@ function renderSearchInfoList(items) {
   if (!infoList) return;
 
   if (!items || items.length === 0) {
-    infoList.innerHTML = '<div class="text-center text-gray-500 py-8">Sin información relacionada a libros, películas o series.</div>';
+    infoList.innerHTML = '<div class="text-center text-gray-500 py-8">Escribe algo para que Baro te responda con información precisa.</div>';
     return;
   }
 
-  infoList.innerHTML = items.map(item => `
+  const item = items[0];
+  infoList.innerHTML = `
     <article class="bg-white border border-[#e6e6e6] rounded-2xl p-4 shadow-sm">
-      <div class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide uppercase text-gray-500 mb-2">
-        <span class="w-2 h-2 rounded-full bg-[#111111]"></span>
-        Generado por IA
+      <div class="flex items-start gap-3">
+        <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-9 h-9 rounded-full flex-shrink-0">
+        <div class="min-w-0 w-full">
+          <p class="text-[11px] font-semibold tracking-wide uppercase text-gray-500 mb-2">Respuesta de IA</p>
+          <p id="search-info-typed-text" class="text-sm text-[#111111] leading-relaxed"></p>
+          <div class="mt-3 pt-3 border-t border-[#e6e6e6] flex items-center gap-2">
+            <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-4 h-4 rounded-full">
+            <span class="text-[11px] text-gray-500">Generado por Baro</span>
+          </div>
+        </div>
       </div>
-      <h3 class="text-sm font-semibold text-[#111111] mb-1">${item.title} · ${item.type}</h3>
-      <p class="text-xs text-gray-600 leading-relaxed">${item.summary}</p>
-      <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-[#111111] hover:underline">Ver en Wikipedia</a>
     </article>
-  `).join('');
+  `;
+
+  const typedText = document.getElementById('search-info-typed-text');
+  if (!typedText) return;
+
+  const fullText = item.summary || '';
+  let charIndex = 0;
+
+  return new Promise(resolve => {
+    const typeInterval = setInterval(() => {
+      charIndex += 1;
+      typedText.textContent = fullText.slice(0, charIndex);
+
+      if (charIndex >= fullText.length) {
+        clearInterval(typeInterval);
+        resolve();
+      }
+    }, 18);
+  });
+}
+
+function renderSearchInfoLoading() {
+  const infoList = document.getElementById('search-info-list');
+  if (!infoList) return;
+
+  infoList.innerHTML = `
+    <article class="bg-white border border-[#e6e6e6] rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center gap-3">
+        <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-9 h-9 rounded-full flex-shrink-0">
+        <div class="w-full">
+          <p class="text-[11px] font-semibold tracking-wide uppercase text-gray-500 mb-2">Baro está pensando</p>
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-gray-500/70 animate-bounce" style="animation-delay:0ms"></span>
+            <span class="w-2 h-2 rounded-full bg-gray-500/70 animate-bounce" style="animation-delay:140ms"></span>
+            <span class="w-2 h-2 rounded-full bg-gray-500/70 animate-bounce" style="animation-delay:280ms"></span>
+          </div>
+        </div>
+      </div>
+    </article>
+  `;
 }
 
 async function searchInfoContent(query) {
@@ -91,63 +135,45 @@ async function searchInfoContent(query) {
     return;
   }
 
+  renderSearchInfoLoading();
+
   const languages = ['es', 'en'];
-  const variants = [
-    cleanQuery,
-    `${cleanQuery} serie`,
-    `${cleanQuery} película`,
-    `${cleanQuery} libro`
-  ];
+  let selectedResult = null;
 
-  const collected = [];
-  const seen = new Set();
+  for (const lang of languages) {
+    try {
+      const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cleanQuery)}&limit=1&namespace=0&format=json&origin=*`;
+      const openSearchResponse = await fetch(openSearchUrl);
+      if (!openSearchResponse.ok) continue;
 
-  for (const variant of variants) {
-    if (collected.length >= 3) break;
+      const openSearchData = await openSearchResponse.json();
+      const bestTitle = openSearchData?.[1]?.[0];
+      if (!bestTitle) continue;
 
-    for (const lang of languages) {
-      if (collected.length >= 3) break;
+      const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`;
+      const summaryResponse = await fetch(summaryUrl);
+      if (!summaryResponse.ok) continue;
 
-      try {
-        const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(variant)}&limit=3&namespace=0&format=json&origin=*`;
-        const openSearchResponse = await fetch(openSearchUrl);
-        if (!openSearchResponse.ok) continue;
+      const summaryData = await summaryResponse.json();
+      const extract = (summaryData?.extract || '').trim();
+      if (extract.length < 40) continue;
 
-        const openSearchData = await openSearchResponse.json();
-        const titles = openSearchData?.[1] || [];
-
-        for (const title of titles) {
-          const key = (title || '').toLowerCase();
-          if (!title || seen.has(key)) continue;
-
-          const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
-          const summaryResponse = await fetch(summaryUrl);
-          if (!summaryResponse.ok) continue;
-
-          const summaryData = await summaryResponse.json();
-          const extract = summaryData?.extract || '';
-          const description = summaryData?.description || '';
-          const type = detectWikipediaEntertainmentType(`${description} ${extract}`);
-
-          if (!type || extract.length < 40) continue;
-
-          seen.add(key);
-          collected.push({
-            title: summaryData?.title || title,
-            type,
-            summary: extract.length > 190 ? `${extract.slice(0, 190)}...` : extract,
-            link: summaryData?.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title)}`
-          });
-
-          if (collected.length >= 3) break;
-        }
-      } catch (error) {
-        continue;
-      }
+      selectedResult = {
+        title: summaryData?.title || bestTitle,
+        summary: extract.length > 280 ? `${extract.slice(0, 280)}...` : extract
+      };
+      break;
+    } catch (error) {
+      continue;
     }
   }
 
-  renderSearchInfoList(collected);
+  if (!selectedResult) {
+    await renderSearchInfoList([{ summary: 'No encontré una respuesta clara en Wikipedia para esa búsqueda. Intenta con otro término más específico.' }]);
+    return;
+  }
+
+  await renderSearchInfoList([selectedResult]);
 }
 
 async function getAllStories() {
