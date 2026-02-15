@@ -4563,7 +4563,7 @@ function toggleClearButton(inputId, buttonId) {
       loadingDiv.classList.add('hidden');
       booksCarousel.innerHTML = '';
       authorsList.innerHTML = '';
-      renderSearchInfoList([]);
+      window.renderSearchInfoList([]);
       return;
     }
 
@@ -4575,7 +4575,7 @@ function toggleClearButton(inputId, buttonId) {
       try {
         await Promise.all([
           performSearch(searchTerm.toLowerCase()),
-          fetchSearchInfoFromWikipedia(searchTerm)
+          window.fetchSearchInfoFromWikipedia(searchTerm)
         ]);
       } catch (error) {
         console.error('Error en búsqueda:', error);
@@ -4594,7 +4594,7 @@ function toggleClearButton(inputId, buttonId) {
 
   
 
-  function detectWikipediaEntertainmentType(text) {
+  window.detectWikipediaEntertainmentType = function(text) {
   const normalized = (text || '').toLowerCase();
 
   const seriesKeywords = ['serie', 'series', 'tv series', 'television series', 'temporada', 'episodio', 'netflix series'];
@@ -4609,7 +4609,7 @@ function toggleClearButton(inputId, buttonId) {
   return null;
 }
 
-function renderSearchInfoList(items) {
+window.renderSearchInfoList = function(items) {
   const infoList = document.getElementById('search-info-list');
   if (!infoList) return;
 
@@ -4631,10 +4631,10 @@ function renderSearchInfoList(items) {
   `).join('');
 }
 
-async function fetchSearchInfoFromWikipedia(query) {
+window.fetchSearchInfoFromWikipedia = async function(query) {
   const cleanQuery = (query || '').trim();
   if (cleanQuery.length < 3) {
-    renderSearchInfoList([]);
+    window.renderSearchInfoList([]);
     return;
   }
 
@@ -4673,7 +4673,7 @@ async function fetchSearchInfoFromWikipedia(query) {
           const summaryData = await summaryResponse.json();
           const extract = summaryData?.extract || '';
           const description = summaryData?.description || '';
-          const detectedType = detectWikipediaEntertainmentType(`${description} ${extract}`);
+          const detectedType = window.detectWikipediaEntertainmentType(`${description} ${extract}`);
 
           if (!detectedType || extract.length < 40) continue;
 
@@ -4693,7 +4693,7 @@ async function fetchSearchInfoFromWikipedia(query) {
     }
   }
 
-  renderSearchInfoList(collected);
+  window.renderSearchInfoList(collected);
 }
 
 // Funciones generales para manejar botones X en campos de búsqueda
