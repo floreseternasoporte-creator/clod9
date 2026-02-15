@@ -4286,6 +4286,16 @@ function escapeHtml(text) {
   </div>
 
   <div class="p-4">
+    <div id="search-ai-card" class="hidden mb-4 bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip">
+      <div class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide uppercase text-uber-muted mb-2">
+        <span class="w-2 h-2 rounded-full bg-uber-black"></span>
+        Generado por IA
+      </div>
+      <p id="search-ai-title" class="text-sm font-semibold text-uber-black mb-1"></p>
+      <p id="search-ai-summary" class="text-xs text-uber-muted leading-relaxed"></p>
+      <a id="search-ai-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-uber-black hover:underline">Ver en Wikipedia</a>
+    </div>
+
     <div class="flex gap-2 overflow-x-auto pb-3 mb-4 uber-chip-row">
       <button type="button" class="category-chip uber-chip active" data-value="">Todas</button>
       <button type="button" class="category-chip uber-chip" data-value="recent">Recientes</button>
