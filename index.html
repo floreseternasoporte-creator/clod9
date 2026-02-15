@@ -166,6 +166,33 @@ body {
   display: none;
 }
 
+/* Overlay de conexión para modo sin internet */
+#internet-status-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#internet-status-overlay.visible {
+  display: flex;
+}
+
+#internet-status-overlay .internet-status-card {
+  width: 100%;
+  max-width: 360px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(17, 17, 17, 0.08);
+  text-align: center;
+}
+
 /* MODAL DE CREACIÓN DE CAPÍTULO FULL SCREEN MODERNIZADO */
 #chapter-creation-modal {
   position: fixed;
@@ -798,15 +825,48 @@ body {
       return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
     /*********************** MODO OFFLINE ***********************/
-    window.addEventListener('offline', function() {
-      document.body.innerHTML = `
-        <div id="offline-modal">
-          <img src="https://ideogram.ai/assets/image/lossless/response/ZL-_GzzNQdy7CzioYPtDHg" alt="Sin conexión">
-        </div>`;
-    });
-    window.addEventListener('online', function() {
-      location.reload();
-    });
+    let internetStatusInterval = null;
+
+    function setInternetOverlayVisible(visible) {
+      const overlay = document.getElementById('internet-status-overlay');
+      if (!overlay) return;
+      overlay.classList.toggle('visible', Boolean(visible));
+    }
+
+    async function verifyInternetConnection() {
+      if (!navigator.onLine) {
+        setInternetOverlayVisible(true);
+        return false;
+      }
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        await fetch('https://www.gstatic.com/generate_204', {
+          method: 'GET',
+          mode: 'no-cors',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        setInternetOverlayVisible(false);
+        return true;
+      } catch (error) {
+        setInternetOverlayVisible(true);
+        return false;
+      }
+    }
+
+    function startInternetStatusWatcher() {
+      verifyInternetConnection();
+      if (internetStatusInterval) clearInterval(internetStatusInterval);
+      internetStatusInterval = setInterval(verifyInternetConnection, 12000);
+      window.addEventListener('offline', () => setInternetOverlayVisible(true));
+      window.addEventListener('online', verifyInternetConnection);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) verifyInternetConnection();
+      });
+    }
     /* TEMA PERMANENTE EN MODO CLARO */
     function setLightTheme() {
       const bg = "#f6f6f6";
@@ -2261,6 +2321,16 @@ setInterval(checkScheduledChapters, 60000);
 </script>
 
 <body class="bg-white font-sans text-[#393B3D]" style="overflow: hidden;">
+  <div id="internet-status-overlay" role="alert" aria-live="assertive">
+    <div class="internet-status-card">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-black text-white flex items-center justify-center">
+        <i class="fas fa-wifi text-xl"></i>
+      </div>
+      <h2 class="text-xl font-bold text-gray-900 mb-2">Ups, no tienes internet</h2>
+      <p class="text-sm text-gray-600 leading-relaxed mb-4">Esta plataforma funciona con internet. Revisa tu WiFi e intenta reiniciar tu router.</p>
+      <button onclick="verifyInternetConnection()" class="w-full py-3 rounded-full bg-black text-white font-semibold">Reintentar conexión</button>
+    </div>
+  </div>
   
   <div id="auth-form" class="w-full h-screen flex flex-col bg-white" style="display: none; opacity: 0;">
     <!-- Header con nombre de la app -->
@@ -17153,5 +17223,12 @@ firebase.auth().onAuthStateChanged(user => {
 <script src="stories.js"></script>
 <script src="community-firebase.js"></script>
 <script src="search-firebase.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof startInternetStatusWatcher === 'function') {
+      startInternetStatusWatcher();
+    }
+  });
+</script>
 </body>
 </html>
