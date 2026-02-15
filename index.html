@@ -4286,6 +4286,16 @@ function escapeHtml(text) {
   </div>
 
   <div class="p-4">
+    <div id="search-ai-card" class="hidden mb-4 bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip">
+      <div class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide uppercase text-uber-muted mb-2">
+        <span class="w-2 h-2 rounded-full bg-uber-black"></span>
+        Generado por IA
+      </div>
+      <p id="search-ai-title" class="text-sm font-semibold text-uber-black mb-1"></p>
+      <p id="search-ai-summary" class="text-xs text-uber-muted leading-relaxed"></p>
+      <a id="search-ai-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-uber-black hover:underline">Ver en Wikipedia</a>
+    </div>
+
     <div class="flex gap-2 overflow-x-auto pb-3 mb-4 uber-chip-row">
       <button type="button" class="category-chip uber-chip active" data-value="">Todas</button>
       <button type="button" class="category-chip uber-chip" data-value="recent">Recientes</button>
@@ -4501,6 +4511,7 @@ function toggleClearButton(inputId, buttonId) {
     const loadingDiv = document.getElementById('search-loading');
     const booksCarousel = document.getElementById('search-books-carousel');
     const authorsList = document.getElementById('search-authors-list');
+    const aiCard = document.getElementById('search-ai-card');
 
     if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
     searchRequestSequence += 1;
@@ -4514,6 +4525,7 @@ function toggleClearButton(inputId, buttonId) {
     if (loadingDiv) loadingDiv.classList.add('hidden');
     if (booksCarousel) booksCarousel.innerHTML = '';
     if (authorsList) authorsList.innerHTML = '';
+    if (aiCard) aiCard.classList.add('hidden');
   }
 
   function handleSearchInput() {
@@ -4534,6 +4546,7 @@ function toggleClearButton(inputId, buttonId) {
       loadingDiv.classList.add('hidden');
       booksCarousel.innerHTML = '';
       authorsList.innerHTML = '';
+      hideSearchAISummary();
       return;
     }
 
@@ -4543,7 +4556,10 @@ function toggleClearButton(inputId, buttonId) {
     searchDebounceTimer = setTimeout(async () => {
       const startTime = Date.now();
       try {
-        await performSearch(searchTerm.toLowerCase());
+        await Promise.all([
+          performSearch(searchTerm.toLowerCase()),
+          fetchSearchAISummary(searchTerm)
+        ]);
       } catch (error) {
         console.error('Error en búsqueda:', error);
       } finally {
@@ -4561,263 +4577,79 @@ function toggleClearButton(inputId, buttonId) {
 
   
 
-    const wikiResults = document.getElementById('wikipedia-results');
-    const wikiContent = document.getElementById('wiki-content');
-    const wikiLink = document.getElementById('wiki-link');
-    const wikiLoading = document.getElementById('wiki-loading');
-    const wikiImage = document.getElementById('wiki-image');
-    const wikiImageContainer = document.getElementById('wiki-image-container');
-    const wikiTypeBadge = document.getElementById('wiki-type-badge');
-    const wikiIcon = document.getElementById('wiki-icon');
-    const categoryChips = document.querySelector('.flex.gap-2.overflow-x-auto');
-    
-    // Palabras clave mejoradas para múltiples idiomas
-    const contentKeywords = {
-      // Español
-      movies: ['película', 'film', 'cine', 'movie', 'cinema'],
-      series: ['serie', 'tv', 'televisión', 'show', 'temporada', 'episodio'],
-      books: ['libro', 'novela', 'autor', 'escritor', 'literatura', 'cuento', 'relato', 'poesía', 'ensayo'],
-      genres: ['fantasía', 'ciencia ficción', 'romance', 'misterio', 'terror', 'aventura', 'drama', 'comedia', 'thriller', 'suspenso', 'biografía', 'documental'],
-      
-      // Inglés
-      moviesEn: ['movie', 'film', 'cinema', 'picture', 'flick'],
-      seriesEn: ['series', 'tv show', 'television', 'season', 'episode'],
-      booksEn: ['book', 'novel', 'author', 'writer', 'literature', 'story', 'tale', 'poetry', 'essay'],
-      genresEn: ['fantasy', 'science fiction', 'romance', 'mystery', 'horror', 'adventure', 'drama', 'comedy', 'thriller', 'suspense', 'biography', 'documentary'],
-      
-      // Portugués
-      moviesPt: ['filme', 'cinema', 'película'],
-      seriesPt: ['série', 'programa', 'televisão', 'temporada', 'episódio'],
-      booksPt: ['livro', 'romance', 'autor', 'escritor', 'literatura', 'conto', 'poesia'],
-      genresPt: ['fantasia', 'ficção científica', 'romance', 'mistério', 'terror', 'aventura', 'drama', 'comédia'],
-      
-      // Japonés (romanizado)
-      moviesJa: ['eiga', 'cinema', 'film'],
-      seriesJa: ['anime', 'dorama', 'bangumi'],
-      booksJa: ['hon', 'shosetsu', 'sakka', 'bungaku'],
-      
-      // Coreano (romanizado)
-      moviesKo: ['yeonghwa', 'cinema'],
-      seriesKo: ['deurama', 'bangbeom'],
-      booksKo: ['chaek', 'soseol', 'jakga'],
-      
-      // Italiano
-      moviesIt: ['film', 'cinema', 'pellicola'],
-      seriesIt: ['serie', 'programma', 'televisione', 'stagione', 'episodio'],
-      booksIt: ['libro', 'romanzo', 'autore', 'scrittore', 'letteratura', 'racconto', 'poesia'],
-      genresIt: ['fantasia', 'fantascienza', 'romantico', 'mistero', 'horror', 'avventura', 'dramma', 'commedia'],
-      
-      // Francés
-      moviesFr: ['film', 'cinéma', 'pellicule'],
-      seriesFr: ['série', 'émission', 'télévision', 'saison', 'épisode'],
-      booksFr: ['livre', 'roman', 'auteur', 'écrivain', 'littérature', 'conte', 'poésie'],
-      genresFr: ['fantaisie', 'science-fiction', 'romance', 'mystère', 'horreur', 'aventure', 'drame', 'comédie']
-    };
-    
-    const allKeywords = [
-      ...contentKeywords.movies, ...contentKeywords.series, ...contentKeywords.books, ...contentKeywords.genres,
-      ...contentKeywords.moviesEn, ...contentKeywords.seriesEn, ...contentKeywords.booksEn, ...contentKeywords.genresEn,
-      ...contentKeywords.moviesPt, ...contentKeywords.seriesPt, ...contentKeywords.booksPt, ...contentKeywords.genresPt,
-      ...contentKeywords.moviesJa, ...contentKeywords.seriesJa, ...contentKeywords.booksJa,
-      ...contentKeywords.moviesKo, ...contentKeywords.seriesKo, ...contentKeywords.booksKo,
-      ...contentKeywords.moviesIt, ...contentKeywords.seriesIt, ...contentKeywords.booksIt, ...contentKeywords.genresIt,
-      ...contentKeywords.moviesFr, ...contentKeywords.seriesFr, ...contentKeywords.booksFr, ...contentKeywords.genresFr
-    ];
-    
-    const isContentRelated = allKeywords.some(keyword => 
-      query.toLowerCase().includes(keyword) || 
-      keyword.includes(query.toLowerCase())
-    ) || query.length >= 5; // Reducido para ser menos restrictivo
-    
-    if (!isContentRelated) {
-      wikiResults.classList.add('hidden');
-      categoryChips.classList.remove('hidden');
+  function hideSearchAISummary() {
+    const card = document.getElementById('search-ai-card');
+    if (card) card.classList.add('hidden');
+  }
+
+  function detectWikipediaEntertainmentType(text) {
+    const normalized = (text || '').toLowerCase();
+
+    const seriesKeywords = ['serie', 'series', 'tv series', 'television series', 'temporada', 'episodio', 'netflix series'];
+    if (seriesKeywords.some(k => normalized.includes(k))) return 'Serie';
+
+    const movieKeywords = ['película', 'pelicula', 'film', 'movie', 'cine', 'largometraje'];
+    if (movieKeywords.some(k => normalized.includes(k))) return 'Película';
+
+    const bookKeywords = ['libro', 'novela', 'book', 'author', 'autor', 'escritor', 'literatura'];
+    if (bookKeywords.some(k => normalized.includes(k))) return 'Libro';
+
+    return null;
+  }
+
+  async function fetchSearchAISummary(query) {
+    const card = document.getElementById('search-ai-card');
+    const titleEl = document.getElementById('search-ai-title');
+    const summaryEl = document.getElementById('search-ai-summary');
+    const linkEl = document.getElementById('search-ai-link');
+
+    if (!card || !titleEl || !summaryEl || !linkEl) return;
+
+    const cleanQuery = (query || '').trim();
+    if (cleanQuery.length < 3) {
+      hideSearchAISummary();
       return;
     }
-    
-    // Mostrar loading
-    wikiResults.classList.remove('hidden');
-    wikiLoading.classList.remove('hidden');
-    wikiContent.textContent = 'Analizando contenido...';
-    
-    // Reset UI
-    wikiImageContainer.classList.add('hidden');
-    wikiTypeBadge.classList.add('hidden');
-    wikiIcon.classList.remove('hidden');
-    
-    // Detectar idioma y configurar URLs de Wikipedia
-    const wikipediaLanguages = {
-      'es': 'es.wikipedia.org',
-      'en': 'en.wikipedia.org',
-      'pt': 'pt.wikipedia.org',
-      'ja': 'ja.wikipedia.org',
-      'ko': 'ko.wikipedia.org',
-      'it': 'it.wikipedia.org',
-      'fr': 'fr.wikipedia.org'
-    };
-    
-    // Detectar idioma basado en las palabras clave
-    let detectedLanguage = 'en'; // Por defecto inglés para mejor compatibilidad
-    
-    if (contentKeywords.moviesEn.some(k => query.toLowerCase().includes(k)) || 
-        contentKeywords.seriesEn.some(k => query.toLowerCase().includes(k)) ||
-        contentKeywords.booksEn.some(k => query.toLowerCase().includes(k))) {
-      detectedLanguage = 'en';
-    } else if (contentKeywords.moviesPt.some(k => query.toLowerCase().includes(k)) || 
-               contentKeywords.seriesPt.some(k => query.toLowerCase().includes(k))) {
-      detectedLanguage = 'pt';
-    } else if (contentKeywords.moviesJa.some(k => query.toLowerCase().includes(k)) || 
-               contentKeywords.seriesJa.some(k => query.toLowerCase().includes(k))) {
-      detectedLanguage = 'ja';
-    } else if (contentKeywords.moviesKo.some(k => query.toLowerCase().includes(k)) || 
-               contentKeywords.seriesKo.some(k => query.toLowerCase().includes(k))) {
-      detectedLanguage = 'ko';
-    } else if (contentKeywords.moviesIt.some(k => query.toLowerCase().includes(k)) || 
-               contentKeywords.seriesIt.some(k => query.toLowerCase().includes(k))) {
-      detectedLanguage = 'it';
-    } else if (contentKeywords.moviesFr.some(k => query.toLowerCase().includes(k)) || 
-               contentKeywords.seriesFr.some(k => query.toLowerCase().includes(k))) {
-      detectedLanguage = 'fr';
-    }
-    
-    try {
-      // Buscar en Wikipedia con el idioma detectado
-      const cleanQuery = query.trim().replace(/[^a-zA-Z0-9À-ſ\s]/g, '');
-      const wikiDomain = wikipediaLanguages[detectedLanguage];
-      const searchUrl = `https://${wikiDomain}/api/rest_v1/page/summary/${encodeURIComponent(cleanQuery)}`;
-      
-      const response = await fetch(searchUrl, {
-        headers: {
-          'User-Agent': 'ZenvioApp/1.0'
+
+    const languages = ['es', 'en'];
+
+    for (const lang of languages) {
+      try {
+        const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cleanQuery)}&limit=1&namespace=0&format=json&origin=*`;
+        const openSearchResponse = await fetch(openSearchUrl);
+        if (!openSearchResponse.ok) continue;
+
+        const openSearchData = await openSearchResponse.json();
+        const bestTitle = openSearchData?.[1]?.[0];
+        if (!bestTitle) continue;
+
+        const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`;
+        const summaryResponse = await fetch(summaryUrl);
+        if (!summaryResponse.ok) continue;
+
+        const summaryData = await summaryResponse.json();
+        const extract = summaryData?.extract || '';
+        const title = summaryData?.title || bestTitle;
+        const description = summaryData?.description || '';
+        const detailText = `${description} ${extract}`;
+        const detectedType = detectWikipediaEntertainmentType(detailText);
+
+        if (!detectedType || extract.length < 40) {
+          continue;
         }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        const extract = data.extract || '';
-        const title = data.title || '';
-        const fullText = (extract + ' ' + title).toLowerCase();
-        
-        // Verificar si hay contenido suficiente
-        if (extract && extract.length > 10) {
-          const summary = extract.length > 120 ? extract.substring(0, 120) + '...' : extract;
-          
-          wikiContent.textContent = summary;
-          wikiLink.href = data.content_urls?.desktop?.page || `https://${wikiDomain}/wiki/${encodeURIComponent(cleanQuery)}`;
-          
-          // Detección mejorada de tipo de contenido para múltiples idiomas
-          const allMovieKeywords = [...contentKeywords.movies, ...contentKeywords.moviesEn, ...contentKeywords.moviesPt, ...contentKeywords.moviesJa, ...contentKeywords.moviesKo, ...contentKeywords.moviesIt, ...contentKeywords.moviesFr];
-          const allSeriesKeywords = [...contentKeywords.series, ...contentKeywords.seriesEn, ...contentKeywords.seriesPt, ...contentKeywords.seriesJa, ...contentKeywords.seriesKo, ...contentKeywords.seriesIt, ...contentKeywords.seriesFr];
-          
-          const isMovie = allMovieKeywords.some(keyword => fullText.includes(keyword));
-          const isSeries = allSeriesKeywords.some(keyword => fullText.includes(keyword));
-          
-          if ((isMovie || isSeries) && data.thumbnail?.source) {
-            // Mostrar imagen y badge
-            wikiImage.src = data.thumbnail.source;
-            wikiImage.onerror = function() {
-              wikiImageContainer.classList.add('hidden');
-              wikiIcon.classList.remove('hidden');
-            };
-            
-            wikiImageContainer.classList.remove('hidden');
-            wikiIcon.classList.add('hidden');
-            
-            wikiTypeBadge.textContent = isSeries ? 'Serie' : 'Película';
-            wikiTypeBadge.classList.remove('hidden');
-            
-            // Ocultar categorías
-            categoryChips.classList.add('hidden');
-          } else {
-            // Contenido literario - mostrar categorías
-            categoryChips.classList.remove('hidden');
-          }
-        } else {
-          // Si no hay contenido suficiente, intentar con otros idiomas
-          const alternativeSearches = [
-            `${cleanQuery}`,
-            `${cleanQuery} series`,
-            `${cleanQuery} movie`
-          ];
-          
-          let found = false;
-          for (const altQuery of alternativeSearches) {
-            for (const lang of ['en', 'es', 'pt', 'fr']) {
-              try {
-                const altWikiDomain = wikipediaLanguages[lang];
-                const altResponse = await fetch(`https://${altWikiDomain}/api/rest_v1/page/summary/${encodeURIComponent(altQuery)}`);
-                if (altResponse.ok) {
-                  const altData = await altResponse.json();
-                  if (altData.extract && altData.extract.length > 10) {
-                    const summary = altData.extract.length > 120 ? altData.extract.substring(0, 120) + '...' : altData.extract;
-                    wikiContent.textContent = summary;
-                    wikiLink.href = altData.content_urls?.desktop?.page || `https://${altWikiDomain}/wiki/${encodeURIComponent(query)}`;
-                    found = true;
-                    categoryChips.classList.add('hidden');
-                    break;
-                  }
-                }
-              } catch (e) {
-                continue;
-              }
-            }
-            if (found) break;
-          }
-          
-          if (!found) {
-            wikiResults.classList.add('hidden');
-            categoryChips.classList.remove('hidden');
-          }
-        }
-        
-      } else {
-        // Intentar búsquedas alternativas en múltiples idiomas
-        const alternativeSearches = [
-          `${cleanQuery}`,
-          `${cleanQuery} series`,
-          `${cleanQuery} movie`,
-          `${cleanQuery} film`
-        ];
-        
-        let found = false;
-        for (const altQuery of alternativeSearches) {
-          for (const lang of ['en', 'es', 'pt', 'fr', 'it']) {
-            try {
-              const altWikiDomain = wikipediaLanguages[lang];
-              const altResponse = await fetch(`https://${altWikiDomain}/api/rest_v1/page/summary/${encodeURIComponent(altQuery)}`);
-              if (altResponse.ok) {
-                const altData = await altResponse.json();
-                if (altData.extract && altData.extract.length > 10) {
-                  const summary = altData.extract.length > 120 ? altData.extract.substring(0, 120) + '...' : altData.extract;
-                  wikiContent.textContent = summary;
-                  wikiLink.href = altData.content_urls?.desktop?.page || `https://${altWikiDomain}/wiki/${encodeURIComponent(query)}`;
-                  found = true;
-                  categoryChips.classList.add('hidden');
-                  break;
-                }
-              }
-            } catch (e) {
-              continue;
-            }
-          }
-          if (found) break;
-        }
-        
-        if (!found) {
-          wikiResults.classList.add('hidden');
-          categoryChips.classList.remove('hidden');
-        }
+
+        const shortSummary = extract.length > 170 ? `${extract.slice(0, 170)}...` : extract;
+        titleEl.textContent = `${title} · ${detectedType}`;
+        summaryEl.textContent = shortSummary;
+        linkEl.href = summaryData?.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(bestTitle)}`;
+        card.classList.remove('hidden');
+        return;
+      } catch (error) {
+        continue;
       }
-      
-    } catch (error) {
-      console.error('Error buscando en Wikipedia:', error);
-      wikiResults.classList.add('hidden');
-      categoryChips.classList.remove('hidden');
-    } finally {
-      wikiLoading.classList.add('hidden');
     }
-    
+
+    hideSearchAISummary();
   }
 
   // Funciones generales para manejar botones X en campos de búsqueda
