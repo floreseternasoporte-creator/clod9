@@ -2430,13 +2430,30 @@ setInterval(checkScheduledChapters, 60000);
       <p id="user-email-display" class="text-sm text-gray-600 mb-6"></p>
       
       <form id="authForm" class="space-y-4" onsubmit="event.preventDefault(); handleAuthSubmit();">
-        <input
-          id="passwordInput"
-          type="password"
-          placeholder="Contraseña"
-          class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition"
-          required
-        >
+        <div class="relative">
+          <input
+            id="passwordInput"
+            type="password"
+            placeholder="Contraseña"
+            class="w-full p-4 pr-14 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition"
+            required
+          >
+          <button
+            id="togglePasswordVisibility"
+            type="button"
+            class="absolute inset-y-0 right-0 flex items-center justify-center px-4 text-gray-500 hover:text-gray-900 transition"
+            aria-label="Mostrar contraseña"
+            aria-pressed="false"
+          >
+            <svg id="eyeOpenIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z"/>
+            </svg>
+            <svg id="eyeClosedIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.964 9.964 0 012.042-3.362M6.223 6.223A9.963 9.963 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.965 9.965 0 01-4.132 5.411M15 12a3 3 0 00-3-3m0 0a2.99 2.99 0 00-2.12.879M12 9l-8 8m16-16L4 20"/>
+            </svg>
+          </button>
+        </div>
         <button
           id="submitButton"
           type="submit"
@@ -11108,6 +11125,9 @@ async function likeNote(noteId) {
   const authForm = document.getElementById('authForm');
   const emailInput = document.getElementById('emailInput');
   const passwordInput = document.getElementById('passwordInput');
+  const togglePasswordVisibilityButton = document.getElementById('togglePasswordVisibility');
+  const eyeOpenIcon = document.getElementById('eyeOpenIcon');
+  const eyeClosedIcon = document.getElementById('eyeClosedIcon');
   const submitButton = document.getElementById('submitButton');
   const toggleAuth = document.getElementById('toggleAuth');
   const authError = document.getElementById('authErrorEmail');
@@ -12044,6 +12064,25 @@ async function likeNote(noteId) {
   });
   }
 
+  function setPasswordVisibility(isVisible) {
+    if (!passwordInput || !togglePasswordVisibilityButton || !eyeOpenIcon || !eyeClosedIcon) {
+      return;
+    }
+
+    passwordInput.type = isVisible ? 'text' : 'password';
+    eyeOpenIcon.classList.toggle('hidden', isVisible);
+    eyeClosedIcon.classList.toggle('hidden', !isVisible);
+    togglePasswordVisibilityButton.setAttribute('aria-label', isVisible ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    togglePasswordVisibilityButton.setAttribute('aria-pressed', isVisible ? 'true' : 'false');
+  }
+
+  if (togglePasswordVisibilityButton) {
+    togglePasswordVisibilityButton.addEventListener('click', () => {
+      const isVisible = passwordInput?.type === 'text';
+      setPasswordVisibility(!isVisible);
+    });
+  }
+
   async function syncUserProfileToAWS(user, profileOverrides = {}) {
     if (!user) return;
     const payload = {
@@ -12103,7 +12142,7 @@ async function likeNote(noteId) {
         isVerified,
         registrationTimestamp: Date.now(),
         founder: false,
-        email: user.email
+        email: (user.email || '').toLowerCase()
       };
 
       await firebase.database().ref('users/' + user.uid).set(userProfile);
