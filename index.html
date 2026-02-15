@@ -2738,6 +2738,17 @@ setInterval(checkScheduledChapters, 60000);
       background: #f2f2f2;
       color: #111111;
     }
+
+    @keyframes smsCardUp {
+      from {
+        transform: translateY(16px) scale(0.98);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
     
     /* Estilo especial para input de código SMS */
     #smsCodeInput {
