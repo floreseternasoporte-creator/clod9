@@ -7,8 +7,9 @@
   <title>Atenis - Historias y Relatos</title>
   
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4653147807800151" crossorigin="anonymous"></script>
-  <!-- reCAPTCHA v3 -->
+  <!-- reCAPTCHA API (v2 + v3) -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
   <!-- Tailwind CSS CDN -->
@@ -2412,6 +2413,32 @@ setInterval(checkScheduledChapters, 60000);
     </div>
   </div>
   
+  <!-- Pantalla de verificación reCAPTCHA para correo -->
+  <div id="email-captcha-form" class="w-full h-screen flex flex-col bg-white hidden">
+    <div class="p-4 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <button onclick="backToEmailFromCaptcha()" class="p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <h2 class="text-lg font-semibold text-gray-900">Verificación de seguridad</h2>
+        <div class="w-10"></div>
+      </div>
+    </div>
+
+    <div class="flex-1 px-6 pt-8 max-w-md w-full mx-auto">
+      <p class="text-sm text-gray-600 mb-2 text-center">Antes de continuar con tu contraseña, confirma que no eres un bot con hCaptcha.</p>
+      <p id="email-captcha-status" class="text-xs text-gray-500 mb-6 text-center">Completa el desafío para continuar.</p>
+      <div class="flex justify-center mb-4">
+        <div class="h-captcha" data-sitekey="310edee8-59ca-48ce-921e-b4a2452e7aa0" data-callback="onEmailHCaptchaSuccess" data-expired-callback="onEmailHCaptchaExpired" data-error-callback="onEmailHCaptchaError"></div>
+      </div>
+      <div id="email-captcha-error" class="text-sm text-red-500 text-center mb-4 hidden">No se pudo validar hCaptcha. Intenta de nuevo.</div>
+      <button id="email-captcha-retry-btn" type="button" onclick="resetEmailHCaptcha()" class="w-full mb-3 border border-gray-300 text-gray-700 p-4 font-semibold rounded-2xl hover:bg-gray-50 transition hidden">Reintentar verificación</button>
+      <button id="email-captcha-continue-btn" type="button" onclick="continueToPasswordAfterCaptcha()" class="w-full bg-[#111111] text-white p-4 font-semibold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>Continuar</button>
+    </div>
+  </div>
+
   <!-- Pantalla de contraseña -->
   <div id="password-form" class="w-full h-screen flex flex-col bg-white hidden">
     <div class="p-4 border-b border-gray-200">
@@ -2548,12 +2575,27 @@ setInterval(checkScheduledChapters, 60000);
     </div>
   </div>
 
-  <!-- Modal de Verificación de SMS (Teléfono) -->
-  <div id="sms-verification-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Verificación por SMS</h2>
-        <p class="text-sm text-gray-600 mb-4">Hemos enviado un código a <span id="sms-phone-display" class="font-semibold text-gray-900"></span></p>
+  <!-- Pantalla completa de Verificación de SMS (Teléfono) -->
+  <div id="sms-verification-modal" class="w-full h-screen flex-col bg-white hidden">
+    <div class="p-4 border-b border-[#e6e6e6] flex items-center justify-between">
+      <button type="button" onclick="backFromSMSVerification()" class="p-2 -ml-2 text-[#111111]">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <h2 class="text-lg font-semibold text-[#111111]">Verificación por SMS</h2>
+      <div class="w-10"></div>
+    </div>
+
+    <div class="flex-1 px-6 pt-10 max-w-md w-full mx-auto">
+      <div class="text-center mb-8">
+        <div class="sms-modal-icon mx-auto mb-4 w-12 h-12 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l8.89 5.93a2 2 0 002.22 0L23 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <p class="text-sm text-[#6b7280] mb-1">Hemos enviado un código a</p>
+        <p class="text-sm font-semibold text-[#111111] tracking-wide" id="sms-phone-display"></p>
       </div>
 
       <form id="smsVerificationForm" class="space-y-4" onsubmit="event.preventDefault(); verifySMSCode();">
@@ -2563,28 +2605,28 @@ setInterval(checkScheduledChapters, 60000);
           placeholder="Código de 6 dígitos"
           maxlength="6"
           inputmode="numeric"
-          class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition text-center text-2xl font-bold letter-spacing tracking-widest"
+          class="w-full p-4 border border-[#e6e6e6] rounded-2xl focus:outline-none transition text-center text-2xl font-bold tracking-widest bg-[#f2f2f2] text-[#111111]"
           required
         >
-        
+
         <button
           type="submit"
-          class="w-full bg-[#00A2FF] text-white p-3 font-semibold rounded-lg hover:bg-[#0066CC] transition"
+          class="w-full bg-[#111111] text-white p-3 font-semibold rounded-2xl hover:bg-black transition"
         >
           Verificar
         </button>
       </form>
 
-      <div id="sms-timer" class="mt-4 text-center text-sm text-gray-600">
+      <div id="sms-timer" class="mt-4 text-center text-sm text-gray-500">
         <p>Código expira en: <span id="sms-countdown">60</span>s</p>
       </div>
 
       <div class="mt-4 text-center">
-        <button 
+        <button
           type="button"
           id="resendSmsBtn"
           onclick="resendSMSCode()"
-          class="text-sm text-[#00A2FF] hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+          class="text-sm text-[#111111] hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
           disabled
         >
           Reenviar código
@@ -2592,14 +2634,6 @@ setInterval(checkScheduledChapters, 60000);
       </div>
 
       <div id="sms-error" class="mt-4 text-red-500 text-center text-sm hidden"></div>
-
-      <button
-        type="button"
-        class="w-full mt-4 text-gray-600 p-3 font-semibold rounded-lg hover:bg-gray-100 transition"
-        onclick="closeSMSModal()"
-      >
-        Cancelar
-      </button>
     </div>
   </div>
 </body>
@@ -2698,35 +2732,14 @@ setInterval(checkScheduledChapters, 60000);
       border-radius: 0.5rem;
     }
     
-    /* Estilos para el Modal de Verificación SMS */
+    /* Estilos Uber para pantalla completa de verificación SMS */
     #sms-verification-modal {
-      animation: slideUp 0.3s ease-out;
+      animation: fadeIn 0.2s ease-out;
     }
-    
-    #sms-verification-modal.hidden {
-      animation: slideDown 0.3s ease-out forwards;
-    }
-    
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-    
-    @keyframes slideDown {
-      from {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateY(20px);
-        opacity: 0;
-      }
+
+    .sms-modal-icon {
+      background: #f2f2f2;
+      color: #111111;
     }
     
     /* Estilo especial para input de código SMS */
@@ -2746,6 +2759,7 @@ setInterval(checkScheduledChapters, 60000);
     #smsCodeInput:focus {
       border-color: #111111 !important;
       box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1) !important;
+      background: #ffffff !important;
     }
     </style>
     
@@ -11537,6 +11551,65 @@ async function likeNote(noteId) {
     document.getElementById('auth-form').style.display = 'flex';
   }
   
+  let emailCaptchaVerified = false;
+  let emailHCaptchaToken = '';
+
+  function onEmailHCaptchaSuccess(token) {
+    emailCaptchaVerified = true;
+    emailHCaptchaToken = token || '';
+    const continueBtn = document.getElementById('email-captcha-continue-btn');
+    const captchaError = document.getElementById('email-captcha-error');
+    const captchaStatus = document.getElementById('email-captcha-status');
+    const retryBtn = document.getElementById('email-captcha-retry-btn');
+    if (continueBtn) continueBtn.disabled = false;
+    if (captchaError) captchaError.classList.add('hidden');
+    if (retryBtn) retryBtn.classList.add('hidden');
+    if (captchaStatus) captchaStatus.textContent = 'Verificación completada.';
+  }
+
+  function onEmailHCaptchaExpired() {
+    emailCaptchaVerified = false;
+    emailHCaptchaToken = '';
+    const continueBtn = document.getElementById('email-captcha-continue-btn');
+    const captchaStatus = document.getElementById('email-captcha-status');
+    if (continueBtn) continueBtn.disabled = true;
+    if (captchaStatus) captchaStatus.textContent = 'El desafío expiró. Complétalo nuevamente.';
+  }
+
+  function onEmailHCaptchaError() {
+    emailCaptchaVerified = false;
+    emailHCaptchaToken = '';
+    const continueBtn = document.getElementById('email-captcha-continue-btn');
+    const captchaError = document.getElementById('email-captcha-error');
+    const captchaStatus = document.getElementById('email-captcha-status');
+    const retryBtn = document.getElementById('email-captcha-retry-btn');
+    if (continueBtn) continueBtn.disabled = true;
+    if (captchaError) captchaError.classList.remove('hidden');
+    if (retryBtn) retryBtn.classList.remove('hidden');
+    if (captchaStatus) captchaStatus.textContent = 'No se pudo validar hCaptcha.';
+  }
+
+  function resetEmailHCaptcha() {
+    emailCaptchaVerified = false;
+    emailHCaptchaToken = '';
+    const continueBtn = document.getElementById('email-captcha-continue-btn');
+    const captchaError = document.getElementById('email-captcha-error');
+    const captchaStatus = document.getElementById('email-captcha-status');
+    const retryBtn = document.getElementById('email-captcha-retry-btn');
+    if (continueBtn) continueBtn.disabled = true;
+    if (captchaError) captchaError.classList.add('hidden');
+    if (retryBtn) retryBtn.classList.add('hidden');
+    if (captchaStatus) captchaStatus.textContent = 'Completa el desafío para continuar.';
+
+    if (window.hcaptcha) {
+      try {
+        window.hcaptcha.reset();
+      } catch (error) {
+        console.warn('hCaptcha aún no está listo para reset:', error);
+      }
+    }
+  }
+
   function showPasswordStep() {
     const email = document.getElementById('emailInput').value.trim();
     const emailError = document.getElementById('authErrorEmail');
@@ -11550,13 +11623,32 @@ async function likeNote(noteId) {
     }
 
     if (emailError) emailError.classList.add('hidden');
-    document.getElementById('user-email-display').textContent = email;
     document.getElementById('email-form').classList.add('hidden');
+    document.getElementById('email-captcha-form').classList.remove('hidden');
+    resetEmailHCaptcha();
+  }
+
+  function backToEmailFromCaptcha() {
+    document.getElementById('email-captcha-form').classList.add('hidden');
+    document.getElementById('email-form').classList.remove('hidden');
+  }
+
+  function continueToPasswordAfterCaptcha() {
+    if (!emailCaptchaVerified || !emailHCaptchaToken) {
+      const captchaError = document.getElementById('email-captcha-error');
+      if (captchaError) captchaError.classList.remove('hidden');
+      return;
+    }
+
+    const email = document.getElementById('emailInput').value.trim();
+    document.getElementById('user-email-display').textContent = email;
+    document.getElementById('email-captcha-form').classList.add('hidden');
     document.getElementById('password-form').classList.remove('hidden');
   }
   
   function backToEmail() {
     document.getElementById('password-form').classList.add('hidden');
+    document.getElementById('email-captcha-form').classList.add('hidden');
     document.getElementById('email-form').classList.remove('hidden');
     document.getElementById('passwordInput').value = '';
   }
@@ -11629,17 +11721,27 @@ async function likeNote(noteId) {
   
   function showSMSVerificationModal(phone) {
     document.getElementById('email-form').classList.add('hidden');
+    const smsScreen = document.getElementById('sms-verification-modal');
+    smsScreen.classList.remove('hidden');
+    smsScreen.classList.add('flex');
     document.getElementById('sms-phone-display').textContent = phone;
     document.getElementById('smsCodeInput').value = '';
-    document.getElementById('sms-verification-modal').classList.remove('hidden');
     document.getElementById('sms-error').classList.add('hidden');
     document.getElementById('resendSmsBtn').disabled = true;
   }
+
+  function backFromSMSVerification() {
+    closeSMSModal(false);
+  }
   
-  function closeSMSModal() {
-    document.getElementById('sms-verification-modal').classList.add('hidden');
+  function closeSMSModal(clearPhoneInput = true) {
+    const smsScreen = document.getElementById('sms-verification-modal');
+    smsScreen.classList.add('hidden');
+    smsScreen.classList.remove('flex');
     document.getElementById('email-form').classList.remove('hidden');
-    document.getElementById('phoneInput').value = '';
+    if (clearPhoneInput) {
+      document.getElementById('phoneInput').value = '';
+    }
     
     // Limpiar timers
     clearTimeout(smsResendTimer);
