@@ -4240,61 +4240,65 @@ function escapeHtml(text) {
 }
 </script>
 
-<!-- VISTA CREATOR HUB ESTILO ROBLOX -->
-<div id="creator-hub-view" class="fixed inset-0 bg-white text-black hidden z-50 overflow-hidden">
+<!-- VISTA CREATOR HUB - ESTILO UBER -->
+<div id="creator-hub-view" class="fixed inset-0 bg-uber-surface text-uber-black hidden z-50 overflow-hidden">
   <div class="h-full flex flex-col">
-    <!-- Header Roblox -->
-    <div class="flex-shrink-0 p-4 flex items-center justify-between bg-white border-b border-gray-200">
-      <button onclick="closeCreatorHub()" class="text-gray-700 hover:text-blue-500 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <h1 class="text-lg font-semibold text-gray-900">Crear</h1>
-      <button onclick="openZenvioChat()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-        <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="h-7 w-7 rounded-full">
-      </button>
+    <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
+      <div class="flex items-center justify-between">
+        <button onclick="closeCreatorHub()" class="w-10 h-10 rounded-full border border-uber-line text-uber-black flex items-center justify-center hover:bg-uber-field transition-colors" aria-label="Cerrar Creator Hub">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="text-center">
+          <p class="text-[11px] uppercase tracking-wide text-uber-muted font-semibold">Uber Style</p>
+          <h1 class="text-base font-semibold text-uber-black">Creator Hub</h1>
+        </div>
+        <button onclick="openZenvioChat()" class="w-10 h-10 rounded-full border border-uber-line bg-white flex items-center justify-center hover:bg-uber-field transition-colors" aria-label="Abrir Baro">
+          <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="h-7 w-7 rounded-full">
+        </button>
+      </div>
     </div>
 
-    <!-- Contenido -->
-    <div class="flex-1 overflow-y-auto bg-gray-50 p-6">
-      <!-- Grid principal 2x2 -->
-      <div class="grid grid-cols-2 gap-6">
-        <!-- Historia -->
-        <div onclick="openStoryCreation()" class="bg-white rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all border border-gray-200 text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-gray-200">
-            <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Historia" class="w-10 h-10 rounded-full">
-          </div>
-          <h3 class="text-lg font-bold text-[#00A2FF] mb-2">Historia</h3>
-          <p class="text-sm text-gray-500">Crear historia larga</p>
-        </div>
+    <div class="flex-1 overflow-y-auto p-4">
+      <div class="bg-white border border-uber-line rounded-3xl p-5 shadow-uber-chip mb-4">
+        <p class="text-[11px] uppercase tracking-wide text-uber-muted font-semibold mb-2">Centro creativo</p>
+        <h2 class="text-xl font-semibold text-uber-black mb-1">Crea y publica en segundos</h2>
+        <p class="text-sm text-uber-muted">Elige una opción para publicar contenido en tu perfil con el diseño limpio de Uber.</p>
+      </div>
 
-        <!-- En Vivo -->
-        <div onclick="openLiveStreamModal()" class="bg-white rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all border border-gray-200 text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-gray-200">
-            <img src="https://i.ibb.co/G39hzrnn/IMG-7704.png" alt="Live" class="w-10 h-10 rounded-full">
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="openStoryCreation()" class="text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip hover:shadow-uber-header transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-uber-field border border-uber-line flex items-center justify-center mb-3">
+            <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Historia" class="w-8 h-8 rounded-full">
           </div>
-          <h3 class="text-lg font-bold text-[#00A2FF] mb-2">En Vivo</h3>
-          <p class="text-sm text-gray-500">Transmitir ahora</p>
-        </div>
+          <h3 class="text-sm font-semibold text-uber-black">Historia</h3>
+          <p class="text-xs text-uber-muted mt-1">Crear historia larga</p>
+        </button>
 
-        <!-- Relato -->
-        <div onclick="document.getElementById('add-story-btn').click()" class="bg-white rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all border border-gray-200 text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-gray-200">
-            <img src="https://i.ibb.co/WpF2kzkt/IMG-7708.png" alt="Relato" class="w-10 h-10 rounded-full">
+        <button onclick="openLiveStreamModal()" class="text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip hover:shadow-uber-header transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-uber-field border border-uber-line flex items-center justify-center mb-3">
+            <img src="https://i.ibb.co/G39hzrnn/IMG-7704.png" alt="Live" class="w-8 h-8 rounded-full">
           </div>
-          <h3 class="text-lg font-bold text-[#00A2FF] mb-2">Relato</h3>
-          <p class="text-sm text-gray-500">Historia de 24h</p>
-        </div>
+          <h3 class="text-sm font-semibold text-uber-black">En vivo</h3>
+          <p class="text-xs text-uber-muted mt-1">Transmitir ahora</p>
+        </button>
 
-        <!-- Imagen IA -->
-        <div onclick="document.getElementById('image-generator-modal').style.display='block'" class="bg-white rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all border border-gray-200 text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-gray-200">
-            <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-10 h-10 rounded-full">
+        <button onclick="document.getElementById('add-story-btn').click()" class="text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip hover:shadow-uber-header transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-uber-field border border-uber-line flex items-center justify-center mb-3">
+            <img src="https://i.ibb.co/WpF2kzkt/IMG-7708.png" alt="Relato" class="w-8 h-8 rounded-full">
           </div>
-          <h3 class="text-lg font-bold text-[#00A2FF] mb-2">Imagen IA</h3>
-          <p class="text-sm text-gray-500">Generar con AI</p>
-        </div>
+          <h3 class="text-sm font-semibold text-uber-black">Relato</h3>
+          <p class="text-xs text-uber-muted mt-1">Historia de 24 horas</p>
+        </button>
+
+        <button onclick="document.getElementById('image-generator-modal').style.display='block'" class="text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip hover:shadow-uber-header transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-uber-field border border-uber-line flex items-center justify-center mb-3">
+            <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-8 h-8 rounded-full">
+          </div>
+          <h3 class="text-sm font-semibold text-uber-black">Imagen IA</h3>
+          <p class="text-xs text-uber-muted mt-1">Generar con Baro</p>
+        </button>
       </div>
     </div>
   </div>
