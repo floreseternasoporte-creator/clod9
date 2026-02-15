@@ -166,11 +166,11 @@ body {
   display: none;
 }
 
-/* Overlay de conexión para modo sin internet */
+/* Pantalla completa para estado sin internet y país restringido */
 #internet-status-overlay {
   position: fixed;
   inset: 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
+  background: #ffffff;
   z-index: 99999;
   display: none;
   align-items: center;
@@ -182,14 +182,9 @@ body {
   display: flex;
 }
 
-#internet-status-overlay .internet-status-card {
+#internet-status-overlay .internet-status-full {
   width: 100%;
-  max-width: 360px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 28px;
-  padding: 24px;
-  box-shadow: 0 20px 50px rgba(17, 17, 17, 0.08);
+  max-width: 460px;
   text-align: center;
 }
 
@@ -824,8 +819,14 @@ body {
     function esDispositivoMovil() {
       return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
-    /*********************** MODO OFFLINE ***********************/
+    /*********************** MODO OFFLINE + RESTRICCIÓN POR PAÍS ***********************/
     let internetStatusInterval = null;
+    let blockedCountryName = null;
+    const restrictedCountries = {
+      MX: 'México',
+      CA: 'Canadá',
+      JP: 'Japón'
+    };
 
     function setInternetOverlayVisible(visible) {
       const overlay = document.getElementById('internet-status-overlay');
@@ -833,8 +834,53 @@ body {
       overlay.classList.toggle('visible', Boolean(visible));
     }
 
+    function setStatusOverlayContent(mode, countryName = '') {
+      const title = document.getElementById('internet-status-title');
+      const message = document.getElementById('internet-status-message');
+      const retryButton = document.getElementById('internet-status-retry-btn');
+      if (!title || !message || !retryButton) return;
+
+      if (mode === 'country-block') {
+        title.textContent = 'Plataforma no disponible en tu país';
+        message.textContent = `Actualmente esta plataforma no está disponible en ${countryName}.`;
+        retryButton.classList.add('hidden');
+      } else {
+        title.textContent = 'Ups, no tienes internet';
+        message.textContent = 'Esta plataforma funciona con internet. Revisa tu WiFi e intenta reiniciar tu router.';
+        retryButton.classList.remove('hidden');
+      }
+    }
+
+    async function detectCountryRestriction() {
+      try {
+        const response = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+        if (!response.ok) return false;
+        const locationData = await response.json();
+        const countryCode = (locationData?.country_code || '').toUpperCase();
+
+        if (restrictedCountries[countryCode]) {
+          blockedCountryName = restrictedCountries[countryCode];
+          setStatusOverlayContent('country-block', blockedCountryName);
+          setInternetOverlayVisible(true);
+          return true;
+        }
+
+        blockedCountryName = null;
+        return false;
+      } catch (error) {
+        return false;
+      }
+    }
+
     async function verifyInternetConnection() {
+      if (blockedCountryName) {
+        setStatusOverlayContent('country-block', blockedCountryName);
+        setInternetOverlayVisible(true);
+        return false;
+      }
+
       if (!navigator.onLine) {
+        setStatusOverlayContent('offline');
         setInternetOverlayVisible(true);
         return false;
       }
@@ -852,19 +898,29 @@ body {
         setInternetOverlayVisible(false);
         return true;
       } catch (error) {
+        setStatusOverlayContent('offline');
         setInternetOverlayVisible(true);
         return false;
       }
     }
 
-    function startInternetStatusWatcher() {
-      verifyInternetConnection();
+    async function startInternetStatusWatcher() {
+      await detectCountryRestriction();
+      await verifyInternetConnection();
       if (internetStatusInterval) clearInterval(internetStatusInterval);
       internetStatusInterval = setInterval(verifyInternetConnection, 12000);
-      window.addEventListener('offline', () => setInternetOverlayVisible(true));
+      window.addEventListener('offline', () => {
+        if (!blockedCountryName) {
+          setStatusOverlayContent('offline');
+          setInternetOverlayVisible(true);
+        }
+      });
       window.addEventListener('online', verifyInternetConnection);
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) verifyInternetConnection();
+      document.addEventListener('visibilitychange', async () => {
+        if (!document.hidden) {
+          if (!blockedCountryName) await detectCountryRestriction();
+          verifyInternetConnection();
+        }
       });
     }
     /* TEMA PERMANENTE EN MODO CLARO */
@@ -2322,13 +2378,13 @@ setInterval(checkScheduledChapters, 60000);
 
 <body class="bg-white font-sans text-[#393B3D]" style="overflow: hidden;">
   <div id="internet-status-overlay" role="alert" aria-live="assertive">
-    <div class="internet-status-card">
-      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-black text-white flex items-center justify-center">
-        <i class="fas fa-wifi text-xl"></i>
+    <div class="internet-status-full">
+      <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-black text-white flex items-center justify-center">
+        <i class="fas fa-wifi text-2xl"></i>
       </div>
-      <h2 class="text-xl font-bold text-gray-900 mb-2">Ups, no tienes internet</h2>
-      <p class="text-sm text-gray-600 leading-relaxed mb-4">Esta plataforma funciona con internet. Revisa tu WiFi e intenta reiniciar tu router.</p>
-      <button onclick="verifyInternetConnection()" class="w-full py-3 rounded-full bg-black text-white font-semibold">Reintentar conexión</button>
+      <h2 id="internet-status-title" class="text-2xl font-bold text-gray-900 mb-3">Ups, no tienes internet</h2>
+      <p id="internet-status-message" class="text-base text-gray-600 leading-relaxed mb-6">Esta plataforma funciona con internet. Revisa tu WiFi e intenta reiniciar tu router.</p>
+      <button id="internet-status-retry-btn" onclick="verifyInternetConnection()" class="w-full py-3 rounded-full bg-black text-white font-semibold">Reintentar conexión</button>
     </div>
   </div>
   
