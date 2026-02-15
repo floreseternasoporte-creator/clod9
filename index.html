@@ -231,63 +231,56 @@ body {
   z-index: 10;
 }
 
-/* LOADER MODERNO GLOBAL 3D (ESTILO UBER) */
+/* LOADER GLOBAL DE 2 BOLITAS (ESTILO UBER + REFERENCIA TIKTOK) */
 .epic-loader {
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   position: relative;
-  display: grid;
-  place-items: center;
-  filter: drop-shadow(0 10px 24px rgba(17, 17, 17, 0.22));
-  transform-style: preserve-3d;
-  animation: epicRotate3D 1.7s linear infinite;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.1);
+  animation: epicOrbit 1.05s cubic-bezier(0.65, 0.05, 0.36, 1) infinite;
 }
 
-.epic-loader::before {
-  content: "";
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #111111;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow:
-    0 -24px 0 0 #111111,
-    20.8px 12px 0 0 #2c2c2c,
-    -20.8px 12px 0 0 #5a5a5a;
-  animation: epicCollision 1.7s ease-in-out infinite;
-}
-
+.epic-loader::before,
 .epic-loader::after {
   content: "";
   position: absolute;
-  inset: 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(17, 17, 17, 0.14);
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
 }
 
-@keyframes epicRotate3D {
-  0% { transform: rotateX(62deg) rotateY(0deg) rotateZ(0deg); }
-  100% { transform: rotateX(62deg) rotateY(360deg) rotateZ(360deg); }
+.epic-loader::before {
+  background: #111111;
+  box-shadow: 0 3px 8px rgba(17, 17, 17, 0.2);
+  animation: epicDotLeft 1.05s ease-in-out infinite;
 }
 
-@keyframes epicCollision {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(0.82);
-    box-shadow:
-      0 -24px 0 0 #111111,
-      20.8px 12px 0 0 #2c2c2c,
-      -20.8px 12px 0 0 #5a5a5a;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1);
-    box-shadow:
-      0 -10px 0 0 #111111,
-      8px 5px 0 0 #2c2c2c,
-      -8px 5px 0 0 #5a5a5a;
-  }
+.epic-loader::after {
+  background: #6b7280;
+  box-shadow: 0 3px 8px rgba(107, 114, 128, 0.22);
+  animation: epicDotRight 1.05s ease-in-out infinite;
+}
+
+@keyframes epicOrbit {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes epicDotLeft {
+  0%, 100% { transform: translate(-50%, -50%) translateX(-18px) scale(0.94); }
+  50% { transform: translate(-50%, -50%) translateX(18px) scale(1.08); }
+}
+
+@keyframes epicDotRight {
+  0%, 100% { transform: translate(-50%, -50%) translateX(18px) scale(1.08); }
+  50% { transform: translate(-50%, -50%) translateX(-18px) scale(0.94); }
 }
 
 #search-loading {
