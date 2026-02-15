@@ -4315,24 +4315,24 @@ function escapeHtml(text) {
 </div>
 
 <!-- Community View - Estilo Twitter/X -->
-<div id="community-view" class="fixed inset-0 bg-white overflow-y-auto hidden z-50">
+<div id="community-view" class="fixed inset-0 bg-uber-surface overflow-y-auto hidden z-50">
   <!-- Header Simple -->
-  <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
+  <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-bold">Comunidad</h1>
-      <button onclick="openNoteCreation()" class="bg-[#00A2FF] text-white px-4 py-2 rounded-full font-semibold hover:bg-[#0066CC] transition-colors">
+      <button onclick="openNoteCreation()" class="bg-uber-black text-white px-4 py-2 rounded-full font-semibold hover:bg-[#222222] transition-colors">
         Publicar
       </button>
     </div>
   </div>
 
   <!-- Tabs Simples -->
-  <div class="bg-white border-b border-gray-200">
+  <div class="bg-white border-b border-uber-line">
     <div class="flex">
-      <button onclick="switchCommunityTab('feed')" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-[#00A2FF]" id="feed-tab">
+      <button onclick="switchCommunityTab('feed')" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-uber-black text-uber-black" id="feed-tab">
         Para ti
       </button>
-      <button onclick="switchCommunityTab('photos'); loadPhotos();" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:bg-gray-50" id="photos-tab">
+      <button onclick="switchCommunityTab('photos'); loadPhotos();" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-uber-muted hover:bg-uber-field" id="photos-tab">
         Fotos
       </button>
     </div>
@@ -4340,21 +4340,21 @@ function escapeHtml(text) {
     
   <!-- Content -->
   <div class="flex-1">
-    <div id="notes-feed" class="divide-y divide-gray-200"></div>
+    <div id="notes-feed" class="divide-y divide-uber-line"></div>
     <div id="photos-feed" class="hidden p-1">
       <div class="grid grid-cols-3 gap-1" id="photos-grid"></div>
     </div>
 
     <!-- Modal de Creación Estilo Twitter -->
     <div id="add-note-form" class="hidden bg-white">
-      <div class="flex items-center justify-between p-3 border-b border-gray-200">
-        <button onclick="switchCommunityTab('feed')" class="text-sm font-medium text-gray-600">Cancelar</button>
+      <div class="flex items-center justify-between p-3 border-b border-uber-line">
+        <button onclick="switchCommunityTab('feed')" class="text-sm font-medium text-uber-muted">Cancelar</button>
         <h2 class="text-base font-semibold">Nueva publicación</h2>
-        <button onclick="publishNote()" class="bg-[#00A2FF] text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-[#0066CC]">Publicar</button>
+        <button onclick="publishNote()" class="bg-uber-black text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-[#222222]">Publicar</button>
       </div>
       
       <div class="p-4">
-        <textarea id="note-content" placeholder="¿Qué está pasando?" maxlength="280" class="w-full border-0 resize-none focus:outline-none text-base" rows="4"></textarea>
+        <textarea id="note-content" placeholder="¿Qué está pasando?" maxlength="280" class="w-full border-0 resize-none focus:outline-none text-base bg-transparent" rows="4"></textarea>
         
         <div id="image-preview" class="hidden mt-3">
           <div class="relative inline-block">
@@ -4365,18 +4365,18 @@ function escapeHtml(text) {
           </div>
         </div>
         
-        <div id="char-counter" class="text-xs text-gray-400 mt-2">0/280</div>
+        <div id="char-counter" class="text-xs text-uber-muted mt-2">0/280</div>
       </div>
       
-      <div class="border-t border-gray-200 p-3">
+      <div class="border-t border-uber-line p-3">
         <div class="flex items-center space-x-4">
-          <label class="cursor-pointer text-[#00A2FF] hover:bg-blue-50 p-2 rounded-full transition">
+          <label class="cursor-pointer text-uber-black hover:bg-uber-field p-2 rounded-full transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <input type="file" id="note-image" accept="image/*" class="hidden" onchange="handleNoteImagePreview(event)">
           </label>
-          <button onclick="document.getElementById('image-generator-modal').style.display='block'" class="text-[#00A2FF] hover:bg-blue-50 p-2 rounded-full transition">
+          <button onclick="document.getElementById('image-generator-modal').style.display='block'" class="text-uber-black hover:bg-uber-field p-2 rounded-full transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -6115,7 +6115,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
   <!-- Vista móvil -->
   <div class="block lg:hidden">
     <!-- Header limpio -->
-    <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
+    <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
       <div class="flex items-center justify-between">
         <button onclick="openHome()" class="p-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
