@@ -4323,6 +4323,7 @@ function escapeHtml(text) {
     <div class="flex rounded-full bg-white border border-uber-line mb-5 p-1 shadow-uber-chip">
       <button onclick="switchSearchTab('stories')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full bg-uber-black text-white transition-colors" id="search-stories-tab">Historias</button>
       <button onclick="switchSearchTab('authors')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors" id="search-authors-tab">Autores</button>
+      <button onclick="switchSearchTab('info')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors" id="search-info-tab">Información</button>
     </div>
 
     <div id="search-stories-section">
@@ -4331,6 +4332,10 @@ function escapeHtml(text) {
 
     <div id="search-authors-section" class="hidden">
       <div id="search-authors-list" class="space-y-3"></div>
+    </div>
+
+    <div id="search-info-section" class="hidden">
+      <div id="search-info-list" class="space-y-3"></div>
     </div>
   </div>
 </div>
@@ -4397,19 +4402,31 @@ function openProfileLegacy() {
 function switchSearchTab(tab) {
   const storiesTab = document.getElementById('search-stories-tab');
   const authorsTab = document.getElementById('search-authors-tab');
+  const infoTab = document.getElementById('search-info-tab');
   const storiesSection = document.getElementById('search-stories-section');
   const authorsSection = document.getElementById('search-authors-section');
-  
-  if (tab === 'stories') {
-    storiesTab.className = 'flex-1 py-2 text-center text-sm font-semibold rounded-full bg-uber-black text-white transition-colors';
-    authorsTab.className = 'flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors';
-    storiesSection.classList.remove('hidden');
-    authorsSection.classList.add('hidden');
-  } else {
-    storiesTab.className = 'flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors';
-    authorsTab.className = 'flex-1 py-2 text-center text-sm font-semibold rounded-full bg-uber-black text-white transition-colors';
-    storiesSection.classList.add('hidden');
+  const infoSection = document.getElementById('search-info-section');
+
+  const inactiveClass = 'flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors';
+  const activeClass = 'flex-1 py-2 text-center text-sm font-semibold rounded-full bg-uber-black text-white transition-colors';
+
+  storiesTab.className = inactiveClass;
+  authorsTab.className = inactiveClass;
+  infoTab.className = inactiveClass;
+
+  storiesSection.classList.add('hidden');
+  authorsSection.classList.add('hidden');
+  infoSection.classList.add('hidden');
+
+  if (tab === 'authors') {
+    authorsTab.className = activeClass;
     authorsSection.classList.remove('hidden');
+  } else if (tab === 'info') {
+    infoTab.className = activeClass;
+    infoSection.classList.remove('hidden');
+  } else {
+    storiesTab.className = activeClass;
+    storiesSection.classList.remove('hidden');
   }
 }
 
@@ -4511,7 +4528,7 @@ function toggleClearButton(inputId, buttonId) {
     const loadingDiv = document.getElementById('search-loading');
     const booksCarousel = document.getElementById('search-books-carousel');
     const authorsList = document.getElementById('search-authors-list');
-    const aiCard = document.getElementById('search-ai-card');
+    const infoList = document.getElementById('search-info-list');
 
     if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
     searchRequestSequence += 1;
@@ -4525,7 +4542,7 @@ function toggleClearButton(inputId, buttonId) {
     if (loadingDiv) loadingDiv.classList.add('hidden');
     if (booksCarousel) booksCarousel.innerHTML = '';
     if (authorsList) authorsList.innerHTML = '';
-    if (aiCard) aiCard.classList.add('hidden');
+    if (infoList) infoList.innerHTML = '';
   }
 
   function handleSearchInput() {
@@ -4546,7 +4563,7 @@ function toggleClearButton(inputId, buttonId) {
       loadingDiv.classList.add('hidden');
       booksCarousel.innerHTML = '';
       authorsList.innerHTML = '';
-      hideSearchAISummary();
+      renderSearchInfoList([]);
       return;
     }
 
@@ -4558,7 +4575,7 @@ function toggleClearButton(inputId, buttonId) {
       try {
         await Promise.all([
           performSearch(searchTerm.toLowerCase()),
-          fetchSearchAISummary(searchTerm)
+          fetchSearchInfoFromWikipedia(searchTerm)
         ]);
       } catch (error) {
         console.error('Error en búsqueda:', error);
@@ -4577,82 +4594,109 @@ function toggleClearButton(inputId, buttonId) {
 
   
 
-  function hideSearchAISummary() {
-    const card = document.getElementById('search-ai-card');
-    if (card) card.classList.add('hidden');
-  }
-
   function detectWikipediaEntertainmentType(text) {
-    const normalized = (text || '').toLowerCase();
+  const normalized = (text || '').toLowerCase();
 
-    const seriesKeywords = ['serie', 'series', 'tv series', 'television series', 'temporada', 'episodio', 'netflix series'];
-    if (seriesKeywords.some(k => normalized.includes(k))) return 'Serie';
+  const seriesKeywords = ['serie', 'series', 'tv series', 'television series', 'temporada', 'episodio', 'netflix series'];
+  if (seriesKeywords.some(k => normalized.includes(k))) return 'Serie';
 
-    const movieKeywords = ['película', 'pelicula', 'film', 'movie', 'cine', 'largometraje'];
-    if (movieKeywords.some(k => normalized.includes(k))) return 'Película';
+  const movieKeywords = ['película', 'pelicula', 'film', 'movie', 'cine', 'largometraje'];
+  if (movieKeywords.some(k => normalized.includes(k))) return 'Película';
 
-    const bookKeywords = ['libro', 'novela', 'book', 'author', 'autor', 'escritor', 'literatura'];
-    if (bookKeywords.some(k => normalized.includes(k))) return 'Libro';
+  const bookKeywords = ['libro', 'novela', 'book', 'author', 'autor', 'escritor', 'literatura'];
+  if (bookKeywords.some(k => normalized.includes(k))) return 'Libro';
 
-    return null;
+  return null;
+}
+
+function renderSearchInfoList(items) {
+  const infoList = document.getElementById('search-info-list');
+  if (!infoList) return;
+
+  if (!items || items.length === 0) {
+    infoList.innerHTML = '<div class="text-center text-uber-muted py-8">Sin información relacionada a libros, películas o series.</div>';
+    return;
   }
 
-  async function fetchSearchAISummary(query) {
-    const card = document.getElementById('search-ai-card');
-    const titleEl = document.getElementById('search-ai-title');
-    const summaryEl = document.getElementById('search-ai-summary');
-    const linkEl = document.getElementById('search-ai-link');
+  infoList.innerHTML = items.map(item => `
+    <article class="bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip">
+      <div class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide uppercase text-uber-muted mb-2">
+        <span class="w-2 h-2 rounded-full bg-uber-black"></span>
+        Generado por IA
+      </div>
+      <h3 class="text-sm font-semibold text-uber-black mb-1">${item.title} · ${item.type}</h3>
+      <p class="text-xs text-uber-muted leading-relaxed">${item.summary}</p>
+      <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-uber-black hover:underline">Ver en Wikipedia</a>
+    </article>
+  `).join('');
+}
 
-    if (!card || !titleEl || !summaryEl || !linkEl) return;
+async function fetchSearchInfoFromWikipedia(query) {
+  const cleanQuery = (query || '').trim();
+  if (cleanQuery.length < 3) {
+    renderSearchInfoList([]);
+    return;
+  }
 
-    const cleanQuery = (query || '').trim();
-    if (cleanQuery.length < 3) {
-      hideSearchAISummary();
-      return;
-    }
+  const languages = ['es', 'en'];
+  const variants = [
+    cleanQuery,
+    `${cleanQuery} serie`,
+    `${cleanQuery} película`,
+    `${cleanQuery} libro`
+  ];
 
-    const languages = ['es', 'en'];
+  const collected = [];
+  const seenTitles = new Set();
+
+  for (const variant of variants) {
+    if (collected.length >= 3) break;
 
     for (const lang of languages) {
+      if (collected.length >= 3) break;
+
       try {
-        const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cleanQuery)}&limit=1&namespace=0&format=json&origin=*`;
+        const openSearchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(variant)}&limit=3&namespace=0&format=json&origin=*`;
         const openSearchResponse = await fetch(openSearchUrl);
         if (!openSearchResponse.ok) continue;
 
         const openSearchData = await openSearchResponse.json();
-        const bestTitle = openSearchData?.[1]?.[0];
-        if (!bestTitle) continue;
+        const titles = openSearchData?.[1] || [];
 
-        const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`;
-        const summaryResponse = await fetch(summaryUrl);
-        if (!summaryResponse.ok) continue;
+        for (const bestTitle of titles) {
+          if (!bestTitle || seenTitles.has(bestTitle.toLowerCase())) continue;
 
-        const summaryData = await summaryResponse.json();
-        const extract = summaryData?.extract || '';
-        const title = summaryData?.title || bestTitle;
-        const description = summaryData?.description || '';
-        const detailText = `${description} ${extract}`;
-        const detectedType = detectWikipediaEntertainmentType(detailText);
+          const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`;
+          const summaryResponse = await fetch(summaryUrl);
+          if (!summaryResponse.ok) continue;
 
-        if (!detectedType || extract.length < 40) {
-          continue;
+          const summaryData = await summaryResponse.json();
+          const extract = summaryData?.extract || '';
+          const description = summaryData?.description || '';
+          const detectedType = detectWikipediaEntertainmentType(`${description} ${extract}`);
+
+          if (!detectedType || extract.length < 40) continue;
+
+          seenTitles.add(bestTitle.toLowerCase());
+          collected.push({
+            title: summaryData?.title || bestTitle,
+            type: detectedType,
+            summary: extract.length > 190 ? `${extract.slice(0, 190)}...` : extract,
+            link: summaryData?.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(bestTitle)}`
+          });
+
+          if (collected.length >= 3) break;
         }
-
-        const shortSummary = extract.length > 170 ? `${extract.slice(0, 170)}...` : extract;
-        titleEl.textContent = `${title} · ${detectedType}`;
-        summaryEl.textContent = shortSummary;
-        linkEl.href = summaryData?.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(bestTitle)}`;
-        card.classList.remove('hidden');
-        return;
       } catch (error) {
         continue;
       }
     }
-
-    hideSearchAISummary();
   }
 
-  // Funciones generales para manejar botones X en campos de búsqueda
+  renderSearchInfoList(collected);
+}
+
+// Funciones generales para manejar botones X en campos de búsqueda
   function toggleClearButton(inputId, buttonId) {
     const input = document.getElementById(inputId);
     const button = document.getElementById(buttonId);
