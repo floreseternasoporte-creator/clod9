@@ -3060,38 +3060,38 @@ firebase.auth().onAuthStateChanged(user => {
     </section>
   </div>
 
-  <!-- BOTTOM NAVIGATION MINIMALISTA -->
-  <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 transition-all duration-300 z-[100]">
-    <div class="grid grid-cols-5 px-2 py-2">
-      <button id="nav-home" data-section="home" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200 active">
+  <!-- BOTTOM NAVIGATION ESTILO UBER -->
+  <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-uber-line transition-all duration-300 z-[100] shadow-uber-header">
+    <div class="grid grid-cols-5 px-2 py-2 gap-1">
+      <button id="nav-home" data-section="home" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200 active">
         <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
           <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
         </svg>
         <span class="text-xs font-medium">Inicio</span>
       </button>
-      <button id="nav-search" data-section="search" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200">
+      <button id="nav-search" data-section="search" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
         <span class="text-xs font-medium">Buscar</span>
       </button>
-      <button id="nav-create" data-section="create" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200">
-        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mb-1">
+      <button id="nav-create" data-section="create" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
+        <div class="w-8 h-8 bg-uber-black rounded-full flex items-center justify-center mb-1 shadow-uber-chip">
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
         </div>
         <span class="text-xs font-medium">Crear</span>
       </button>
-      <button id="nav-community" data-section="community" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200">
+      <button id="nav-community" data-section="community" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
           <circle cx="9" cy="7" r="4" />
         </svg>
         <span class="text-xs font-medium">Comunidad</span>
       </button>
-      <button id="nav-profile" data-section="profile" class="nav-button flex flex-col items-center py-2 px-1 rounded-lg transition-colors duration-200">
+      <button id="nav-profile" data-section="profile" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
         <img id="bottom-nav-profile-pic" src="https://via.placeholder.com/150" class="w-6 h-6 rounded-full object-cover mb-1" alt="Perfil">
         <span class="text-xs font-medium">Perfil</span>
       </button>
@@ -3102,19 +3102,20 @@ firebase.auth().onAuthStateChanged(user => {
     .nav-button {
       color: #6b7280;
     }
-    
+
     .nav-button.active {
-      color: #3b82f6;
-    }
-    
-    .nav-button:hover {
+      color: #111111;
       background-color: #f3f4f6;
     }
-    
-    .nav-button.active:hover {
-      background-color: #dbeafe;
+
+    .nav-button:hover {
+      background-color: #f7f7f7;
     }
-    
+
+    .nav-button.active:hover {
+      background-color: #eeeeee;
+    }
+
     #bottom-nav.hide {
       transform: translateY(100%);
     }
