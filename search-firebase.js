@@ -72,31 +72,42 @@ function renderSearchInfoList(items) {
   }
 
   const item = items[0];
+  const isXuaProfile = (item?.title || '').toLowerCase() === 'xua xia';
   const showIdentityTags = Boolean(item?.title || item?.isVerified || item?.founderLabel);
   const verifiedBadge = item?.isVerified
-    ? `<span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#1d9bf0] text-white text-[10px] font-bold" title="Perfil verificado">✓</span>`
+    ? `<span class="inline-flex items-center justify-center w-4 h-4 rounded-full ${isXuaProfile ? 'bg-pink-500 shadow-[0_0_0_3px_rgba(244,114,182,0.18)]' : 'bg-[#1d9bf0]'} text-white text-[10px] font-bold" title="Verified profile">✓</span>`
     : '';
   const founderBadge = item?.founderLabel
-    ? `<span class="inline-flex items-center rounded-full bg-[#f1f5f9] text-[#0f172a] text-[10px] font-semibold px-2 py-0.5">${item.founderLabel}</span>`
+    ? `<span class="inline-flex items-center rounded-full ${isXuaProfile ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-[#f1f5f9] text-[#0f172a]'} text-[10px] font-semibold px-2 py-0.5">${item.founderLabel}</span>`
+    : '';
+  const cardClasses = isXuaProfile
+    ? 'relative overflow-hidden bg-gradient-to-br from-[#fff1f7] via-white to-[#ffe4ef] border border-pink-200 rounded-2xl p-4 shadow-[0_10px_30px_rgba(236,72,153,0.18)]'
+    : 'bg-white border border-[#e6e6e6] rounded-2xl p-4 shadow-sm';
+  const responseLabel = isXuaProfile ? 'Valentine Special' : 'Respuesta de IA';
+  const separatorClass = isXuaProfile ? 'border-pink-200/70' : 'border-[#e6e6e6]';
+  const footerTextClass = isXuaProfile ? 'text-pink-600' : 'text-gray-500';
+  const romanticDecor = isXuaProfile
+    ? `<div class="pointer-events-none absolute inset-0"><span class="absolute top-3 right-4 text-pink-300 text-lg">❤</span><span class="absolute bottom-3 left-4 text-pink-200 text-xl">❤</span></div>`
     : '';
 
   infoList.innerHTML = `
-    <article class="bg-white border border-[#e6e6e6] rounded-2xl p-4 shadow-sm">
-      <div class="flex items-start gap-3">
+    <article class="${cardClasses}"> 
+      ${romanticDecor}
+      <div class="relative flex items-start gap-3">
         <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-9 h-9 rounded-full flex-shrink-0">
         <div class="min-w-0 w-full">
-          <p class="text-[11px] font-semibold tracking-wide uppercase text-gray-500 mb-2">Respuesta de IA</p>
+          <p class="text-[11px] font-semibold tracking-wide uppercase ${isXuaProfile ? 'text-pink-500' : 'text-gray-500'} mb-2">${responseLabel}</p>
           ${showIdentityTags ? `
             <div class="mb-2 flex flex-wrap items-center gap-2">
-              ${item?.title ? `<span class="text-sm font-semibold text-[#111111]">${item.title}</span>` : ''}
+              ${item?.title ? `<span class="text-sm font-semibold ${isXuaProfile ? 'text-pink-700' : 'text-[#111111]'}">${item.title}</span>` : ''}
               ${verifiedBadge}
               ${founderBadge}
             </div>
           ` : ''}
-          <p id="search-info-typed-text" class="text-sm text-[#111111] leading-relaxed"></p>
-          <div class="mt-3 pt-3 border-t border-[#e6e6e6] flex items-center gap-2">
+          <p id="search-info-typed-text" class="text-sm ${isXuaProfile ? 'text-pink-900' : 'text-[#111111]'} leading-relaxed"></p>
+          <div class="mt-3 pt-3 border-t ${separatorClass} flex items-center gap-2">
             <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-4 h-4 rounded-full">
-            <span class="text-[11px] text-gray-500">Generado por Baro</span>
+            <span class="text-[11px] ${footerTextClass}">Generado por Baro</span>
           </div>
         </div>
       </div>
