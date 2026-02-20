@@ -2,7 +2,7 @@
 
 ## Arquitectura
 - **Firebase**: Autenticación + aún hay uso de Realtime Database en frontend (pendiente migración completa)
-- **AWS S3**: TODO (datos + imágenes)
+- **Supabase (PostgreSQL + Storage)**: usuarios, likes, follows, historias, notas, búsqueda e imágenes
 - **AWS SES**: Emails
 - **Vercel Functions**: Serverless
 
@@ -31,11 +31,11 @@ zenvio-storage/
 ## Variables de Entorno
 
 ```
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-AWS_REGION
-AWS_S3_BUCKET
 SUPPORT_EMAIL
+SUPABASE_URL
+SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_STORAGE_BUCKET
 ```
 
 ## Funciones
@@ -67,3 +67,5 @@ npm install
 
 - Ver auditoría técnica en `AUDITORIA_INFRAESTRUCTURA.md` para el detalle de dependencias activas.
 - Objetivo vigente: Firebase solo para auth; datos/tiempo real a través de APIs en Vercel.
+
+- Setup de Supabase: `SUPABASE_SETUP.md`

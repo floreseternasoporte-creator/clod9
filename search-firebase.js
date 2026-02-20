@@ -290,7 +290,7 @@ async function searchContent(query) {
   
   // Buscar autores
   try {
-    const response = await fetch('/api/users');
+    const response = await fetch(`/api/users?q=${encodeURIComponent(query)}&limit=30`);
     if (!response.ok) {
       throw new Error('No se pudieron cargar autores');
     }

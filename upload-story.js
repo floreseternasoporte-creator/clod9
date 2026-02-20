@@ -1,20 +1,21 @@
-const AWS = require('aws-sdk');
+const { supabaseRequest, parseDataUrl, uploadToStorage } = require('./supabase-client');
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
-});
+const MEDIA_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'media';
 
-const BUCKET = process.env.ZENVIO_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET;
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+};
 
 exports.handler = async (event) => {
   try {
+    if (event.httpMethod === 'OPTIONS') {
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true }) };
+    }
+
     if (event.httpMethod !== 'POST') {
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ error: 'Method not allowed' })
-      };
+      return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
     }
 
     const {
@@ -27,91 +28,77 @@ exports.handler = async (event) => {
       username,
       email,
       coverImageData,
-      coverImageFileName,
       coverImageContentType
-    } = JSON.parse(event.body);
+    } = JSON.parse(event.body || '{}');
 
     if (!userId || !coverImageData) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'userId and coverImageData are required' })
-      };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'userId and coverImageData are required' }) };
     }
 
-    const storyId = `story_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const storyId = `story_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
     const timestamp = Date.now();
 
-    // Procesar imagen base64
-    const base64Data = coverImageData.replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
+    const parsed = parseDataUrl(coverImageData);
+    const imagePath = `story-covers/${userId}/${storyId}.jpg`;
+    const uploadResult = await uploadToStorage({
+      bucket: MEDIA_BUCKET,
+      path: imagePath,
+      buffer: parsed.buffer,
+      contentType: coverImageContentType || parsed.contentType || 'image/jpeg',
+      upsert: true
+    });
 
-    // Subir imagen de portada
-    const imageKey = `story-covers/${userId}/${storyId}.jpg`;
-    await s3.putObject({
-      Bucket: BUCKET,
-      Key: imageKey,
-      Body: buffer,
-      ContentType: coverImageContentType || 'image/jpeg',
-      ACL: 'public-read'
-    }).promise();
-
-    const coverImageUrl = `https://${BUCKET}.s3.amazonaws.com/${imageKey}`;
-
-    // Crear objeto de historia
-    const story = {
-      id: storyId,
+    const row = {
+      story_id: storyId,
       title: title || 'Story',
       category: category || 'story',
       rating: rating || 'all',
       language: language || 'es',
       synopsis: synopsis || '',
-      userId,
-      username: username || email?.split('@')[0] || 'Usuario',
-      email,
-      coverImage: coverImageUrl,
+      user_id: userId,
+      username: username || (email ? String(email).split('@')[0] : 'Usuario'),
+      email: email || '',
+      cover_image: uploadResult.publicUrl,
       timestamp,
       views: 0,
       likes: 0,
-      createdAt: timestamp
+      created_at: timestamp,
+      updated_at: timestamp
     };
 
-    // Guardar metadata de la historia
-    const storyKey = `stories/${userId}/${storyId}.json`;
-    await s3.putObject({
-      Bucket: BUCKET,
-      Key: storyKey,
-      Body: JSON.stringify(story),
-      ContentType: 'application/json'
-    }).promise();
+    await supabaseRequest('stories', {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify([row])
+    }, { useServiceRole: true });
+
+    const story = {
+      id: row.story_id,
+      title: row.title,
+      category: row.category,
+      rating: row.rating,
+      language: row.language,
+      synopsis: row.synopsis,
+      userId: row.user_id,
+      username: row.username,
+      email: row.email,
+      coverImage: row.cover_image,
+      timestamp: row.timestamp,
+      views: row.views,
+      likes: row.likes,
+      createdAt: row.created_at
+    };
 
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
-      body: JSON.stringify({
-        success: true,
-        story,
-        storyId,
-        coverImageUrl
-      })
+      headers: corsHeaders,
+      body: JSON.stringify({ success: true, story, storyId, coverImageUrl: row.cover_image })
     };
-
   } catch (error) {
     console.error('Error uploading story:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
-      body: JSON.stringify({ error: error.message })
-    };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: error.message }) };
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
 
+const { runVercelHandler } = require('./vercel-adapter');
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);
