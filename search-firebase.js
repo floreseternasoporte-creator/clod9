@@ -72,12 +72,27 @@ function renderSearchInfoList(items) {
   }
 
   const item = items[0];
+  const showIdentityTags = Boolean(item?.title || item?.isVerified || item?.founderLabel);
+  const verifiedBadge = item?.isVerified
+    ? `<span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#1d9bf0] text-white text-[10px] font-bold" title="Perfil verificado">✓</span>`
+    : '';
+  const founderBadge = item?.founderLabel
+    ? `<span class="inline-flex items-center rounded-full bg-[#f1f5f9] text-[#0f172a] text-[10px] font-semibold px-2 py-0.5">${item.founderLabel}</span>`
+    : '';
+
   infoList.innerHTML = `
     <article class="bg-white border border-[#e6e6e6] rounded-2xl p-4 shadow-sm">
       <div class="flex items-start gap-3">
         <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-9 h-9 rounded-full flex-shrink-0">
         <div class="min-w-0 w-full">
           <p class="text-[11px] font-semibold tracking-wide uppercase text-gray-500 mb-2">Respuesta de IA</p>
+          ${showIdentityTags ? `
+            <div class="mb-2 flex flex-wrap items-center gap-2">
+              ${item?.title ? `<span class="text-sm font-semibold text-[#111111]">${item.title}</span>` : ''}
+              ${verifiedBadge}
+              ${founderBadge}
+            </div>
+          ` : ''}
           <p id="search-info-typed-text" class="text-sm text-[#111111] leading-relaxed"></p>
           <div class="mt-3 pt-3 border-t border-[#e6e6e6] flex items-center gap-2">
             <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-4 h-4 rounded-full">
@@ -130,6 +145,32 @@ function renderSearchInfoLoading() {
 
 async function searchInfoContent(query) {
   const cleanQuery = (query || '').trim();
+  const normalizedQuery = cleanQuery.toLowerCase();
+
+  if (normalizedQuery.includes('darel vega')) {
+    await renderSearchInfoList([
+      {
+        title: 'Darel Vega',
+        isVerified: true,
+        founderLabel: 'Founder · CEO',
+        summary: 'Darel Vega is the current founder and CEO of Baro and Atenis. He was born in Cuba.'
+      }
+    ]);
+    return;
+  }
+
+  if (normalizedQuery.includes('xua xia')) {
+    await renderSearchInfoList([
+      {
+        title: 'Xua Xia',
+        isVerified: true,
+        founderLabel: 'Co-founder · CEO',
+        summary: 'Xua Xia is the co-founder and CEO, and Darel Vega\'s girlfriend. She is from China.'
+      }
+    ]);
+    return;
+  }
+
   if (cleanQuery.length < 3) {
     renderSearchInfoList([]);
     return;
