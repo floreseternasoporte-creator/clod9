@@ -1,51 +1,21 @@
-const AWS = require('aws-sdk');
-
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
-});
-
-const BUCKET = process.env.ZENVIO_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET;
+const { supabaseCount } = require('./supabase-client');
 
 exports.handler = async (event) => {
   try {
     const { userId, type } = event.queryStringParameters || {};
-    
+
     if (!userId || !type) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'userId and type are required' })
-      };
+      return { statusCode: 400, body: JSON.stringify({ error: 'userId and type are required' }) };
     }
 
     let count = 0;
 
     if (type === 'stories') {
-      // Contar historias del usuario
-      const params = {
-        Bucket: BUCKET,
-        Prefix: `stories/${userId}/`
-      };
-      
-      const data = await s3.listObjectsV2(params).promise();
-      count = data.Contents ? data.Contents.length : 0;
-      
+      count = await supabaseCount(`stories?user_id=eq.${encodeURIComponent(userId)}&select=story_id`, { useServiceRole: true });
     } else if (type === 'notes') {
-      // Contar notas del usuario
-      const params = {
-        Bucket: BUCKET,
-        Prefix: `notes/${userId}/`
-      };
-      
-      const data = await s3.listObjectsV2(params).promise();
-      count = data.Contents ? data.Contents.length : 0;
-      
+      count = await supabaseCount(`notes?user_id=eq.${encodeURIComponent(userId)}&select=note_id`, { useServiceRole: true });
     } else {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Invalid type. Use "stories" or "notes"' })
-      };
+      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid type. Use "stories" or "notes"' }) };
     }
 
     return {
@@ -55,13 +25,8 @@ exports.handler = async (event) => {
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
       },
-      body: JSON.stringify({ 
-        userId,
-        type,
-        count 
-      })
+      body: JSON.stringify({ userId, type, count })
     };
-    
   } catch (error) {
     console.error('Error getting user stats:', error);
     return {
@@ -75,6 +40,6 @@ exports.handler = async (event) => {
     };
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
 
+const { runVercelHandler } = require('./vercel-adapter');
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);
