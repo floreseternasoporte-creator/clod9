@@ -69,3 +69,9 @@ npm install
 - Objetivo vigente: Firebase solo para auth; datos/tiempo real a través de APIs en Vercel.
 
 - Setup de Supabase: `SUPABASE_SETUP.md`
+
+
+## Diagnóstico
+
+- `GET /api/health` estado del runtime y variables Supabase.
+- `GET /api/health-supabase` prueba conectividad real contra Supabase REST.
