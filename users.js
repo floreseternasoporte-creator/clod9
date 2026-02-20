@@ -10,21 +10,32 @@ const response = (statusCode, body) => ({
   body: JSON.stringify(body)
 });
 
+const toClientUser = (row) => ({
+  userId: row.user_id,
+  username: row.username,
+  bio: row.bio,
+  profileImage: row.profile_image,
+  followersCount: row.followers_count,
+  followingCount: row.following_count,
+  ratedCount: row.rated_count,
+  isVerified: row.is_verified,
+  registrationTimestamp: row.registration_timestamp,
+  founder: row.founder,
+  email: row.email,
+  updatedAt: row.updated_at
+});
+
 exports.handler = async (event) => {
   try {
-    if (event.httpMethod === 'OPTIONS') {
-      return response(200, { ok: true });
-    }
+    if (event.httpMethod === 'OPTIONS') return response(200, { ok: true });
 
     if (event.httpMethod === 'GET') {
       const { userId, q = '', limit = 50 } = event.queryStringParameters || {};
 
       if (userId) {
         const rows = await supabaseRequest(`users?user_id=eq.${encodeURIComponent(userId)}&select=*`);
-        if (!rows.length) {
-          return response(404, { error: 'User not found.' });
-        }
-        return response(200, { user: rows[0] });
+        if (!rows.length) return response(404, { error: 'User not found.' });
+        return response(200, { user: toClientUser(rows[0]) });
       }
 
       const safeLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
@@ -33,20 +44,14 @@ exports.handler = async (event) => {
         ? `&or=(username.ilike.*${encodeURIComponent(normalizedQ)}*,email.ilike.*${encodeURIComponent(normalizedQ)}*)`
         : '';
 
-      const users = await supabaseRequest(
-        `users?select=*&order=updated_at.desc&limit=${safeLimit}${queryFilter}`
-      );
-
-      return response(200, { users });
+      const rows = await supabaseRequest(`users?select=*&order=updated_at.desc&limit=${safeLimit}${queryFilter}`);
+      return response(200, { users: rows.map(toClientUser) });
     }
 
     if (event.httpMethod === 'POST') {
       const body = event.body ? JSON.parse(event.body) : {};
       const userId = body.userId ? String(body.userId) : '';
-
-      if (!userId) {
-        return response(400, { error: 'Missing userId.' });
-      }
+      if (!userId) return response(400, { error: 'Missing userId.' });
 
       const profile = {
         user_id: userId,
@@ -69,23 +74,7 @@ exports.handler = async (event) => {
         body: JSON.stringify([profile])
       }, { useServiceRole: true });
 
-      return response(200, {
-        success: true,
-        user: {
-          userId: profile.user_id,
-          username: profile.username,
-          bio: profile.bio,
-          profileImage: profile.profile_image,
-          followersCount: profile.followers_count,
-          followingCount: profile.following_count,
-          ratedCount: profile.rated_count,
-          isVerified: profile.is_verified,
-          registrationTimestamp: profile.registration_timestamp,
-          founder: profile.founder,
-          email: profile.email,
-          updatedAt: profile.updated_at
-        }
-      });
+      return response(200, { success: true, user: toClientUser(profile) });
     }
 
     return response(405, { error: 'Method Not Allowed' });
@@ -96,5 +85,4 @@ exports.handler = async (event) => {
 };
 
 const { runVercelHandler } = require('./vercel-adapter');
-
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);

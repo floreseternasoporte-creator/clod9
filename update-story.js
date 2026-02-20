@@ -1,111 +1,72 @@
-const AWS = require('aws-sdk');
+const { supabaseRequest } = require('./supabase-client');
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+};
+
+const toClientStory = (row) => ({
+  id: row.story_id,
+  title: row.title,
+  category: row.category,
+  rating: row.rating,
+  language: row.language,
+  synopsis: row.synopsis,
+  userId: row.user_id,
+  username: row.username,
+  email: row.email,
+  coverImage: row.cover_image,
+  timestamp: row.timestamp,
+  views: row.views,
+  likes: row.likes,
+  createdAt: row.created_at,
+  lastUpdated: row.updated_at
 });
-
-const BUCKET = process.env.ZENVIO_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET;
 
 exports.handler = async (event) => {
   try {
     if (event.httpMethod !== 'POST') {
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ error: 'Method not allowed' })
-      };
+      return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
     }
 
-    const { storyId, updates } = JSON.parse(event.body);
-
+    const { storyId, updates } = JSON.parse(event.body || '{}');
     if (!storyId || !updates) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'storyId and updates are required' })
-      };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'storyId and updates are required' }) };
     }
 
-    // Buscar la historia para actualizarla
-    const listParams = {
-      Bucket: BUCKET,
-      Prefix: 'stories/'
-    };
+    const allowed = ['title', 'category', 'rating', 'language', 'synopsis', 'views', 'likes'];
+    const payload = { updated_at: Date.now() };
 
-    const data = await s3.listObjectsV2(listParams).promise();
-    
-    let storyToUpdate = null;
-    let storyKey = null;
-
-    // Buscar la historia específica
-    for (const item of data.Contents || []) {
-      if (item.Key.includes(storyId)) {
-        try {
-          const obj = await s3.getObject({ 
-            Bucket: BUCKET, 
-            Key: item.Key 
-          }).promise();
-          
-          const story = JSON.parse(obj.Body.toString());
-          if (story.id === storyId) {
-            storyToUpdate = story;
-            storyKey = item.Key;
-            break;
-          }
-        } catch (error) {
-          console.error(`Error reading story ${item.Key}:`, error);
-        }
+    for (const key of allowed) {
+      if (Object.prototype.hasOwnProperty.call(updates, key)) {
+        payload[key] = updates[key];
       }
     }
 
-    if (!storyToUpdate || !storyKey) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ error: 'Story not found' })
-      };
+    const rows = await supabaseRequest(`stories?story_id=eq.${encodeURIComponent(storyId)}&select=*`, {}, { useServiceRole: true });
+    if (!rows.length) {
+      return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Story not found' }) };
     }
 
-    // Aplicar actualizaciones
-    const updatedStory = {
-      ...storyToUpdate,
-      ...updates,
-      lastUpdated: Date.now()
-    };
+    await supabaseRequest(`stories?story_id=eq.${encodeURIComponent(storyId)}`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify(payload)
+    }, { useServiceRole: true });
 
-    // Guardar historia actualizada
-    await s3.putObject({
-      Bucket: BUCKET,
-      Key: storyKey,
-      Body: JSON.stringify(updatedStory),
-      ContentType: 'application/json'
-    }).promise();
+    const updatedRows = await supabaseRequest(`stories?story_id=eq.${encodeURIComponent(storyId)}&select=*`, {}, { useServiceRole: true });
 
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
-      body: JSON.stringify({
-        success: true,
-        story: updatedStory
-      })
+      headers: corsHeaders,
+      body: JSON.stringify({ success: true, story: toClientStory(updatedRows[0]) })
     };
-
   } catch (error) {
     console.error('Error updating story:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
-      body: JSON.stringify({ error: error.message })
-    };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: error.message }) };
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
 
+const { runVercelHandler } = require('./vercel-adapter');
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);

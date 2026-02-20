@@ -1,10 +1,6 @@
-const AWS = require('aws-sdk');
+const { parseDataUrl, uploadToStorage } = require('./supabase-client');
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
-});
+const MEDIA_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'media';
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -12,26 +8,28 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { imageData, fileName, userId, timestamp, contentType, imageType } = JSON.parse(event.body);
-    
-    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
-    
-    const key = `${imageType}/${userId}/${timestamp}_${fileName}`;
-    
-    const params = {
-      Bucket: process.env.ZENVIO_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: contentType,
-      ACL: 'public-read'
-    };
+    const { imageData, fileName = 'image.jpg', userId, timestamp = Date.now(), contentType, imageType = 'misc' } = JSON.parse(event.body || '{}');
 
-    const result = await s3.upload(params).promise();
+    if (!imageData || !userId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'imageData and userId are required' })
+      };
+    }
+
+    const parsed = parseDataUrl(imageData);
+    const key = `${imageType}/${userId}/${timestamp}_${String(fileName).replace(/\s+/g, '_')}`;
+    const uploaded = await uploadToStorage({
+      bucket: MEDIA_BUCKET,
+      path: key,
+      buffer: parsed.buffer,
+      contentType: contentType || parsed.contentType,
+      upsert: true
+    });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ imageUrl: result.Location })
+      body: JSON.stringify({ imageUrl: uploaded.publicUrl, path: uploaded.path })
     };
   } catch (error) {
     return {
@@ -40,6 +38,6 @@ exports.handler = async (event) => {
     };
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
 
+const { runVercelHandler } = require('./vercel-adapter');
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);

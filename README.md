@@ -2,8 +2,7 @@
 
 ## Arquitectura
 - **Firebase**: Autenticación + aún hay uso de Realtime Database en frontend (pendiente migración completa)
-- **Supabase (PostgreSQL)**: usuarios, likes, follows, búsqueda
-- **AWS S3**: almacenamiento de imágenes y objetos legados
+- **Supabase (PostgreSQL + Storage)**: usuarios, likes, follows, historias, notas, búsqueda e imágenes
 - **AWS SES**: Emails
 - **Vercel Functions**: Serverless
 
@@ -32,14 +31,11 @@ zenvio-storage/
 ## Variables de Entorno
 
 ```
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-AWS_REGION
-AWS_S3_BUCKET
 SUPPORT_EMAIL
 SUPABASE_URL
 SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_STORAGE_BUCKET
 ```
 
 ## Funciones

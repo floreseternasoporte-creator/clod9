@@ -1,117 +1,57 @@
-const AWS = require('aws-sdk');
+const { supabaseRequest, deleteFromStorage } = require('./supabase-client');
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
-});
+const MEDIA_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'media';
 
-const BUCKET = process.env.ZENVIO_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET;
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+};
+
+function extractStoragePath(url) {
+  const marker = '/storage/v1/object/public/';
+  if (!url || !url.includes(marker)) return null;
+  const tail = url.split(marker)[1] || '';
+  const parts = tail.split('/');
+  parts.shift();
+  return decodeURIComponent(parts.join('/'));
+}
 
 exports.handler = async (event) => {
   try {
     if (event.httpMethod !== 'POST') {
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ error: 'Method not allowed' })
-      };
+      return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
     }
 
-    const { storyId } = JSON.parse(event.body);
-
+    const { storyId } = JSON.parse(event.body || '{}');
     if (!storyId) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'storyId is required' })
-      };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'storyId is required' }) };
     }
 
-    // Buscar la historia para obtener información del usuario
-    const listParams = {
-      Bucket: BUCKET,
-      Prefix: 'stories/'
-    };
-
-    const data = await s3.listObjectsV2(listParams).promise();
-    
-    let storyToDelete = null;
-    let storyKey = null;
-
-    // Buscar la historia específica
-    for (const item of data.Contents || []) {
-      if (item.Key.includes(storyId)) {
-        try {
-          const obj = await s3.getObject({ 
-            Bucket: BUCKET, 
-            Key: item.Key 
-          }).promise();
-          
-          const story = JSON.parse(obj.Body.toString());
-          if (story.id === storyId) {
-            storyToDelete = story;
-            storyKey = item.Key;
-            break;
-          }
-        } catch (error) {
-          console.error(`Error reading story ${item.Key}:`, error);
-        }
-      }
+    const rows = await supabaseRequest(`stories?story_id=eq.${encodeURIComponent(storyId)}&select=*`, {}, { useServiceRole: true });
+    if (!rows.length) {
+      return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Story not found' }) };
     }
 
-    if (!storyToDelete || !storyKey) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ error: 'Story not found' })
-      };
-    }
+    const story = rows[0];
+    const storagePath = extractStoragePath(story.cover_image) || `story-covers/${story.user_id}/${story.story_id}.jpg`;
 
-    // Eliminar imagen de portada si existe
-    if (storyToDelete.coverImage) {
-      try {
-        const imageKey = `story-covers/${storyToDelete.userId}/${storyId}.jpg`;
-        await s3.deleteObject({
-          Bucket: BUCKET,
-          Key: imageKey
-        }).promise();
-      } catch (error) {
-        console.error('Error deleting cover image:', error);
-        // Continuar aunque falle la eliminación de la imagen
-      }
-    }
+    await deleteFromStorage({ bucket: MEDIA_BUCKET, path: storagePath }, { useServiceRole: true });
 
-    // Eliminar metadata de la historia
-    await s3.deleteObject({
-      Bucket: BUCKET,
-      Key: storyKey
-    }).promise();
+    await supabaseRequest(`stories?story_id=eq.${encodeURIComponent(storyId)}`, {
+      method: 'DELETE'
+    }, { useServiceRole: true });
 
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
-      body: JSON.stringify({
-        success: true,
-        message: 'Story deleted successfully',
-        storyId
-      })
+      headers: corsHeaders,
+      body: JSON.stringify({ success: true, message: 'Story deleted successfully', storyId })
     };
-
   } catch (error) {
     console.error('Error deleting story:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
-      body: JSON.stringify({ error: error.message })
-    };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: error.message }) };
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
 
+const { runVercelHandler } = require('./vercel-adapter');
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);
