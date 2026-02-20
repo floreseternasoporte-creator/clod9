@@ -152,8 +152,20 @@ async function searchInfoContent(query) {
       {
         title: 'Darel Vega',
         isVerified: true,
-        founderLabel: 'Fundador · CEO',
-        summary: 'Darel Vega es el actual fundador y CEO de Baro y Atenis. Nació en Cuba.'
+        founderLabel: 'Founder · CEO',
+        summary: 'Darel Vega is the current founder and CEO of Baro and Atenis. He was born in Cuba.'
+      }
+    ]);
+    return;
+  }
+
+  if (normalizedQuery.includes('xua xia')) {
+    await renderSearchInfoList([
+      {
+        title: 'Xua Xia',
+        isVerified: true,
+        founderLabel: 'Co-founder · CEO',
+        summary: 'Xua Xia is the co-founder and CEO, and Darel Vega\'s girlfriend. She is from China.'
       }
     ]);
     return;
