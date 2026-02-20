@@ -1,47 +1,57 @@
-const AWS = require('aws-sdk');
+const { supabaseRequest } = require('./supabase-client');
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
+const response = (statusCode, body) => ({
+  statusCode,
+  headers: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  },
+  body: JSON.stringify(body)
 });
 
-const BUCKET = process.env.ZENVIO_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET;
-
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return response(200, { ok: true });
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return response(405, { error: 'Method Not Allowed' });
   }
 
   try {
-    const { userId, targetUserId, action } = JSON.parse(event.body);
-    const followKey = `following/${userId}/${targetUserId}.json`;
-    
-    if (action === 'follow') {
-      await s3.putObject({
-        Bucket: BUCKET,
-        Key: followKey,
-        Body: JSON.stringify({ userId, targetUserId, timestamp: Date.now() }),
-        ContentType: 'application/json'
-      }).promise();
-    } else if (action === 'unfollow') {
-      await s3.deleteObject({
-        Bucket: BUCKET,
-        Key: followKey
-      }).promise();
+    const { userId, targetUserId, action } = JSON.parse(event.body || '{}');
+
+    if (!userId || !targetUserId || !action) {
+      return response(400, { error: 'Missing userId, targetUserId or action.' });
     }
-    
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ success: true })
-    };
+
+    if (action === 'follow') {
+      await supabaseRequest('following?on_conflict=follower_id,following_id', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify([
+          {
+            follower_id: userId,
+            following_id: targetUserId,
+            created_at: new Date().toISOString()
+          }
+        ])
+      }, { useServiceRole: true });
+    } else if (action === 'unfollow') {
+      await supabaseRequest(`following?follower_id=eq.${encodeURIComponent(userId)}&following_id=eq.${encodeURIComponent(targetUserId)}`, {
+        method: 'DELETE'
+      }, { useServiceRole: true });
+    } else {
+      return response(400, { error: 'Invalid action. Use follow or unfollow.' });
+    }
+
+    return response(200, { success: true });
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
+    return response(500, { error: error.message });
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
+
+const { runVercelHandler } = require('./vercel-adapter');
 
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);

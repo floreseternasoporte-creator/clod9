@@ -1,12 +1,4 @@
-const AWS = require('aws-sdk');
-
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
-});
-
-const BUCKET = process.env.ZENVIO_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET;
+const { supabaseRequest } = require('./supabase-client');
 
 const response = (statusCode, body) => ({
   statusCode,
@@ -20,55 +12,32 @@ const response = (statusCode, body) => ({
 
 exports.handler = async (event) => {
   try {
-    if (!BUCKET) {
-      return response(500, {
-        error: 'Missing S3 bucket: set ZENVIO_AWS_S3_BUCKET or AWS_S3_BUCKET.'
-      });
+    if (event.httpMethod === 'OPTIONS') {
+      return response(200, { ok: true });
     }
 
     if (event.httpMethod === 'GET') {
-      const { userId } = event.queryStringParameters || {};
+      const { userId, q = '', limit = 50 } = event.queryStringParameters || {};
 
       if (userId) {
-        try {
-          const obj = await s3
-            .getObject({ Bucket: BUCKET, Key: `users/${userId}.json` })
-            .promise();
-          return response(200, { user: JSON.parse(obj.Body.toString()) });
-        } catch (error) {
-          if (error.code === 'NoSuchKey') {
-            return response(404, { error: 'User not found.' });
-          }
-          throw error;
+        const rows = await supabaseRequest(`users?user_id=eq.${encodeURIComponent(userId)}&select=*`);
+        if (!rows.length) {
+          return response(404, { error: 'User not found.' });
         }
+        return response(200, { user: rows[0] });
       }
 
-      const data = await s3
-        .listObjectsV2({ Bucket: BUCKET, Prefix: 'users/' })
-        .promise();
+      const safeLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
+      const normalizedQ = String(q).trim();
+      const queryFilter = normalizedQ
+        ? `&or=(username.ilike.*${encodeURIComponent(normalizedQ)}*,email.ilike.*${encodeURIComponent(normalizedQ)}*)`
+        : '';
 
-      if (!data.Contents || data.Contents.length === 0) {
-        return response(200, { users: [] });
-      }
-
-      const users = await Promise.all(
-        data.Contents.map(async (item) => {
-          try {
-            const obj = await s3
-              .getObject({ Bucket: BUCKET, Key: item.Key })
-              .promise();
-            return JSON.parse(obj.Body.toString());
-          } catch (error) {
-            console.error('Error reading user:', item.Key, error);
-            return null;
-          }
-        })
+      const users = await supabaseRequest(
+        `users?select=*&order=updated_at.desc&limit=${safeLimit}${queryFilter}`
       );
 
-      return response(
-        200,
-        { users: users.filter(Boolean).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)) }
-      );
+      return response(200, { users });
     }
 
     if (event.httpMethod === 'POST') {
@@ -80,30 +49,43 @@ exports.handler = async (event) => {
       }
 
       const profile = {
-        userId,
+        user_id: userId,
         username: body.username || body.displayName || 'Usuario',
         bio: body.bio || '',
-        profileImage: body.profileImage || '',
-        followersCount: body.followersCount || 0,
-        followingCount: body.followingCount || 0,
-        ratedCount: body.ratedCount || 0,
-        isVerified: body.isVerified || false,
-        registrationTimestamp: body.registrationTimestamp || Date.now(),
+        profile_image: body.profileImage || '',
+        followers_count: body.followersCount || 0,
+        following_count: body.followingCount || 0,
+        rated_count: body.ratedCount || 0,
+        is_verified: body.isVerified || false,
+        registration_timestamp: body.registrationTimestamp || Date.now(),
         founder: body.founder || false,
         email: body.email || '',
-        updatedAt: Date.now()
+        updated_at: new Date().toISOString()
       };
 
-      await s3
-        .putObject({
-          Bucket: BUCKET,
-          Key: `users/${userId}.json`,
-          Body: JSON.stringify(profile),
-          ContentType: 'application/json'
-        })
-        .promise();
+      await supabaseRequest('users?on_conflict=user_id', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify([profile])
+      }, { useServiceRole: true });
 
-      return response(200, { success: true, user: profile });
+      return response(200, {
+        success: true,
+        user: {
+          userId: profile.user_id,
+          username: profile.username,
+          bio: profile.bio,
+          profileImage: profile.profile_image,
+          followersCount: profile.followers_count,
+          followingCount: profile.following_count,
+          ratedCount: profile.rated_count,
+          isVerified: profile.is_verified,
+          registrationTimestamp: profile.registration_timestamp,
+          founder: profile.founder,
+          email: profile.email,
+          updatedAt: profile.updated_at
+        }
+      });
     }
 
     return response(405, { error: 'Method Not Allowed' });
@@ -112,6 +94,7 @@ exports.handler = async (event) => {
     return response(500, { error: error.message });
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
+
+const { runVercelHandler } = require('./vercel-adapter');
 
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);
