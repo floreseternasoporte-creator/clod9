@@ -1,58 +1,53 @@
-const AWS = require('aws-sdk');
+const { supabaseRequest, supabaseCount } = require('./supabase-client');
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
+const response = (statusCode, body) => ({
+  statusCode,
+  headers: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  },
+  body: JSON.stringify(body)
 });
 
-const BUCKET = process.env.ZENVIO_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET;
-
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return response(200, { ok: true });
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return response(405, { error: 'Method Not Allowed' });
   }
 
   try {
-    const { noteId, userId } = JSON.parse(event.body);
-    const likeKey = `likes/${noteId}/${userId}.json`;
-    
-    // Verificar si ya dio like
-    try {
-      await s3.headObject({ Bucket: BUCKET, Key: likeKey }).promise();
-      return {
-        statusCode: 409,
-        body: JSON.stringify({ error: 'User already liked this note' })
-      };
-    } catch (e) {
-      // No existe, continuar
+    const { noteId, userId, action = 'like' } = JSON.parse(event.body || '{}');
+
+    if (!noteId || !userId) {
+      return response(400, { error: 'Missing noteId or userId.' });
     }
-    
-    // Guardar like
-    await s3.putObject({
-      Bucket: BUCKET,
-      Key: likeKey,
-      Body: JSON.stringify({ userId, timestamp: Date.now() }),
-      ContentType: 'application/json'
-    }).promise();
-    
-    // Contar likes
-    const data = await s3.listObjectsV2({
-      Bucket: BUCKET,
-      Prefix: `likes/${noteId}/`
-    }).promise();
-    
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ likes: data.KeyCount })
-    };
+
+    if (action === 'unlike') {
+      await supabaseRequest(`likes?note_id=eq.${encodeURIComponent(noteId)}&user_id=eq.${encodeURIComponent(userId)}`, {
+        method: 'DELETE'
+      }, { useServiceRole: true });
+    } else {
+      await supabaseRequest('likes?on_conflict=note_id,user_id', {
+        method: 'POST',
+        headers: {
+          Prefer: 'resolution=merge-duplicates,return=minimal'
+        },
+        body: JSON.stringify([{ note_id: noteId, user_id: userId, created_at: new Date().toISOString() }])
+      }, { useServiceRole: true });
+    }
+
+    const total = await supabaseCount(`likes?note_id=eq.${encodeURIComponent(noteId)}&select=id`, { useServiceRole: true });
+
+    return response(200, { success: true, likes: total });
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
+    return response(500, { error: error.message });
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
+
+const { runVercelHandler } = require('./vercel-adapter');
 
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);
