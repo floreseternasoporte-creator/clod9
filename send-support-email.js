@@ -1,10 +1,5 @@
-const AWS = require('aws-sdk');
-
-const ses = new AWS.SES({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
-});
+const { firebaseRequest } = require('./firebase-realtime-client');
+const { runVercelHandler } = require('./vercel-adapter');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -12,26 +7,27 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { email, problemType, description } = JSON.parse(event.body);
+    const { email, problemType, description } = JSON.parse(event.body || '{}');
+    if (!email || !problemType || !description) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'email, problemType and description are required' }) };
+    }
 
-    const params = {
-      Source: process.env.SUPPORT_EMAIL || 'support@zenvio.app',
-      Destination: {
-        ToAddresses: [process.env.SUPPORT_EMAIL || 'support@zenvio.app']
-      },
-      Message: {
-        Subject: { Data: `Soporte: ${problemType}` },
-        Body: {
-          Text: { Data: `Email: ${email}\nTipo: ${problemType}\n\n${description}` }
-        }
+    const ticketId = `ticket_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+    await firebaseRequest(`support_tickets/${ticketId}`, {
+      method: 'PUT',
+      body: {
+        ticketId,
+        email: String(email),
+        problemType: String(problemType),
+        description: String(description),
+        status: 'open',
+        createdAt: Date.now()
       }
-    };
-
-    await ses.sendEmail(params).promise();
+    });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true })
+      body: JSON.stringify({ success: true, ticketId })
     };
   } catch (error) {
     return {
@@ -40,6 +36,5 @@ exports.handler = async (event) => {
     };
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
 
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);

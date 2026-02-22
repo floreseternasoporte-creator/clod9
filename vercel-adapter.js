@@ -1,9 +1,5 @@
 const aliasEnvironmentVariables = () => {
   const aliases = {
-    AWS_ACCESS_KEY_ID: ['MY_AWS_ACCESS_KEY_ID'],
-    AWS_SECRET_ACCESS_KEY: ['MY_AWS_SECRET_ACCESS_KEY'],
-    AWS_REGION: ['MY_AWS_REGION'],
-    AWS_S3_BUCKET: ['MY_AWS_S3_BUCKET_NAME'],
     GROQ_API_KEY: ['MY_GROQ_API_KEY']
   };
 

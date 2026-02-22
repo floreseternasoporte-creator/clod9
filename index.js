@@ -11,7 +11,6 @@ const allowedRoutes = new Set([
   'get-stories',
   'groq-chat',
   'likes',
-  'migrate-firebase-to-s3',
   'notes',
   'notifications',
   'scheduled-chapters',
@@ -49,7 +48,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  if (route === 'health-firebase' || route === 'health-supabase') {
+  if (route === 'health-firebase') {
     try {
       await firebaseRequest('users', { queryParams: { limitToFirst: 1 } });
       res.status(200).json({ ok: true, reachable: true, firebase: getFirebaseConfig() });

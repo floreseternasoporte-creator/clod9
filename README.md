@@ -3,10 +3,10 @@
 ## Arquitectura
 - **Firebase**: Autenticación + Realtime Database para notas (incluye soporte de imágenes base64).
 - **Firebase Realtime Database**: usuarios, likes, follows, historias, notas, comunidad, imágenes y métricas en tiempo real.
-- **AWS SES**: Emails
+- **Soporte**: tickets de soporte guardados en Firebase
 - **Vercel Functions**: Serverless
 
-## Estructura en S3
+## Estructura en Firebase Realtime Database
 
 ```
 zenvio-storage/
@@ -73,4 +73,4 @@ npm install
 ## Diagnóstico
 
 - `GET /api/health` estado del runtime y variables Firebase.
-- `GET /api/health-firebase` (o `GET /api/health-supabase` por compatibilidad) prueba conectividad real contra Firebase Realtime Database.
+- `GET /api/health-firebase` (o `GET /api/health-firebase` por compatibilidad) prueba conectividad real contra Firebase Realtime Database.

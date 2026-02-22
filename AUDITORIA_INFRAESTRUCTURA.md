@@ -1,20 +1,15 @@
-# Auditoría de infraestructura (Firebase vs AWS vs Vercel)
+# Auditoría de infraestructura (modo Firebase)
 
 ## Resultado corto
-No: **la plataforma todavía no está en modo “Firebase solo autenticación”**.
+Sí: la plataforma está orientada a **Firebase** para autenticación y persistencia de datos.
 
-Actualmente Firebase se usa en:
-- **Auth** (correcto)
-- **Realtime Database** (incorrecto para el objetivo) para múltiples módulos: perfiles, seguidores, comunidad, live, chat, mensajes, notificaciones y capítulos programados.
+## Alcance actual
+- **Firebase Auth** para autenticación.
+- **Firebase Realtime Database** para usuarios, notas, historias, comunidad, likes, follows, imágenes en base64 y tickets de soporte.
+- **Vercel Functions** como capa API.
 
-## Evidencia encontrada
-- `index.html` sigue cargando SDK de Realtime Database y Storage de Firebase en el frontend.
-- `index.html` contiene un volumen alto de llamadas `firebase.database().ref(...)` para funcionalidades críticas.
-- A nivel backend, los endpoints bajo `api/` sí están preparados para Vercel + AWS S3 (con `runVercelHandler` y AWS SDK).
+## Exclusiones actuales
+- No se usan proveedores alternos de base de datos o storage en este despliegue.
 
-## Estado de despliegue
-- Objetivo de despliegue: **Vercel**.
-- El directorio `netlify/` fue retirado del repositorio en esta actualización.
-
-## Conclusión técnica
-Para cumplir 100% tu regla (“Firebase solo autenticación”), falta migrar del frontend todos los módulos que todavía escriben/leen de `firebase.database()` hacia `/api/*` en Vercel (persistiendo en AWS/S3 o la base que definas en Vercel).
+## Nota operativa
+Si en el futuro se requiere otro proveedor, deberá implementarse explícitamente y documentarse en este archivo.
