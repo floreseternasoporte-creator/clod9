@@ -1,4 +1,4 @@
-// community-firebase.js - Comunidad con AWS (auth en Firebase)
+// community-firebase.js - Comunidad con Firebase (auth en Firebase)
 
 async function fetchUserProfile(user) {
   try {
@@ -8,7 +8,7 @@ async function fetchUserProfile(user) {
       return data.user || null;
     }
   } catch (error) {
-    console.warn('No se pudo cargar perfil desde AWS:', error);
+    console.warn('No se pudo cargar perfil desde Firebase:', error);
   }
 
   const fallbackName = user.displayName || user.email?.split('@')[0] || 'Usuario';

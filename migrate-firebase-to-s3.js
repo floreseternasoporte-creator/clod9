@@ -6,18 +6,15 @@ exports.handler = async (event) => {
     };
   }
 
-  // La app intenta ejecutar una migración automática tras autenticación.
-  // La migración real no está implementada en este repo; este endpoint evita
-  // que el usuario quede con errores constantes en consola y loaders/parpadeos.
   return {
     statusCode: 200,
     body: JSON.stringify({
       success: true,
       migrated: 0,
-      message: 'Migration not configured in this deployment.'
+      message: 'Endpoint deprecated: the deployment uses Firebase only.'
     })
   };
 };
-const { runVercelHandler } = require('../vercel-adapter');
 
+const { runVercelHandler } = require('./vercel-adapter');
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);
