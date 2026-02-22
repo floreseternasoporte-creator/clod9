@@ -1,7 +1,7 @@
 # Configuración de Vercel Functions
 
 ## Arquitectura
-- **Firebase**: Autenticación + aún hay uso de Realtime Database en frontend (pendiente migración completa)
+- **Firebase**: Autenticación + Realtime Database para notas (incluye soporte de imágenes base64).
 - **Supabase (PostgreSQL + Storage)**: usuarios, likes, follows, historias, notas, búsqueda e imágenes
 - **AWS SES**: Emails
 - **Vercel Functions**: Serverless
@@ -36,11 +36,13 @@ SUPABASE_URL
 SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
 SUPABASE_STORAGE_BUCKET
+FIREBASE_DATABASE_URL
+FIREBASE_DATABASE_SECRET (opcional, para reglas restringidas)
 ```
 
 ## Funciones
 
-- `notes.js` - GET/POST/DELETE notas
+- `notes.js` - GET/POST/DELETE notas en Firebase Realtime Database (con soporte base64)
 - `community-notes.js` - GET/POST notas de comunidad
 - `likes.js` - POST likes
 - `following.js` - POST follow/unfollow
