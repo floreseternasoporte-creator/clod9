@@ -3258,8 +3258,28 @@ firebase.auth().onAuthStateChanged(user => {
     </div>
 
     <!-- Chat Tab -->
-    <div id="zenvio-tab-chat" class="zenvio-tab-content flex-1 flex flex-col overflow-hidden">
-      <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div id="zenvio-tab-chat" class="zenvio-tab-content flex-1 flex flex-col overflow-hidden bg-[#F7F9FC]">
+      <div class="px-4 pt-4 pb-2">
+        <div class="atenis-chat-shell rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">Workspace</p>
+              <h3 class="text-sm font-semibold text-gray-900">Atenis AI Assistant</h3>
+            </div>
+            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              En línea
+            </span>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button onclick="applyChatQuickPrompt('Crea una historia de ciencia ficción con final inesperado')" class="atenis-quick-chip">Historia pro</button>
+            <button onclick="applyChatQuickPrompt('Genera una imagen cinematográfica de una ciudad futurista al atardecer')" class="atenis-quick-chip">Imagen pro</button>
+            <button onclick="applyChatQuickPrompt('Hazme un plan de 5 capítulos para una novela de misterio')" class="atenis-quick-chip">Plan capítulos</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="chat-messages-container" class="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
         <!-- Mensaje de bienvenida -->
         <div class="flex items-start space-x-3">
           <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center flex-shrink-0">
@@ -3281,8 +3301,9 @@ firebase.auth().onAuthStateChanged(user => {
 
       <!-- Input area fijo en la parte inferior -->
       <div class="flex-shrink-0 border-t border-gray-200 p-4 bg-white">
+        <div class="mb-2 text-xs text-gray-500 px-1">Tip: puedes pedir “responde como editor profesional” para mejores resultados.</div>
         <div class="flex items-end space-x-2">
-          <div class="flex-1 bg-gray-100 rounded-full px-4 py-2 flex items-center">
+          <div class="flex-1 bg-gray-100 rounded-2xl px-4 py-2 flex items-center border border-gray-200 focus-within:border-[#00A2FF] transition-colors">
             <input id="chat-input" type="text" placeholder="Escribe un mensaje o pide una imagen..." class="flex-1 bg-transparent border-0 focus:outline-none text-gray-900 placeholder-gray-500" onkeypress="if(event.key==='Enter') sendChatMessage()">
           </div>
           <button onclick="sendChatMessage()" class="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-full flex items-center justify-center hover:scale-105 transition-transform">
@@ -3818,6 +3839,14 @@ function openZenvioMenu() {
     </div>
   `;
   document.body.appendChild(menu);
+}
+
+
+function applyChatQuickPrompt(prompt) {
+  const input = document.getElementById('chat-input');
+  if (!input) return;
+  input.value = prompt;
+  input.focus();
 }
 
 function sendChatMessage() {
@@ -6029,6 +6058,27 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
   
   .zenvio-tab-content {
     animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .atenis-chat-shell {
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  }
+
+  .atenis-quick-chip {
+    border: 1px solid #d7e6ff;
+    background: #f4f8ff;
+    color: #1f3a60;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 999px;
+    transition: all 0.2s ease;
+  }
+
+  .atenis-quick-chip:hover {
+    border-color: #00A2FF;
+    color: #003d7a;
+    transform: translateY(-1px);
   }
   
   @keyframes fadeIn {
