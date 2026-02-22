@@ -15,9 +15,7 @@ function ensureDatabaseUrl() {
 }
 
 function normalizePath(path) {
-  return String(path || '')
-    .replace(/^\/+/, '')
-    .replace(/\/+$/, '');
+  return String(path || '').replace(/^\/+/, '').replace(/\/+$/, '');
 }
 
 function buildUrl(path, queryParams = {}) {
@@ -52,21 +50,35 @@ async function firebaseRequest(path, { method = 'GET', body, queryParams } = {})
 
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('application/json')) return response.text();
-
   return response.json();
 }
 
+async function getCollection(path) {
+  return (await firebaseRequest(path)) || {};
+}
+
 async function listByTimestamp(path, limit = 50) {
-  return firebaseRequest(path, {
+  const map = await firebaseRequest(path, {
     queryParams: {
       orderBy: '"timestamp"',
       limitToLast: Math.max(1, Math.min(Number(limit) || 50, 200))
     }
   });
+
+  return map || {};
+}
+
+function asSortedArray(map, mapper, userId) {
+  return Object.entries(map || {})
+    .map(([id, value]) => mapper(id, value || {}))
+    .filter((item) => (userId ? item.userId === userId : true))
+    .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
 }
 
 module.exports = {
   getFirebaseConfig,
   firebaseRequest,
-  listByTimestamp
+  getCollection,
+  listByTimestamp,
+  asSortedArray
 };
