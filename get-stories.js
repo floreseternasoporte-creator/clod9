@@ -1,4 +1,4 @@
-const { supabaseRequest } = require('./supabase-client');
+const { listByTimestamp, asSortedArray } = require('./firebase-realtime-client');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -6,50 +6,32 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
 };
 
-const toClientStory = (row) => ({
-  id: row.story_id,
+const toClientStory = (id, row = {}) => ({
+  id,
   title: row.title,
   category: row.category,
   rating: row.rating,
   language: row.language,
   synopsis: row.synopsis,
-  userId: row.user_id,
+  userId: row.userId,
   username: row.username,
   email: row.email,
-  coverImage: row.cover_image,
+  coverImage: row.coverImage,
   timestamp: row.timestamp,
   views: row.views,
   likes: row.likes,
-  createdAt: row.created_at,
-  lastUpdated: row.updated_at
+  createdAt: row.createdAt,
+  lastUpdated: row.updatedAt
 });
 
 exports.handler = async (event) => {
   try {
     const { userId, limit = 100 } = event.queryStringParameters || {};
-    const safeLimit = Math.max(1, Math.min(Number(limit) || 100, 200));
-    const userFilter = userId ? `&user_id=eq.${encodeURIComponent(userId)}` : '';
+    const stories = asSortedArray(await listByTimestamp('stories', limit), toClientStory, userId);
 
-    const rows = await supabaseRequest(
-      `stories?select=*&order=timestamp.desc&limit=${safeLimit}${userFilter}`,
-      {},
-      { useServiceRole: true }
-    );
-
-    const stories = rows.map(toClientStory);
-
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({ stories, count: stories.length })
-    };
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ stories, count: stories.length }) };
   } catch (error) {
-    console.error('Error getting stories:', error);
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: error.message })
-    };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: error.message }) };
   }
 };
 
