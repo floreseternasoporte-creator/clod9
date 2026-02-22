@@ -1,41 +1,30 @@
-const { supabaseCount } = require('./supabase-client');
+const { getCollection } = require('./firebase-realtime-client');
 
 exports.handler = async (event) => {
   try {
     const { userId, type } = event.queryStringParameters || {};
-
-    if (!userId || !type) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'userId and type are required' }) };
-    }
+    if (!userId || !type) return { statusCode: 400, body: JSON.stringify({ error: 'userId and type are required' }) };
 
     let count = 0;
-
     if (type === 'stories') {
-      count = await supabaseCount(`stories?user_id=eq.${encodeURIComponent(userId)}&select=story_id`, { useServiceRole: true });
+      const stories = await getCollection('stories');
+      count = Object.values(stories).filter((story) => story && story.userId === userId).length;
     } else if (type === 'notes') {
-      count = await supabaseCount(`notes?user_id=eq.${encodeURIComponent(userId)}&select=note_id`, { useServiceRole: true });
+      const notes = await getCollection('notes');
+      count = Object.values(notes).filter((note) => note && note.userId === userId).length;
     } else {
       return { statusCode: 400, body: JSON.stringify({ error: 'Invalid type. Use "stories" or "notes"' }) };
     }
 
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
+      headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' },
       body: JSON.stringify({ userId, type, count })
     };
   } catch (error) {
-    console.error('Error getting user stats:', error);
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
+      headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' },
       body: JSON.stringify({ error: error.message })
     };
   }
