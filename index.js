@@ -1,5 +1,5 @@
 const { runVercelHandler } = require('./vercel-adapter');
-const { getSupabaseConfig, supabaseRequest } = require('./supabase-client');
+const { getFirebaseConfig, firebaseRequest } = require('./firebase-realtime-client');
 
 const allowedRoutes = new Set([
   'chapters',
@@ -11,7 +11,6 @@ const allowedRoutes = new Set([
   'get-stories',
   'groq-chat',
   'likes',
-  'migrate-firebase-to-s3',
   'notes',
   'notifications',
   'scheduled-chapters',
@@ -45,44 +44,29 @@ module.exports = async (req, res) => {
   const route = getRoute(req.query);
 
   if (route === 'health') {
-    res.status(200).json({
-      ok: true,
-      runtime: 'vercel-node',
-      supabase: getSupabaseConfig()
-    });
+    res.status(200).json({ ok: true, runtime: 'vercel-node', firebase: getFirebaseConfig() });
     return;
   }
 
-  if (route === 'health-supabase') {
+  if (route === 'health-firebase') {
     try {
-      await supabaseRequest('users?select=user_id&limit=1', {}, { useServiceRole: true });
-      res.status(200).json({ ok: true, reachable: true, supabase: getSupabaseConfig() });
+      await firebaseRequest('users', { queryParams: { limitToFirst: 1 } });
+      res.status(200).json({ ok: true, reachable: true, firebase: getFirebaseConfig() });
       return;
     } catch (error) {
-      res.status(500).json({ ok: false, reachable: false, error: error.message, supabase: getSupabaseConfig() });
+      res.status(500).json({ ok: false, reachable: false, error: error.message, firebase: getFirebaseConfig() });
       return;
     }
   }
 
   const loadedModule = loadRouteModule(route);
   const handler = resolveHandler(loadedModule);
-
-  if (!handler) {
-    res.status(404).json({ error: 'Function not found.' });
-    return;
-  }
+  if (!handler) return res.status(404).json({ error: 'Function not found.' });
 
   try {
-    if (handler === loadedModule) {
-      await handler(req, res);
-      return;
-    }
-
+    if (handler === loadedModule) return await handler(req, res);
     await runVercelHandler(handler, req, res);
   } catch (error) {
-    res.status(500).json({
-      error: `Failed to run handler "${route}".`,
-      details: error.message
-    });
+    res.status(500).json({ error: `Failed to run handler "${route}".`, details: error.message });
   }
 };

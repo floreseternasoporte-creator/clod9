@@ -1,41 +1,33 @@
-const { parseDataUrl, uploadToStorage } = require('./supabase-client');
-
-const MEDIA_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'media';
+const { firebaseRequest } = require('./firebase-realtime-client');
 
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
   try {
-    const { imageData, fileName = 'image.jpg', userId, timestamp = Date.now(), contentType, imageType = 'misc' } = JSON.parse(event.body || '{}');
+    const { imageData, fileName = 'image.jpg', userId, timestamp = Date.now(), imageType = 'misc' } = JSON.parse(event.body || '{}');
 
     if (!imageData || !userId) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'imageData and userId are required' })
-      };
+      return { statusCode: 400, body: JSON.stringify({ error: 'imageData and userId are required' }) };
     }
 
-    const parsed = parseDataUrl(imageData);
-    const key = `${imageType}/${userId}/${timestamp}_${String(fileName).replace(/\s+/g, '_')}`;
-    const uploaded = await uploadToStorage({
-      bucket: MEDIA_BUCKET,
-      path: key,
-      buffer: parsed.buffer,
-      contentType: contentType || parsed.contentType,
-      upsert: true
+    const safeName = String(fileName).replace(/\s+/g, '_');
+    const key = `${timestamp}_${safeName}`;
+    const path = `images/${encodeURIComponent(imageType)}/${encodeURIComponent(userId)}/${encodeURIComponent(key)}`;
+
+    await firebaseRequest(path, {
+      method: 'PUT',
+      body: {
+        imageData: String(imageData),
+        fileName: safeName,
+        imageType,
+        userId,
+        timestamp
+      }
     });
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ imageUrl: uploaded.publicUrl, path: uploaded.path })
-    };
+    return { statusCode: 200, body: JSON.stringify({ imageUrl: String(imageData), path }) };
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
   }
 };
 

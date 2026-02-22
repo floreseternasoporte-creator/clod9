@@ -229,14 +229,14 @@ async function searchInfoContent(query) {
 }
 
 async function getAllStories() {
-  if (typeof window.loadStoriesFromAWS === 'function') {
+  if (typeof window.loadStoriesFromFirebase === 'function') {
     try {
-      const stories = await window.loadStoriesFromAWS();
+      const stories = await window.loadStoriesFromFirebase();
       if (Array.isArray(stories) && stories.length) {
         return stories;
       }
     } catch (error) {
-      console.error('Error loading stories from AWS helper:', error);
+      console.error('Error loading stories from Firebase helper:', error);
     }
   }
 
@@ -248,7 +248,7 @@ async function getAllStories() {
     const data = await response.json();
     return data.stories || [];
   } catch (error) {
-    console.error('Error loading stories from AWS:', error);
+    console.error('Error loading stories from Firebase:', error);
     return [];
   }
 }
