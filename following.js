@@ -1,47 +1,28 @@
-const { supabaseRequest } = require('./supabase-client');
+const { firebaseRequest } = require('./firebase-realtime-client');
 
-const response = (statusCode, body) => ({
-  statusCode,
-  headers: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS'
-  },
-  body: JSON.stringify(body)
-});
+const response = (statusCode, body) => ({ statusCode, headers: {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+}, body: JSON.stringify(body) });
 
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') {
-    return response(200, { ok: true });
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return response(405, { error: 'Method Not Allowed' });
-  }
+  if (event.httpMethod === 'OPTIONS') return response(200, { ok: true });
+  if (event.httpMethod !== 'POST') return response(405, { error: 'Method Not Allowed' });
 
   try {
     const { userId, targetUserId, action } = JSON.parse(event.body || '{}');
+    if (!userId || !targetUserId || !action) return response(400, { error: 'Missing userId, targetUserId or action.' });
 
-    if (!userId || !targetUserId || !action) {
-      return response(400, { error: 'Missing userId, targetUserId or action.' });
-    }
+    const source = encodeURIComponent(userId);
+    const target = encodeURIComponent(targetUserId);
 
     if (action === 'follow') {
-      await supabaseRequest('following?on_conflict=follower_id,following_id', {
-        method: 'POST',
-        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify([
-          {
-            follower_id: userId,
-            following_id: targetUserId,
-            created_at: new Date().toISOString()
-          }
-        ])
-      }, { useServiceRole: true });
+      await firebaseRequest(`following/${source}/${target}`, { method: 'PUT', body: { createdAt: Date.now() } });
+      await firebaseRequest(`followers/${target}/${source}`, { method: 'PUT', body: { createdAt: Date.now() } });
     } else if (action === 'unfollow') {
-      await supabaseRequest(`following?follower_id=eq.${encodeURIComponent(userId)}&following_id=eq.${encodeURIComponent(targetUserId)}`, {
-        method: 'DELETE'
-      }, { useServiceRole: true });
+      await firebaseRequest(`following/${source}/${target}`, { method: 'DELETE' });
+      await firebaseRequest(`followers/${target}/${source}`, { method: 'DELETE' });
     } else {
       return response(400, { error: 'Invalid action. Use follow or unfollow.' });
     }
@@ -53,5 +34,4 @@ exports.handler = async (event) => {
 };
 
 const { runVercelHandler } = require('./vercel-adapter');
-
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);

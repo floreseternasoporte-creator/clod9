@@ -15,7 +15,7 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pap6t+K2bD6xIxQqkQ3sM8e+RXw7C3DyrgXV++o2aL/88+/9kS/l+SmpD8zZR1oN40Nq3QfT7HigDYfFW1zZAQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha512-pap6t+K2bD6xIxQqkQ3sM8e+RXw7C3DyrgXV++o2aL/88+/9kS/l+SmpD8zZR1oN40Nq3QfT7HigDYfFW1zZAQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- MediaPipe para detección facial real -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
@@ -1000,13 +1000,13 @@ body {
       updateChapterUI();
     }
 
-    /*********************** LAS FUNCIONES DE HISTORIAS ESTÁN DEFINIDAS MÁS ADELANTE CON AWS S3 ***********************/
+    /*********************** LAS FUNCIONES DE HISTORIAS ESTÁN DEFINIDAS MÁS ADELANTE CON Firebase ***********************/
     /*************** FIN NUEVAS FUNCIONES ***********************/
   </script>
 </head>
 
 <script>
-// Funciones para capítulos programados (AWS)
+// Funciones para capítulos programados (Firebase)
 async function saveScheduledChapter(chapterId, publishDate) {
   if (!currentEditingStory?.id) {
     console.warn('No story selected for scheduling.');
@@ -3258,8 +3258,28 @@ firebase.auth().onAuthStateChanged(user => {
     </div>
 
     <!-- Chat Tab -->
-    <div id="zenvio-tab-chat" class="zenvio-tab-content flex-1 flex flex-col overflow-hidden">
-      <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div id="zenvio-tab-chat" class="zenvio-tab-content flex-1 flex flex-col overflow-hidden bg-[#F7F9FC]">
+      <div class="px-4 pt-4 pb-2">
+        <div class="atenis-chat-shell rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">Workspace</p>
+              <h3 class="text-sm font-semibold text-gray-900">Atenis AI Assistant</h3>
+            </div>
+            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              En línea
+            </span>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button onclick="applyChatQuickPrompt('Crea una historia de ciencia ficción con final inesperado')" class="atenis-quick-chip">Historia pro</button>
+            <button onclick="applyChatQuickPrompt('Genera una imagen cinematográfica de una ciudad futurista al atardecer')" class="atenis-quick-chip">Imagen pro</button>
+            <button onclick="applyChatQuickPrompt('Hazme un plan de 5 capítulos para una novela de misterio')" class="atenis-quick-chip">Plan capítulos</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="chat-messages-container" class="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
         <!-- Mensaje de bienvenida -->
         <div class="flex items-start space-x-3">
           <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center flex-shrink-0">
@@ -3281,10 +3301,19 @@ firebase.auth().onAuthStateChanged(user => {
 
       <!-- Input area fijo en la parte inferior -->
       <div class="flex-shrink-0 border-t border-gray-200 p-4 bg-white">
+        <div class="mb-2 text-xs text-gray-500 px-1">Tip: puedes pedir “responde como editor profesional” para mejores resultados.</div>
+        <div id="voice-hold-hint" class="hidden mb-2 text-center text-xs font-medium text-[#003D7A] bg-[#EAF4FF] border border-[#BFDCFF] rounded-xl py-2">
+          Grabando... suelta para enviar como WeChat
+        </div>
         <div class="flex items-end space-x-2">
-          <div class="flex-1 bg-gray-100 rounded-full px-4 py-2 flex items-center">
+          <div class="flex-1 bg-gray-100 rounded-2xl px-4 py-2 flex items-center border border-gray-200 focus-within:border-[#00A2FF] transition-colors">
             <input id="chat-input" type="text" placeholder="Escribe un mensaje o pide una imagen..." class="flex-1 bg-transparent border-0 focus:outline-none text-gray-900 placeholder-gray-500" onkeypress="if(event.key==='Enter') sendChatMessage()">
           </div>
+          <button id="voice-hold-btn" class="atenis-voice-btn w-10 h-10 rounded-full flex items-center justify-center transition-transform" title="Mantén presionado para hablar" aria-label="Mantén presionado para hablar">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v11m0 0a3 3 0 003-3V7a3 3 0 00-6 0v2a3 3 0 003 3zm-7 0a7 7 0 0014 0M5 20h14" />
+            </svg>
+          </button>
           <button onclick="sendChatMessage()" class="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-full flex items-center justify-center hover:scale-105 transition-transform">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -3473,6 +3502,7 @@ firebase.auth().onAuthStateChanged(user => {
 function openZenvioChat() {
   document.getElementById('creator-hub-view').classList.add('hidden');
   document.getElementById('zenvio-chat-view').classList.remove('hidden');
+  initVoiceHoldRecorder();
   
   // Ocultar barra de navegación inferior
   const bottomNav = document.getElementById('bottom-nav');
@@ -3818,6 +3848,125 @@ function openZenvioMenu() {
     </div>
   `;
   document.body.appendChild(menu);
+}
+
+
+function applyChatQuickPrompt(prompt) {
+  const input = document.getElementById('chat-input');
+  if (!input) return;
+  input.value = prompt;
+  input.focus();
+}
+
+
+let voiceRecordState = {
+  isHolding: false,
+  startedAt: 0,
+  transcript: '',
+  recognition: null
+};
+
+function getSpeechRecognition() {
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function initVoiceHoldRecorder() {
+  const btn = document.getElementById('voice-hold-btn');
+  if (!btn || btn.dataset.bound === '1') return;
+  btn.dataset.bound = '1';
+
+  const start = (event) => {
+    if (event) event.preventDefault();
+    startVoiceHoldRecording();
+  };
+
+  const end = (event) => {
+    if (event) event.preventDefault();
+    stopVoiceHoldRecording(true);
+  };
+
+  btn.addEventListener('mousedown', start);
+  btn.addEventListener('mouseup', end);
+  btn.addEventListener('mouseleave', () => stopVoiceHoldRecording(false));
+  btn.addEventListener('touchstart', start, { passive: false });
+  btn.addEventListener('touchend', end, { passive: false });
+  btn.addEventListener('touchcancel', () => stopVoiceHoldRecording(false));
+}
+
+function setVoiceHoldVisualState(isActive) {
+  const btn = document.getElementById('voice-hold-btn');
+  const hint = document.getElementById('voice-hold-hint');
+  if (btn) btn.classList.toggle('recording', Boolean(isActive));
+  if (hint) hint.classList.toggle('hidden', !isActive);
+}
+
+function startVoiceHoldRecording() {
+  if (voiceRecordState.isHolding) return;
+
+  voiceRecordState.isHolding = true;
+  voiceRecordState.startedAt = Date.now();
+  voiceRecordState.transcript = '';
+  setVoiceHoldVisualState(true);
+
+  const SpeechRecognition = getSpeechRecognition();
+  if (!SpeechRecognition) return;
+
+  try {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.interimResults = true;
+    recognition.continuous = true;
+
+    recognition.onresult = (event) => {
+      let text = '';
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        text += event.results[i][0].transcript;
+      }
+      voiceRecordState.transcript = text.trim();
+    };
+
+    recognition.onerror = () => {
+      voiceRecordState.recognition = null;
+    };
+
+    recognition.onend = () => {
+      if (voiceRecordState.isHolding) {
+        try { recognition.start(); } catch (error) {}
+      }
+    };
+
+    recognition.start();
+    voiceRecordState.recognition = recognition;
+  } catch (error) {
+    voiceRecordState.recognition = null;
+  }
+}
+
+function stopVoiceHoldRecording(sendMessage) {
+  if (!voiceRecordState.isHolding) return;
+
+  voiceRecordState.isHolding = false;
+  const durationMs = Date.now() - voiceRecordState.startedAt;
+  const durationSecs = Math.max(1, Math.round(durationMs / 1000));
+
+  if (voiceRecordState.recognition) {
+    try { voiceRecordState.recognition.stop(); } catch (error) {}
+    voiceRecordState.recognition = null;
+  }
+
+  setVoiceHoldVisualState(false);
+
+  if (!sendMessage || durationMs < 500) {
+    voiceRecordState.transcript = '';
+    return;
+  }
+
+  const text = voiceRecordState.transcript || `[Audio ${durationSecs}s] Mensaje de voz enviado. Por favor transcribe y responde.`;
+  const input = document.getElementById('chat-input');
+  if (!input) return;
+  input.value = text;
+  sendChatMessage();
+  voiceRecordState.transcript = '';
 }
 
 function sendChatMessage() {
@@ -6030,6 +6179,47 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
   .zenvio-tab-content {
     animation: fadeIn 0.3s ease-in-out;
   }
+
+  .atenis-chat-shell {
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  }
+
+  .atenis-quick-chip {
+    border: 1px solid #d7e6ff;
+    background: #f4f8ff;
+    color: #1f3a60;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 999px;
+    transition: all 0.2s ease;
+  }
+
+  .atenis-quick-chip:hover {
+    border-color: #00A2FF;
+    color: #003d7a;
+    transform: translateY(-1px);
+  }
+
+  .atenis-voice-btn {
+    background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+    box-shadow: 0 2px 8px rgba(17, 24, 39, 0.28);
+  }
+
+  .atenis-voice-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .atenis-voice-btn.recording {
+    background: linear-gradient(180deg, #ff5c7a 0%, #d90429 100%);
+    box-shadow: 0 0 0 4px rgba(255, 92, 122, 0.2);
+    animation: atenisPulse 1.1s ease-in-out infinite;
+  }
+
+  @keyframes atenisPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
   
   @keyframes fadeIn {
     from {
@@ -6825,7 +7015,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (profileImage) profileImage.src = base64String;
         if (profileImageDesktop) profileImageDesktop.src = base64String;
 
-        // Subir a S3
+        // Subir a Firebase
         const response = await fetch('/api/upload-image', {
           method: 'POST',
           headers: {
@@ -6847,7 +7037,7 @@ document.addEventListener('DOMContentLoaded', function() {
           throw new Error(result.error || 'Error al subir imagen');
         }
 
-        // Actualizar TODAS las imágenes de perfil con la URL final de S3
+        // Actualizar TODAS las imágenes de perfil con la URL final en Firebase
         if (editProfileImageMobile) editProfileImageMobile.src = result.imageUrl;
         if (editProfileImageDesktop) editProfileImageDesktop.src = result.imageUrl;
         if (profileImage) profileImage.src = result.imageUrl;
@@ -9957,7 +10147,7 @@ function showLiveNotification(message, type = 'info') {
     });
   }
 
-  // Función para cargar estadísticas del perfil desde AWS S3
+  // Función para cargar estadísticas del perfil desde Firebase
   async function loadUserStats(userId) {
     try {
       const response = await fetch(`/api/user-stats?userId=${userId}`);
@@ -10010,14 +10200,14 @@ function showLiveNotification(message, type = 'info') {
       }
 
       // Cargar las historias del usuario
-      loadUserStoriesFromS3(userId);
+      loadUserStoriesFromFirebase(userId);
     } catch (error) {
       console.error('Error al cargar estadísticas:', error);
     }
   }
 
-  // Nueva función para cargar historias desde S3
-  async function loadUserStoriesFromS3(userId) {
+  // Nueva función para cargar historias desde Firebase
+  async function loadUserStoriesFromFirebase(userId) {
     try {
       const response = await fetch(`/api/get-stories?userId=${userId}`);
       const result = await response.json();
@@ -10299,7 +10489,7 @@ function openCreatorHub() {
     if (notesCountEl) notesCountEl.innerHTML = '<span class="inline-flex justify-center"><span class="epic-loader" style="width:20px;height:20px;border-radius:6px;"></span></span>';
 
     try {
-      // Cargar estadísticas de historias desde AWS S3
+      // Cargar estadísticas de historias desde Firebase
       const storiesResponse = await fetch(`/api/user-stats?userId=${user.uid}&type=stories`);
       if (storiesResponse.ok) {
         const storiesData = await storiesResponse.json();
@@ -10317,7 +10507,7 @@ function openCreatorHub() {
         }
       }
 
-      // Cargar estadísticas de notas desde AWS S3
+      // Cargar estadísticas de notas desde Firebase
       const notesResponse = await fetch(`/api/notes?userId=${user.uid}`);
       if (notesResponse.ok) {
         const notesData = await notesResponse.json();
@@ -10483,7 +10673,7 @@ function openCreatorHub() {
         contentType = file.type;
       }
 
-      // Subir nota a AWS S3
+      // Subir nota a Firebase
       const response = await fetch('/api/notes', {
         method: 'POST',
         headers: {
@@ -11449,7 +11639,7 @@ async function likeNote(noteId) {
         
         document.getElementById('notifications-modal').classList.remove('hidden');
         
-        // Cargar notificaciones desde AWS S3
+        // Cargar notificaciones desde Firebase
         const response = await fetch(`/api/notifications?userId=${currentUser.uid}`);
         const result = await response.json();
         
@@ -12138,7 +12328,7 @@ async function likeNote(noteId) {
     });
   }
 
-  async function syncUserProfileToAWS(user, profileOverrides = {}) {
+  async function syncUserProfileToFirebase(user, profileOverrides = {}) {
     if (!user) return;
     const payload = {
       userId: user.uid,
@@ -12155,7 +12345,7 @@ async function likeNote(noteId) {
         body: JSON.stringify(payload)
       });
     } catch (error) {
-      console.warn('No se pudo sincronizar perfil en AWS:', error);
+      console.warn('No se pudo sincronizar perfil en Firebase:', error);
     }
   }
 
@@ -12201,7 +12391,7 @@ async function likeNote(noteId) {
       };
 
       await firebase.database().ref('users/' + user.uid).set(userProfile);
-      await syncUserProfileToAWS(user, userProfile);
+      await syncUserProfileToFirebase(user, userProfile);
     } catch (error) {
       console.error(error);
       authError.textContent = error.message || 'No se pudo crear la cuenta';
@@ -12235,7 +12425,7 @@ async function likeNote(noteId) {
           firebase.auth().signOut();
           return;
         }
-        syncUserProfileToAWS(user, data || {});
+        syncUserProfileToFirebase(user, data || {});
         authFormContainer.style.display = 'none';
         mainAppContainer.style.display = 'flex';
         loadStories();
@@ -12445,7 +12635,7 @@ async function likeNote(noteId) {
     document.getElementById('detail-author').onclick = () => openAuthorProfile(story.userId);
     document.getElementById('detail-synopsis').textContent = story.synopsis || "Sinopsis no disponible.";
     
-    // Cargar capítulos (AWS)
+    // Cargar capítulos (Firebase)
     fetch(`/api/get-chapters?storyId=${story.id}`)
       .then(response => response.json())
       .then(data => {
@@ -12708,7 +12898,7 @@ async function likeNote(noteId) {
     const recentRangeMs = 7 * 24 * 60 * 60 * 1000;
     const recentThreshold = Date.now() - recentRangeMs;
 
-    loadStoriesFromAWS()
+    loadStoriesFromFirebase()
       .then((stories) => {
         const books = [];
         stories.forEach((story) => {
@@ -12757,7 +12947,7 @@ async function likeNote(noteId) {
     categoryFilter.addEventListener('change', performRealTimeSearch);
   }
   async function performSearch(query) {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     let books = [];
     stories.forEach(story => {
       if (story.title && story.title.toLowerCase().includes(query)) books.push(story);
@@ -14179,7 +14369,7 @@ async function likeNote(noteId) {
         let terrorStories = stories.filter(story => story.category === 'terror');
         renderStories(terrorStories, 'terror-stories', false);
       })
-      .catch(error => console.error('Error loading stories from AWS:', error));
+      .catch(error => console.error('Error loading stories from Firebase:', error));
   }
 
   function renderStories(stories, elementId, editMode) {
@@ -14240,10 +14430,10 @@ async function likeNote(noteId) {
           container.appendChild(card);
         });
       })
-      .catch(error => console.error('Error loading user stories from AWS:', error));
+      .catch(error => console.error('Error loading user stories from Firebase:', error));
   }
   
-  /*********************** FUNCIONES AUXILIARES PARA CARGAR HISTORIAS DESDE AWS S3 **************************/
+  /*********************** FUNCIONES AUXILIARES PARA CARGAR HISTORIAS DESDE Firebase **************************/
   function getStoryTimestamp(story) {
     const raw = story.createdAt || story.timestamp;
     if (!raw) return 0;
@@ -14261,31 +14451,24 @@ async function likeNote(noteId) {
   }
 
   async function loadStoriesFromFirebase() {
-    return [];
-  }
-  
-  async function loadStoriesFromAWS() {
-    let awsStories = [];
+    let firebaseStories = [];
     try {
       const response = await fetch('/api/get-stories');
       if (!response.ok) {
-        throw new Error(`AWS fetch failed with status ${response.status}`);
+        throw new Error(`Firebase fetch failed with status ${response.status}`);
       }
       const data = await response.json();
-      awsStories = data.stories || [];
+      firebaseStories = data.stories || [];
     } catch (error) {
-      console.error('Error loading stories from AWS:', error);
+      console.error('Error loading stories from Firebase:', error);
+      return [];
     }
 
-    const firebaseStories = await loadStoriesFromFirebase();
-    if (!awsStories.length) {
+    if (!firebaseStories.length) {
       return firebaseStories;
     }
 
     const merged = new Map();
-    awsStories.forEach((story, index) => {
-      merged.set(getStoryKey(story, index), story);
-    });
     firebaseStories.forEach((story, index) => {
       const key = getStoryKey(story, index);
       if (!merged.has(key)) {
@@ -14297,7 +14480,7 @@ async function likeNote(noteId) {
   }
 
   async function loadTopStories() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('top-stories');
     container.innerHTML = '';
 
@@ -14337,7 +14520,7 @@ async function likeNote(noteId) {
   }
 
   async function getUserRatingPreferences(userId) {
-    const allStories = await loadStoriesFromAWS();
+    const allStories = await loadStoriesFromFirebase();
     const userRatings = {};
     const categoryScores = {};
     
@@ -14427,7 +14610,7 @@ async function likeNote(noteId) {
   /*********************** NUEVAS FUNCIONES: SUGERENCIAS Y AUTORES DESTACADOS **************************/
   async function loadSuggestedStories() {
     const user = firebase.auth().currentUser;
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('suggested-stories');
     container.innerHTML = '';
     
@@ -14484,7 +14667,7 @@ async function likeNote(noteId) {
   }
 
   async function loadFeaturedAuthors() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('featured-authors');
     container.innerHTML = '';
     
@@ -14548,7 +14731,7 @@ async function likeNote(noteId) {
   }
   
   async function loadTrendingStories() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('trending-stories');
     container.innerHTML = '';
     
@@ -14572,7 +14755,7 @@ async function likeNote(noteId) {
   }
 
   async function loadMysteryStories() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('mystery-stories');
     container.innerHTML = '';
     
@@ -14587,7 +14770,7 @@ async function likeNote(noteId) {
   }
 
   async function loadAdventureStories() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('adventure-stories');
     container.innerHTML = '';
     
@@ -15401,7 +15584,7 @@ async function likeNote(noteId) {
   /*********************** NUEVAS FUNCIONES: SUGERENCIAS Y AUTORES DESTACADOS **************************/
   async function loadSuggestedStories() {
     const user = firebase.auth().currentUser;
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('suggested-stories');
     container.innerHTML = '';
     
@@ -15458,7 +15641,7 @@ async function likeNote(noteId) {
   }
 
   async function loadFeaturedAuthors() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('featured-authors');
     container.innerHTML = '';
     
@@ -17265,47 +17448,18 @@ function hideLoader() {
   }
 }
 
-// Automatic Firebase to S3 migration on first load
-async function autoMigrateFirebaseData() {
-  const migrationKey = 'firebase_s3_migration_completed';
-  const migrationCompleted = localStorage.getItem(migrationKey);
-  
-  if (migrationCompleted === 'true') {
-    console.log('Migration already completed');
-    return;
-  }
-
+// Verificación ligera de backend Firebase en primer inicio
+async function checkFirebaseBackendReady() {
   try {
-    console.log('Starting automatic Firebase to S3 migration...');
-    showLoader();
-    
-    const response = await fetch('/api/migrate-firebase-to-s3', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ deleteFromFirebase: false })
-    });
-
-    const result = await response.json();
-    
-    if (response.ok && result.success) {
-      console.log(`Migration successful: ${result.migrated} stories migrated`);
-      localStorage.setItem(migrationKey, 'true');
-    } else {
-      console.warn('Migration had issues:', result);
-    }
+    await fetch('/api/health-firebase');
   } catch (error) {
-    console.error('Auto-migration error:', error);
-  } finally {
-    hideLoader();
+    console.warn('No se pudo verificar backend Firebase:', error);
   }
 }
 
-// Run migration on authenticated user
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    autoMigrateFirebaseData();
+    checkFirebaseBackendReady();
   }
 });
 </script>

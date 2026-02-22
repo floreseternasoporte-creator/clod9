@@ -1,5 +1,5 @@
 
-// js/stories.js - Historias con AWS (auth en Firebase)
+// js/stories.js - Historias con Firebase (auth en Firebase)
 
 document.addEventListener('DOMContentLoaded', () => {
     const auth = firebase.auth();

@@ -43,6 +43,6 @@ exports.handler = async (event) => {
     };
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
+const { runVercelHandler } = require('./vercel-adapter');
 
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);
