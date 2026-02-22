@@ -14261,10 +14261,6 @@ async function likeNote(noteId) {
   }
 
   async function loadStoriesFromFirebase() {
-    return [];
-  }
-  
-  async function loadStoriesFromFirebase() {
     let firebaseStories = [];
     try {
       const response = await fetch('/api/get-stories');
@@ -14275,17 +14271,14 @@ async function likeNote(noteId) {
       firebaseStories = data.stories || [];
     } catch (error) {
       console.error('Error loading stories from Firebase:', error);
+      return [];
     }
 
-    const firebaseStories = await loadStoriesFromFirebase();
     if (!firebaseStories.length) {
       return firebaseStories;
     }
 
     const merged = new Map();
-    firebaseStories.forEach((story, index) => {
-      merged.set(getStoryKey(story, index), story);
-    });
     firebaseStories.forEach((story, index) => {
       const key = getStoryKey(story, index);
       if (!merged.has(key)) {
