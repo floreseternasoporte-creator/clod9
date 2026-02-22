@@ -1,28 +1,24 @@
-const { supabaseRequest } = require('./supabase-client');
+const { firebaseRequest, getCollection } = require('./firebase-realtime-client');
 
-const response = (statusCode, body) => ({
-  statusCode,
-  headers: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-  },
-  body: JSON.stringify(body)
-});
+const response = (statusCode, body) => ({ statusCode, headers: {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+}, body: JSON.stringify(body) });
 
-const toClientUser = (row) => ({
-  userId: row.user_id,
-  username: row.username,
-  bio: row.bio,
-  profileImage: row.profile_image,
-  followersCount: row.followers_count,
-  followingCount: row.following_count,
-  ratedCount: row.rated_count,
-  isVerified: row.is_verified,
-  registrationTimestamp: row.registration_timestamp,
-  founder: row.founder,
-  email: row.email,
-  updatedAt: row.updated_at
+const toClientUser = (userId, row = {}) => ({
+  userId,
+  username: row.username || 'Usuario',
+  bio: row.bio || '',
+  profileImage: row.profileImage || '',
+  followersCount: Number(row.followersCount || 0),
+  followingCount: Number(row.followingCount || 0),
+  ratedCount: Number(row.ratedCount || 0),
+  isVerified: Boolean(row.isVerified),
+  registrationTimestamp: row.registrationTimestamp || Date.now(),
+  founder: Boolean(row.founder),
+  email: row.email || '',
+  updatedAt: row.updatedAt || Date.now()
 });
 
 exports.handler = async (event) => {
@@ -31,21 +27,21 @@ exports.handler = async (event) => {
 
     if (event.httpMethod === 'GET') {
       const { userId, q = '', limit = 50 } = event.queryStringParameters || {};
-
       if (userId) {
-        const rows = await supabaseRequest(`users?user_id=eq.${encodeURIComponent(userId)}&select=*`);
-        if (!rows.length) return response(404, { error: 'User not found.' });
-        return response(200, { user: toClientUser(rows[0]) });
+        const user = await firebaseRequest(`users/${encodeURIComponent(userId)}`);
+        if (!user) return response(404, { error: 'User not found.' });
+        return response(200, { user: toClientUser(userId, user) });
       }
 
       const safeLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
-      const normalizedQ = String(q).trim();
-      const queryFilter = normalizedQ
-        ? `&or=(username.ilike.*${encodeURIComponent(normalizedQ)}*,email.ilike.*${encodeURIComponent(normalizedQ)}*)`
-        : '';
+      const needle = String(q).trim().toLowerCase();
+      const users = Object.entries(await getCollection('users'))
+        .map(([id, row]) => toClientUser(id, row))
+        .filter((u) => !needle || u.username.toLowerCase().includes(needle) || u.email.toLowerCase().includes(needle))
+        .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
+        .slice(0, safeLimit);
 
-      const rows = await supabaseRequest(`users?select=*&order=updated_at.desc&limit=${safeLimit}${queryFilter}`);
-      return response(200, { users: rows.map(toClientUser) });
+      return response(200, { users });
     }
 
     if (event.httpMethod === 'POST') {
@@ -53,33 +49,28 @@ exports.handler = async (event) => {
       const userId = body.userId ? String(body.userId) : '';
       if (!userId) return response(400, { error: 'Missing userId.' });
 
-      const profile = {
-        user_id: userId,
-        username: body.username || body.displayName || 'Usuario',
-        bio: body.bio || '',
-        profile_image: body.profileImage || '',
-        followers_count: body.followersCount || 0,
-        following_count: body.followingCount || 0,
-        rated_count: body.ratedCount || 0,
-        is_verified: body.isVerified || false,
-        registration_timestamp: body.registrationTimestamp || Date.now(),
-        founder: body.founder || false,
-        email: body.email || '',
-        updated_at: new Date().toISOString()
+      const existing = await firebaseRequest(`users/${encodeURIComponent(userId)}`) || {};
+      const merged = {
+        ...existing,
+        username: body.username || body.displayName || existing.username || 'Usuario',
+        bio: body.bio ?? existing.bio ?? '',
+        profileImage: body.profileImage ?? existing.profileImage ?? '',
+        followersCount: body.followersCount ?? existing.followersCount ?? 0,
+        followingCount: body.followingCount ?? existing.followingCount ?? 0,
+        ratedCount: body.ratedCount ?? existing.ratedCount ?? 0,
+        isVerified: body.isVerified ?? existing.isVerified ?? false,
+        registrationTimestamp: body.registrationTimestamp || existing.registrationTimestamp || Date.now(),
+        founder: body.founder ?? existing.founder ?? false,
+        email: body.email ?? existing.email ?? '',
+        updatedAt: Date.now()
       };
 
-      await supabaseRequest('users?on_conflict=user_id', {
-        method: 'POST',
-        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify([profile])
-      }, { useServiceRole: true });
-
-      return response(200, { success: true, user: toClientUser(profile) });
+      await firebaseRequest(`users/${encodeURIComponent(userId)}`, { method: 'PUT', body: merged });
+      return response(200, { success: true, user: toClientUser(userId, merged) });
     }
 
     return response(405, { error: 'Method Not Allowed' });
   } catch (error) {
-    console.error('Users error:', error);
     return response(500, { error: error.message });
   }
 };
