@@ -275,7 +275,7 @@ window.confirmationResult.confirm(code)
 ## ⚠️ Limitaciones Actuales
 
 - **Desarrollo**: Muestra código en consola y alert
-- **SMS Real**: Requiere servicio SMS (Twilio, AWS SNS, etc.)
+- **SMS Real**: Requiere servicio SMS (Twilio, Firebase SNS, etc.)
 - **Múltiples Dispositivos**: Requiere verificación adicional
 - **Backup Codes**: No implementados aún
 
@@ -284,7 +284,7 @@ window.confirmationResult.confirm(code)
 ## 🔄 Mejoras Futuras
 
 - [ ] Integración con Firebase Phone Auth
-- [ ] Servicio SMS real (Twilio/AWS)
+- [ ] Servicio SMS real (Twilio/Firebase)
 - [ ] Códigos de respaldo (backup codes)
 - [ ] Autenticación biométrica
 - [ ] WhatsApp como alternativa a SMS

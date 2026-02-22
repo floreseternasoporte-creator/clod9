@@ -15,7 +15,7 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pap6t+K2bD6xIxQqkQ3sM8e+RXw7C3DyrgXV++o2aL/88+/9kS/l+SmpD8zZR1oN40Nq3QfT7HigDYfFW1zZAQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha512-pap6t+K2bD6xIxQqkQ3sM8e+RXw7C3DyrgXV++o2aL/88+/9kS/l+SmpD8zZR1oN40Nq3QfT7HigDYfFW1zZAQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- MediaPipe para detección facial real -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
@@ -1000,13 +1000,13 @@ body {
       updateChapterUI();
     }
 
-    /*********************** LAS FUNCIONES DE HISTORIAS ESTÁN DEFINIDAS MÁS ADELANTE CON AWS S3 ***********************/
+    /*********************** LAS FUNCIONES DE HISTORIAS ESTÁN DEFINIDAS MÁS ADELANTE CON Firebase ***********************/
     /*************** FIN NUEVAS FUNCIONES ***********************/
   </script>
 </head>
 
 <script>
-// Funciones para capítulos programados (AWS)
+// Funciones para capítulos programados (Firebase)
 async function saveScheduledChapter(chapterId, publishDate) {
   if (!currentEditingStory?.id) {
     console.warn('No story selected for scheduling.');
@@ -6825,7 +6825,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (profileImage) profileImage.src = base64String;
         if (profileImageDesktop) profileImageDesktop.src = base64String;
 
-        // Subir a S3
+        // Subir a Firebase
         const response = await fetch('/api/upload-image', {
           method: 'POST',
           headers: {
@@ -6847,7 +6847,7 @@ document.addEventListener('DOMContentLoaded', function() {
           throw new Error(result.error || 'Error al subir imagen');
         }
 
-        // Actualizar TODAS las imágenes de perfil con la URL final de S3
+        // Actualizar TODAS las imágenes de perfil con la URL final en Firebase
         if (editProfileImageMobile) editProfileImageMobile.src = result.imageUrl;
         if (editProfileImageDesktop) editProfileImageDesktop.src = result.imageUrl;
         if (profileImage) profileImage.src = result.imageUrl;
@@ -9957,7 +9957,7 @@ function showLiveNotification(message, type = 'info') {
     });
   }
 
-  // Función para cargar estadísticas del perfil desde AWS S3
+  // Función para cargar estadísticas del perfil desde Firebase
   async function loadUserStats(userId) {
     try {
       const response = await fetch(`/api/user-stats?userId=${userId}`);
@@ -10010,14 +10010,14 @@ function showLiveNotification(message, type = 'info') {
       }
 
       // Cargar las historias del usuario
-      loadUserStoriesFromS3(userId);
+      loadUserStoriesFromFirebase(userId);
     } catch (error) {
       console.error('Error al cargar estadísticas:', error);
     }
   }
 
-  // Nueva función para cargar historias desde S3
-  async function loadUserStoriesFromS3(userId) {
+  // Nueva función para cargar historias desde Firebase
+  async function loadUserStoriesFromFirebase(userId) {
     try {
       const response = await fetch(`/api/get-stories?userId=${userId}`);
       const result = await response.json();
@@ -10299,7 +10299,7 @@ function openCreatorHub() {
     if (notesCountEl) notesCountEl.innerHTML = '<span class="inline-flex justify-center"><span class="epic-loader" style="width:20px;height:20px;border-radius:6px;"></span></span>';
 
     try {
-      // Cargar estadísticas de historias desde AWS S3
+      // Cargar estadísticas de historias desde Firebase
       const storiesResponse = await fetch(`/api/user-stats?userId=${user.uid}&type=stories`);
       if (storiesResponse.ok) {
         const storiesData = await storiesResponse.json();
@@ -10317,7 +10317,7 @@ function openCreatorHub() {
         }
       }
 
-      // Cargar estadísticas de notas desde AWS S3
+      // Cargar estadísticas de notas desde Firebase
       const notesResponse = await fetch(`/api/notes?userId=${user.uid}`);
       if (notesResponse.ok) {
         const notesData = await notesResponse.json();
@@ -10483,7 +10483,7 @@ function openCreatorHub() {
         contentType = file.type;
       }
 
-      // Subir nota a AWS S3
+      // Subir nota a Firebase
       const response = await fetch('/api/notes', {
         method: 'POST',
         headers: {
@@ -11449,7 +11449,7 @@ async function likeNote(noteId) {
         
         document.getElementById('notifications-modal').classList.remove('hidden');
         
-        // Cargar notificaciones desde AWS S3
+        // Cargar notificaciones desde Firebase
         const response = await fetch(`/api/notifications?userId=${currentUser.uid}`);
         const result = await response.json();
         
@@ -12138,7 +12138,7 @@ async function likeNote(noteId) {
     });
   }
 
-  async function syncUserProfileToAWS(user, profileOverrides = {}) {
+  async function syncUserProfileToFirebase(user, profileOverrides = {}) {
     if (!user) return;
     const payload = {
       userId: user.uid,
@@ -12155,7 +12155,7 @@ async function likeNote(noteId) {
         body: JSON.stringify(payload)
       });
     } catch (error) {
-      console.warn('No se pudo sincronizar perfil en AWS:', error);
+      console.warn('No se pudo sincronizar perfil en Firebase:', error);
     }
   }
 
@@ -12201,7 +12201,7 @@ async function likeNote(noteId) {
       };
 
       await firebase.database().ref('users/' + user.uid).set(userProfile);
-      await syncUserProfileToAWS(user, userProfile);
+      await syncUserProfileToFirebase(user, userProfile);
     } catch (error) {
       console.error(error);
       authError.textContent = error.message || 'No se pudo crear la cuenta';
@@ -12235,7 +12235,7 @@ async function likeNote(noteId) {
           firebase.auth().signOut();
           return;
         }
-        syncUserProfileToAWS(user, data || {});
+        syncUserProfileToFirebase(user, data || {});
         authFormContainer.style.display = 'none';
         mainAppContainer.style.display = 'flex';
         loadStories();
@@ -12445,7 +12445,7 @@ async function likeNote(noteId) {
     document.getElementById('detail-author').onclick = () => openAuthorProfile(story.userId);
     document.getElementById('detail-synopsis').textContent = story.synopsis || "Sinopsis no disponible.";
     
-    // Cargar capítulos (AWS)
+    // Cargar capítulos (Firebase)
     fetch(`/api/get-chapters?storyId=${story.id}`)
       .then(response => response.json())
       .then(data => {
@@ -12708,7 +12708,7 @@ async function likeNote(noteId) {
     const recentRangeMs = 7 * 24 * 60 * 60 * 1000;
     const recentThreshold = Date.now() - recentRangeMs;
 
-    loadStoriesFromAWS()
+    loadStoriesFromFirebase()
       .then((stories) => {
         const books = [];
         stories.forEach((story) => {
@@ -12757,7 +12757,7 @@ async function likeNote(noteId) {
     categoryFilter.addEventListener('change', performRealTimeSearch);
   }
   async function performSearch(query) {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     let books = [];
     stories.forEach(story => {
       if (story.title && story.title.toLowerCase().includes(query)) books.push(story);
@@ -14179,7 +14179,7 @@ async function likeNote(noteId) {
         let terrorStories = stories.filter(story => story.category === 'terror');
         renderStories(terrorStories, 'terror-stories', false);
       })
-      .catch(error => console.error('Error loading stories from AWS:', error));
+      .catch(error => console.error('Error loading stories from Firebase:', error));
   }
 
   function renderStories(stories, elementId, editMode) {
@@ -14240,10 +14240,10 @@ async function likeNote(noteId) {
           container.appendChild(card);
         });
       })
-      .catch(error => console.error('Error loading user stories from AWS:', error));
+      .catch(error => console.error('Error loading user stories from Firebase:', error));
   }
   
-  /*********************** FUNCIONES AUXILIARES PARA CARGAR HISTORIAS DESDE AWS S3 **************************/
+  /*********************** FUNCIONES AUXILIARES PARA CARGAR HISTORIAS DESDE Firebase **************************/
   function getStoryTimestamp(story) {
     const raw = story.createdAt || story.timestamp;
     if (!raw) return 0;
@@ -14261,31 +14261,24 @@ async function likeNote(noteId) {
   }
 
   async function loadStoriesFromFirebase() {
-    return [];
-  }
-  
-  async function loadStoriesFromAWS() {
-    let awsStories = [];
+    let firebaseStories = [];
     try {
       const response = await fetch('/api/get-stories');
       if (!response.ok) {
-        throw new Error(`AWS fetch failed with status ${response.status}`);
+        throw new Error(`Firebase fetch failed with status ${response.status}`);
       }
       const data = await response.json();
-      awsStories = data.stories || [];
+      firebaseStories = data.stories || [];
     } catch (error) {
-      console.error('Error loading stories from AWS:', error);
+      console.error('Error loading stories from Firebase:', error);
+      return [];
     }
 
-    const firebaseStories = await loadStoriesFromFirebase();
-    if (!awsStories.length) {
+    if (!firebaseStories.length) {
       return firebaseStories;
     }
 
     const merged = new Map();
-    awsStories.forEach((story, index) => {
-      merged.set(getStoryKey(story, index), story);
-    });
     firebaseStories.forEach((story, index) => {
       const key = getStoryKey(story, index);
       if (!merged.has(key)) {
@@ -14297,7 +14290,7 @@ async function likeNote(noteId) {
   }
 
   async function loadTopStories() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('top-stories');
     container.innerHTML = '';
 
@@ -14337,7 +14330,7 @@ async function likeNote(noteId) {
   }
 
   async function getUserRatingPreferences(userId) {
-    const allStories = await loadStoriesFromAWS();
+    const allStories = await loadStoriesFromFirebase();
     const userRatings = {};
     const categoryScores = {};
     
@@ -14427,7 +14420,7 @@ async function likeNote(noteId) {
   /*********************** NUEVAS FUNCIONES: SUGERENCIAS Y AUTORES DESTACADOS **************************/
   async function loadSuggestedStories() {
     const user = firebase.auth().currentUser;
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('suggested-stories');
     container.innerHTML = '';
     
@@ -14484,7 +14477,7 @@ async function likeNote(noteId) {
   }
 
   async function loadFeaturedAuthors() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('featured-authors');
     container.innerHTML = '';
     
@@ -14548,7 +14541,7 @@ async function likeNote(noteId) {
   }
   
   async function loadTrendingStories() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('trending-stories');
     container.innerHTML = '';
     
@@ -14572,7 +14565,7 @@ async function likeNote(noteId) {
   }
 
   async function loadMysteryStories() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('mystery-stories');
     container.innerHTML = '';
     
@@ -14587,7 +14580,7 @@ async function likeNote(noteId) {
   }
 
   async function loadAdventureStories() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('adventure-stories');
     container.innerHTML = '';
     
@@ -15401,7 +15394,7 @@ async function likeNote(noteId) {
   /*********************** NUEVAS FUNCIONES: SUGERENCIAS Y AUTORES DESTACADOS **************************/
   async function loadSuggestedStories() {
     const user = firebase.auth().currentUser;
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('suggested-stories');
     container.innerHTML = '';
     
@@ -15458,7 +15451,7 @@ async function likeNote(noteId) {
   }
 
   async function loadFeaturedAuthors() {
-    const stories = await loadStoriesFromAWS();
+    const stories = await loadStoriesFromFirebase();
     const container = document.getElementById('featured-authors');
     container.innerHTML = '';
     
@@ -17265,47 +17258,18 @@ function hideLoader() {
   }
 }
 
-// Automatic Firebase to S3 migration on first load
-async function autoMigrateFirebaseData() {
-  const migrationKey = 'firebase_s3_migration_completed';
-  const migrationCompleted = localStorage.getItem(migrationKey);
-  
-  if (migrationCompleted === 'true') {
-    console.log('Migration already completed');
-    return;
-  }
-
+// Verificación ligera de backend Firebase en primer inicio
+async function checkFirebaseBackendReady() {
   try {
-    console.log('Starting automatic Firebase to S3 migration...');
-    showLoader();
-    
-    const response = await fetch('/api/migrate-firebase-to-s3', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ deleteFromFirebase: false })
-    });
-
-    const result = await response.json();
-    
-    if (response.ok && result.success) {
-      console.log(`Migration successful: ${result.migrated} stories migrated`);
-      localStorage.setItem(migrationKey, 'true');
-    } else {
-      console.warn('Migration had issues:', result);
-    }
+    await fetch('/api/health-firebase');
   } catch (error) {
-    console.error('Auto-migration error:', error);
-  } finally {
-    hideLoader();
+    console.warn('No se pudo verificar backend Firebase:', error);
   }
 }
 
-// Run migration on authenticated user
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    autoMigrateFirebaseData();
+    checkFirebaseBackendReady();
   }
 });
 </script>

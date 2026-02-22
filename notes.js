@@ -1,6 +1,4 @@
-const { supabaseRequest, parseDataUrl, uploadToStorage, deleteFromStorage } = require('./supabase-client');
-
-const MEDIA_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'media';
+const { firebaseRequest, listByTimestamp } = require('./firebase-realtime-client');
 
 const response = (statusCode, body) => ({
   statusCode,
@@ -12,26 +10,27 @@ const response = (statusCode, body) => ({
   body: JSON.stringify(body)
 });
 
-const toClientNote = (row) => ({
-  id: row.note_id,
-  userId: row.user_id,
-  authorName: row.author_name,
-  authorImage: row.author_image,
-  content: row.content,
-  imageUrl: row.image_url,
-  fileName: row.file_name,
-  timestamp: row.timestamp,
-  likes: row.likes,
-  blocked: row.blocked
-});
+function toClientNote(noteId, note) {
+  return {
+    id: noteId,
+    userId: note.userId,
+    authorName: note.authorName,
+    authorImage: note.authorImage,
+    content: note.content || '',
+    imageUrl: note.imageUrl || null,
+    imageData: note.imageData || null,
+    fileName: note.fileName || null,
+    timestamp: note.timestamp || 0,
+    likes: Number(note.likes || 0),
+    blocked: Boolean(note.blocked)
+  };
+}
 
-function extractStoragePath(url) {
-  const marker = '/storage/v1/object/public/';
-  if (!url || !url.includes(marker)) return null;
-  const tail = url.split(marker)[1] || '';
-  const parts = tail.split('/');
-  parts.shift();
-  return decodeURIComponent(parts.join('/'));
+function mapNotesToSortedList(notesMap, userId) {
+  return Object.entries(notesMap || {})
+    .map(([id, note]) => toClientNote(id, note || {}))
+    .filter((note) => (userId ? note.userId === userId : true))
+    .sort((a, b) => b.timestamp - a.timestamp);
 }
 
 exports.handler = async (event) => {
@@ -40,42 +39,21 @@ exports.handler = async (event) => {
 
     if (event.httpMethod === 'GET') {
       const { userId, limit = 50 } = event.queryStringParameters || {};
-      const safeLimit = Math.max(1, Math.min(Number(limit) || 50, 200));
-      const userFilter = userId ? `&user_id=eq.${encodeURIComponent(userId)}` : '';
-
-      const rows = await supabaseRequest(
-        `notes?select=*&order=timestamp.desc&limit=${safeLimit}${userFilter}`,
-        {},
-        { useServiceRole: true }
-      );
-
-      return response(200, { notes: rows.map(toClientNote) });
+      const notesMap = await listByTimestamp('notes', limit);
+      const notes = mapNotesToSortedList(notesMap, userId);
+      return response(200, { notes });
     }
 
     if (event.httpMethod === 'POST') {
       const body = event.body ? JSON.parse(event.body) : {};
 
       if (body.action === 'delete' && body.noteId && body.userId) {
-        const rows = await supabaseRequest(
-          `notes?note_id=eq.${encodeURIComponent(body.noteId)}&user_id=eq.${encodeURIComponent(body.userId)}&select=*`,
-          {},
-          { useServiceRole: true }
-        );
-
-        if (!rows.length) return response(404, { error: 'Note not found.' });
-
-        const note = rows[0];
-        const storagePath = extractStoragePath(note.image_url);
-        if (storagePath) {
-          await deleteFromStorage({ bucket: MEDIA_BUCKET, path: storagePath }, { useServiceRole: true });
+        const note = await firebaseRequest(`notes/${body.noteId}`);
+        if (!note || note.userId !== body.userId) {
+          return response(404, { error: 'Note not found.' });
         }
 
-        await supabaseRequest(
-          `notes?note_id=eq.${encodeURIComponent(body.noteId)}&user_id=eq.${encodeURIComponent(body.userId)}`,
-          { method: 'DELETE' },
-          { useServiceRole: true }
-        );
-
+        await firebaseRequest(`notes/${body.noteId}`, { method: 'DELETE' });
         return response(200, { success: true });
       }
 
@@ -85,60 +63,45 @@ exports.handler = async (event) => {
       const authorImage = body.authorImage ? String(body.authorImage) : '';
       const imageData = body.imageData ? String(body.imageData) : null;
       const fileName = body.fileName ? String(body.fileName) : null;
-      const contentType = body.contentType ? String(body.contentType) : null;
+      const imageUrl = body.imageUrl ? String(body.imageUrl) : null;
 
       if (!userId) return response(400, { error: 'Missing userId.' });
-
-      const noteId = `note_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-      const timestamp = Date.now();
-
-      let imageUrl = null;
-      if (imageData) {
-        const parsed = parseDataUrl(imageData);
-        const safeExt = (contentType || parsed.contentType || '').includes('png') ? 'png' : 'jpg';
-        const imagePath = `notes/${userId}/${noteId}.${safeExt}`;
-        const uploaded = await uploadToStorage({
-          bucket: MEDIA_BUCKET,
-          path: imagePath,
-          buffer: parsed.buffer,
-          contentType: contentType || parsed.contentType || 'image/jpeg',
-          upsert: true
-        });
-        imageUrl = uploaded.publicUrl;
+      if (!content && !imageData && !imageUrl) {
+        return response(400, { error: 'Missing note content or image.' });
       }
 
-      const row = {
-        note_id: noteId,
-        user_id: userId,
-        author_name: authorName || body.username || 'Usuario',
-        author_image: authorImage || 'https://via.placeholder.com/150',
+      const noteId = `note_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+      const note = {
+        userId,
+        authorName: authorName || body.username || 'Usuario',
+        authorImage: authorImage || 'https://via.placeholder.com/150',
         content,
-        image_url: imageUrl,
-        file_name: fileName,
-        timestamp,
+        imageUrl,
+        imageData,
+        fileName,
+        timestamp: Date.now(),
         likes: 0,
         blocked: false
       };
 
-      await supabaseRequest('notes', {
-        method: 'POST',
-        headers: { Prefer: 'return=minimal' },
-        body: JSON.stringify([row])
-      }, { useServiceRole: true });
+      await firebaseRequest(`notes/${noteId}`, {
+        method: 'PUT',
+        body: note
+      });
 
-      return response(200, { success: true, note: toClientNote(row) });
+      return response(200, { success: true, note: toClientNote(noteId, note) });
     }
 
     if (event.httpMethod === 'DELETE') {
       const { noteId, userId } = JSON.parse(event.body || '{}');
       if (!noteId || !userId) return response(400, { error: 'Missing noteId or userId.' });
 
-      await supabaseRequest(
-        `notes?note_id=eq.${encodeURIComponent(noteId)}&user_id=eq.${encodeURIComponent(userId)}`,
-        { method: 'DELETE' },
-        { useServiceRole: true }
-      );
+      const note = await firebaseRequest(`notes/${noteId}`);
+      if (!note || note.userId !== userId) {
+        return response(404, { error: 'Note not found.' });
+      }
 
+      await firebaseRequest(`notes/${noteId}`, { method: 'DELETE' });
       return response(200, { success: true });
     }
 

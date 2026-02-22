@@ -1,71 +1,36 @@
-const AWS = require('aws-sdk');
-
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ZENVIO_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.ZENVIO_AWS_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.ZENVIO_AWS_REGION || process.env.AWS_REGION || 'us-east-2'
-});
-
-const BUCKET = process.env.ZENVIO_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET;
+const { firebaseRequest, getCollection } = require('./firebase-realtime-client');
+const { runVercelHandler } = require('./vercel-adapter');
 
 exports.handler = async (event) => {
   try {
     if (event.httpMethod === 'GET') {
       const { userId } = event.queryStringParameters || {};
-      
-      const data = await s3.listObjectsV2({
-        Bucket: BUCKET,
-        Prefix: `notifications/${userId}/`
-      }).promise();
-      
-      const notifications = await Promise.all(
-        data.Contents.map(async (item) => {
-          const obj = await s3.getObject({ Bucket: BUCKET, Key: item.Key }).promise();
-          return JSON.parse(obj.Body.toString());
-        })
-      );
-      
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ notifications: notifications.sort((a, b) => b.timestamp - a.timestamp) })
-      };
+      if (!userId) return { statusCode: 400, body: JSON.stringify({ error: 'userId is required' }) };
+
+      const notifications = Object.values(await getCollection(`notifications/${encodeURIComponent(userId)}`))
+        .filter(Boolean)
+        .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
+
+      return { statusCode: 200, body: JSON.stringify({ notifications }) };
     }
 
     if (event.httpMethod === 'POST') {
-      const { userId, type, message, fromUserId } = JSON.parse(event.body);
-      
-      const notifId = `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const notification = {
-        id: notifId,
-        userId,
-        type,
-        message,
-        fromUserId,
-        timestamp: Date.now(),
-        read: false
-      };
-      
-      await s3.putObject({
-        Bucket: BUCKET,
-        Key: `notifications/${userId}/${notifId}.json`,
-        Body: JSON.stringify(notification),
-        ContentType: 'application/json'
-      }).promise();
-      
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ success: true })
-      };
+      const { userId, type, message, fromUserId } = JSON.parse(event.body || '{}');
+      if (!userId || !type || !message) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'userId, type and message are required' }) };
+      }
+
+      const notifId = `notif_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+      const notification = { id: notifId, userId, type, message, fromUserId: fromUserId || null, timestamp: Date.now(), read: false };
+
+      await firebaseRequest(`notifications/${encodeURIComponent(userId)}/${notifId}`, { method: 'PUT', body: notification });
+      return { statusCode: 200, body: JSON.stringify({ success: true, notification }) };
     }
 
     return { statusCode: 405, body: 'Method Not Allowed' };
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
   }
 };
-const { runVercelHandler } = require('../vercel-adapter');
 
 module.exports = async (req, res) => runVercelHandler(exports.handler, req, res);
