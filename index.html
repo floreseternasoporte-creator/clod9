@@ -131,11 +131,11 @@ body {
   margin-left: 4px;
 }
 
-/* Barra inferior con efecto difuminado */
+/* Barra inferior sólida */
 #bottom-nav {
-  background-color: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background-color: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   transition: background-color 0.3s ease-in-out;
   border-top: 1px solid #e6e6e6;
 }
@@ -735,7 +735,7 @@ body {
       }
 
       #bottom-nav {
-        background-color: rgba(255, 255, 255, 0.9);
+        background-color: #ffffff;
       }
 
       /* Hacer las imágenes de autores destacados circulares en desktop */
@@ -4614,17 +4614,12 @@ function escapeHtml(text) {
       <a id="search-ai-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-uber-black hover:underline">Ver en Wikipedia</a>
     </div>
 
-    <div class="flex gap-2 overflow-x-auto pb-3 mb-4 uber-chip-row">
-      <button type="button" class="category-chip uber-chip active" data-value="">Todas</button>
-      <button type="button" class="category-chip uber-chip" data-value="recent">Recientes</button>
-      <button type="button" class="category-chip uber-chip" data-value="aventura">Aventura</button>
-      <button type="button" class="category-chip uber-chip" data-value="romance">Romance</button>
-      <button type="button" class="category-chip uber-chip" data-value="misterio">Misterio</button>
-      <button type="button" class="category-chip uber-chip" data-value="fantasia">Fantasía</button>
-      <button type="button" class="category-chip uber-chip" data-value="terror">Terror</button>
-      <button type="button" class="category-chip uber-chip" data-value="ciencia_ficcion">Ciencia Ficción</button>
-      <button type="button" class="category-chip uber-chip" data-value="drama">Drama</button>
-      <button type="button" class="category-chip uber-chip" data-value="comedia">Comedia</button>
+    <div class="flex items-center justify-between mb-4">
+      <div id="active-search-filters" class="flex flex-wrap gap-2"></div>
+      <button type="button" onclick="openCategoryFilterSheet()" class="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-uber-line bg-white text-sm font-semibold text-uber-black shadow-uber-chip">
+        <i class="fa-solid fa-sliders"></i>
+        Filtrar por categorías
+      </button>
     </div>
     <select id="category-filter" class="hidden" aria-hidden="true">
       <option value="">Todas</option>
@@ -4640,7 +4635,7 @@ function escapeHtml(text) {
     </select>
     <div class="flex rounded-full bg-white border border-uber-line mb-5 p-1 shadow-uber-chip">
       <button onclick="switchSearchTab('stories')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full bg-uber-black text-white transition-colors" id="search-stories-tab">Historias</button>
-      <button onclick="switchSearchTab('authors')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors" id="search-authors-tab">Autores</button>
+      <button onclick="switchSearchTab('authors')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors" id="search-authors-tab">Perfiles</button>
       <button onclick="switchSearchTab('info')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors" id="search-info-tab">Información</button>
     </div>
 
@@ -4656,6 +4651,14 @@ function escapeHtml(text) {
       <div id="search-info-list" class="space-y-3"></div>
     </div>
   </div>
+</div>
+
+<div id="category-filter-sheet-backdrop" class="fixed inset-0 bg-black/40 hidden z-[70]" onclick="closeCategoryFilterSheet()"></div>
+<div id="category-filter-sheet" class="fixed left-0 right-0 bottom-0 translate-y-full transition-transform duration-300 ease-out bg-white rounded-t-3xl shadow-uber-modal z-[80] p-4 max-h-[50vh] overflow-y-auto">
+  <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
+  <h3 class="text-base font-bold text-uber-black mb-3">Filtrar por categorías</h3>
+  <div id="category-filter-sheet-options" class="grid grid-cols-2 gap-2"></div>
+  <button type="button" onclick="clearCategoryFilter()" class="w-full mt-4 py-2.5 rounded-full border border-uber-line text-uber-black font-semibold">Quitar filtro</button>
 </div>
 
 <script>
@@ -12931,6 +12934,85 @@ async function likeNote(noteId) {
     document.getElementById('search-view').classList.add('hidden');
     mainApp.classList.remove('hidden');
   }
+
+  const searchCategoryOptions = [
+    { value: '', label: 'Todas' },
+    { value: 'recent', label: 'Recientes' },
+    { value: 'aventura', label: 'Aventura' },
+    { value: 'romance', label: 'Romance' },
+    { value: 'misterio', label: 'Misterio' },
+    { value: 'fantasia', label: 'Fantasía' },
+    { value: 'terror', label: 'Terror' },
+    { value: 'ciencia_ficcion', label: 'Ciencia Ficción' },
+    { value: 'drama', label: 'Drama' },
+    { value: 'comedia', label: 'Comedia' }
+  ];
+
+  function getActiveCategoryLabel() {
+    const categoryFilterEl = document.getElementById('category-filter');
+    const value = categoryFilterEl?.value || '';
+    const option = searchCategoryOptions.find((item) => item.value === value);
+    return option ? option.label : 'Todas';
+  }
+
+  function renderActiveSearchFilters() {
+    const container = document.getElementById('active-search-filters');
+    if (!container) return;
+    const categoryFilterEl = document.getElementById('category-filter');
+    const value = categoryFilterEl?.value || '';
+
+    if (!value) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-medium">${getActiveCategoryLabel()} <button onclick="clearCategoryFilter()" class="text-white/80 hover:text-white">×</button></span>`;
+  }
+
+  function renderCategoryFilterSheetOptions() {
+    const container = document.getElementById('category-filter-sheet-options');
+    const categoryFilterEl = document.getElementById('category-filter');
+    if (!container || !categoryFilterEl) return;
+    const active = categoryFilterEl.value || '';
+
+    container.innerHTML = searchCategoryOptions.map((item) => {
+      const isActive = item.value === active;
+      return `<button type="button" onclick="selectCategoryFilter('${item.value}')" class="px-3 py-2 rounded-xl text-sm font-semibold border ${isActive ? 'bg-black text-white border-black' : 'bg-white text-uber-black border-uber-line'}">${item.label}</button>`;
+    }).join('');
+  }
+
+  function openCategoryFilterSheet() {
+    renderCategoryFilterSheetOptions();
+    document.getElementById('category-filter-sheet-backdrop')?.classList.remove('hidden');
+    const sheet = document.getElementById('category-filter-sheet');
+    if (sheet) sheet.classList.remove('translate-y-full');
+  }
+
+  function closeCategoryFilterSheet() {
+    document.getElementById('category-filter-sheet-backdrop')?.classList.add('hidden');
+    const sheet = document.getElementById('category-filter-sheet');
+    if (sheet) sheet.classList.add('translate-y-full');
+  }
+
+  function selectCategoryFilter(value) {
+    const categoryFilterEl = document.getElementById('category-filter');
+    if (!categoryFilterEl) return;
+    categoryFilterEl.value = value;
+    renderActiveSearchFilters();
+    renderCategoryFilterSheetOptions();
+    performRealTimeSearch();
+    closeCategoryFilterSheet();
+  }
+
+  function clearCategoryFilter() {
+    const categoryFilterEl = document.getElementById('category-filter');
+    if (!categoryFilterEl) return;
+    categoryFilterEl.value = '';
+    renderActiveSearchFilters();
+    renderCategoryFilterSheetOptions();
+    performRealTimeSearch();
+  }
+
   function performRealTimeSearch() {
     const searchInputEl = document.getElementById('search-input');
     const categoryFilterEl = document.getElementById('category-filter');
@@ -12964,7 +13046,7 @@ async function likeNote(noteId) {
     if (query) {
       fetch('/api/users')
         .then((response) => {
-          if (!response.ok) throw new Error('No se pudieron cargar autores');
+          if (!response.ok) throw new Error('No se pudieron cargar perfiles');
           return response.json();
         })
         .then(data => {
@@ -12972,11 +13054,11 @@ async function likeNote(noteId) {
             (user.username && user.username.toLowerCase().includes(query))
             || (user.email && user.email.toLowerCase().includes(query))
           );
-          renderAuthorsList(authors);
+          renderProfilesList(authors);
         })
         .catch((error) => {
-          console.error('Error buscando autores:', error);
-          renderAuthorsList([]);
+          console.error('Error buscando perfiles:', error);
+          renderProfilesList([]);
         });
     } else {
       document.getElementById('search-authors-list').innerHTML = '';
@@ -12985,8 +13067,12 @@ async function likeNote(noteId) {
 
   const categoryFilter = document.getElementById('category-filter');
   if (categoryFilter) {
-    categoryFilter.addEventListener('change', performRealTimeSearch);
+    categoryFilter.addEventListener('change', () => {
+      renderActiveSearchFilters();
+      performRealTimeSearch();
+    });
   }
+  renderActiveSearchFilters();
   async function performSearch(query) {
     const stories = await loadStoriesFromFirebase();
     let books = [];
@@ -12999,7 +13085,7 @@ async function likeNote(noteId) {
     const authors = (usersData.users || []).filter(user =>
       user.username && user.username.toLowerCase().includes(query)
     );
-    renderAuthorsList(authors);
+    renderProfilesList(authors);
   }
 
   function renderBooksCarousel(books) {
@@ -13026,13 +13112,13 @@ async function likeNote(noteId) {
     });
   }
 
-  function renderAuthorsList(authors) {
+  function renderProfilesList(authors) {
     const list = document.getElementById('search-authors-list');
     if (!list) return;
     list.innerHTML = '';
 
     if (!authors || authors.length === 0) {
-      list.innerHTML = '<div class="text-center text-gray-500 py-8">No se encontraron autores</div>';
+      list.innerHTML = '<div class="text-center text-gray-500 py-8">No se encontraron perfiles</div>';
       return;
     }
 
@@ -16390,7 +16476,7 @@ async function likeNote(noteId) {
       });
 
       if (!hasResults) {
-        resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-center">No se encontraron autores</div>';
+        resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-center">No se encontraron perfiles</div>';
       }
     });
   }
