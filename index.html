@@ -1773,13 +1773,6 @@ setInterval(checkScheduledChapters, 60000);
         </svg>
       </button>
 
-      <button onclick="openCloseAccountSection()" class="w-full bg-white rounded-2xl border border-black/5 px-4 py-4 flex items-center justify-between hover:bg-red-50 transition-colors">
-        <span class="font-semibold text-red-600">Cerrar cuenta</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-
       <button onclick="openSupportModal(); closeMenuModal();" class="w-full bg-white rounded-2xl border border-black/5 px-4 py-4 flex items-center gap-3 hover:bg-gray-50 transition-colors">
         <div class="h-10 w-10 rounded-full bg-[#00A2FF] bg-opacity-10 flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#00A2FF]" viewBox="0 0 20 20" fill="currentColor">
@@ -1849,6 +1842,7 @@ setInterval(checkScheduledChapters, 60000);
         <button onclick="openMenuAccountEditor('email')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between"><span class="font-medium text-gray-900">Correo electrónico</span><span class="text-gray-400">›</span></button>
         <button onclick="openMenuAccountEditor('password')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between"><span class="font-medium text-gray-900">Contraseña</span><span class="text-gray-400">›</span></button>
         <button onclick="openMenuAccountEditor('birthday')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between"><span class="font-medium text-gray-900">Cumpleaños</span><span class="text-gray-400">›</span></button>
+        <button onclick="openCloseAccountSection()" class="w-full text-left bg-white border border-red-200 rounded-xl px-4 py-4 flex items-center justify-between hover:bg-red-50 transition-colors"><span class="font-medium text-red-600">Cerrar cuenta</span><span class="text-red-300">›</span></button>
       </div>
     </div>
 
@@ -1865,19 +1859,20 @@ setInterval(checkScheduledChapters, 60000);
       <div class="p-4 space-y-4">
         <div id="menu-account-editor-text" class="hidden">
           <label id="menu-account-editor-label" class="block text-sm font-medium text-gray-700 mb-2"></label>
-          <div class="flex items-center border border-gray-300 rounded-lg px-3">
+          <div class="flex items-center border border-gray-200 rounded-2xl px-4 bg-white shadow-sm">
             <span id="menu-account-editor-prefix" class="text-gray-500 mr-2 hidden">@</span>
-            <input id="menu-account-editor-input" type="text" class="w-full py-3 outline-none" placeholder="">
+            <input id="menu-account-editor-input" type="text" class="w-full py-4 outline-none bg-white text-gray-900" placeholder="">
           </div>
           <p id="menu-account-editor-help" class="text-xs text-gray-500 mt-2"></p>
         </div>
 
         <div id="menu-account-editor-password" class="hidden">
           <label class="block text-sm font-medium text-gray-700 mb-2">Nueva contraseña</label>
-          <div class="flex items-center border border-gray-300 rounded-lg px-3">
-            <input id="menu-account-password-input" type="password" class="w-full py-3 outline-none" placeholder="Escribe tu nueva contraseña">
-            <button type="button" onclick="toggleMenuPasswordVisibility()" class="text-gray-500">
+          <div class="flex items-center border border-gray-200 rounded-2xl px-4 bg-white shadow-sm">
+            <input id="menu-account-password-input" type="password" class="w-full py-4 outline-none bg-white text-gray-900" placeholder="Escribe tu nueva contraseña">
+            <button type="button" onclick="toggleMenuPasswordVisibility()" class="text-gray-500" aria-label="Mostrar contraseña">
               <svg id="menu-password-eye-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg id="menu-password-eye-closed" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.964 9.964 0 012.042-3.362M6.223 6.223A9.963 9.963 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.965 9.965 0 01-4.132 5.411M15 12a3 3 0 00-3-3m0 0a2.99 2.99 0 00-2.12.879M3 3l18 18"/></svg>
             </button>
           </div>
           <p class="text-xs text-gray-500 mt-2">La contraseña se puede cambiar cada 14 días.</p>
@@ -1886,7 +1881,18 @@ setInterval(checkScheduledChapters, 60000);
 
         <div id="menu-account-editor-birthday" class="hidden">
           <label class="block text-sm font-medium text-gray-700 mb-2">Cumpleaños</label>
-          <input id="menu-account-birthday-input" type="date" class="w-full p-3 border border-gray-300 rounded-lg">
+          <div class="grid grid-cols-3 gap-3">
+            <select id="menu-account-birthday-day" class="w-full p-4 border border-gray-200 rounded-2xl bg-white text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-black/10">
+              <option value="">Día</option>
+            </select>
+            <select id="menu-account-birthday-month" class="w-full p-4 border border-gray-200 rounded-2xl bg-white text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-black/10">
+              <option value="">Mes</option>
+            </select>
+            <select id="menu-account-birthday-year" class="w-full p-4 border border-gray-200 rounded-2xl bg-white text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-black/10">
+              <option value="">Año</option>
+            </select>
+          </div>
+          <p class="text-xs text-gray-500 mt-2">Selecciona tu fecha de nacimiento.</p>
         </div>
       </div>
     </div>
@@ -1901,12 +1907,12 @@ setInterval(checkScheduledChapters, 60000);
         <h3 class="font-semibold text-gray-900">¿Cerrar tu cuenta de Atenis?</h3>
         <p id="close-account-username" class="text-sm text-gray-600">@usuario</p>
         <p class="text-sm text-gray-700">¿Por qué te quieres ir? Cuéntanos por favor</p>
-        <div class="space-y-2 text-sm">
-          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Quiero cambiar mi nombre de usuario">Quiero cambiar mi nombre de usuario</label>
-          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Quiero cambiar mi dirección de correo electrónico">Quiero cambiar mi dirección de correo electrónico</label>
-          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Recibo demasiado spam por el equipo de Atenis">Recibo demasiado spam por el equipo de Atenis</label>
-          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Tengo problemas con mi cuenta">Tengo problemas con mi cuenta</label>
-          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Prefiero no contestar a esta pregunta">Prefiero no contestar a esta pregunta</label>
+        <div class="space-y-2 text-sm" id="close-account-reasons-list">
+          <label class="close-account-option"><input type="radio" name="close-account-reason" value="Quiero cambiar mi nombre de usuario"><span>Quiero cambiar mi nombre de usuario</span></label>
+          <label class="close-account-option"><input type="radio" name="close-account-reason" value="Quiero cambiar mi dirección de correo electrónico"><span>Quiero cambiar mi dirección de correo electrónico</span></label>
+          <label class="close-account-option"><input type="radio" name="close-account-reason" value="Recibo demasiado spam por el equipo de Atenis"><span>Recibo demasiado spam por el equipo de Atenis</span></label>
+          <label class="close-account-option"><input type="radio" name="close-account-reason" value="Tengo problemas con mi cuenta"><span>Tengo problemas con mi cuenta</span></label>
+          <label class="close-account-option"><input type="radio" name="close-account-reason" value="Prefiero no contestar a esta pregunta"><span>Prefiero no contestar a esta pregunta</span></label>
         </div>
         <div class="grid grid-cols-2 gap-3 pt-4">
           <button onclick="cancelCloseAccountSession()" class="py-3 rounded-xl border border-gray-300 font-semibold">No la eliminaré</button>
@@ -6017,6 +6023,56 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     color: #9ca3af;
   }
 
+  .close-account-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e6e6e6;
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 14px 16px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .close-account-option:hover {
+    border-color: #cfd4dc;
+    background: #fafafa;
+  }
+
+  .close-account-option input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    border: 2px solid #c4c8cf;
+    position: relative;
+    margin: 0;
+    flex-shrink: 0;
+    background: #fff;
+  }
+
+  .close-account-option input[type="radio"]:checked {
+    border-color: #111111;
+  }
+
+  .close-account-option input[type="radio"]:checked::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #111111;
+    transform: translate(-50%, -50%);
+  }
+
+  .close-account-option:has(input[type="radio"]:checked) {
+    border-color: #111111;
+    box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.06);
+  }
+
   .bg-uber-surface {
     background-color: #f6f6f6;
   }
@@ -6185,6 +6241,56 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
   input::placeholder,
   textarea::placeholder {
     color: #9ca3af;
+  }
+
+  .close-account-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e6e6e6;
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 14px 16px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .close-account-option:hover {
+    border-color: #cfd4dc;
+    background: #fafafa;
+  }
+
+  .close-account-option input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    border: 2px solid #c4c8cf;
+    position: relative;
+    margin: 0;
+    flex-shrink: 0;
+    background: #fff;
+  }
+
+  .close-account-option input[type="radio"]:checked {
+    border-color: #111111;
+  }
+
+  .close-account-option input[type="radio"]:checked::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #111111;
+    transform: translate(-50%, -50%);
+  }
+
+  .close-account-option:has(input[type="radio"]:checked) {
+    border-color: #111111;
+    box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.06);
   }
 
   .community-tab {
@@ -6417,9 +6523,9 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         </button>
         <h2 id="profile-username-header" class="text-base font-semibold text-gray-900">@nombre_usuario</h2>
         <button onclick="openMenuModal()" class="p-2" aria-label="Configuración">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75h1.5l.45 2.04a6.9 6.9 0 011.62.67l1.74-1.12 1.06 1.06-1.12 1.74c.26.5.48 1.04.64 1.61l2.06.46v1.5l-2.06.46a6.94 6.94 0 01-.64 1.61l1.12 1.74-1.06 1.06-1.74-1.12a6.9 6.9 0 01-1.62.67l-.45 2.04h-1.5l-.45-2.04a6.9 6.9 0 01-1.62-.67l-1.74 1.12-1.06-1.06 1.12-1.74a6.94 6.94 0 01-.64-1.61L3.75 12v-1.5l2.06-.46c.16-.57.38-1.11.64-1.61L5.33 6.69l1.06-1.06 1.74 1.12a6.9 6.9 0 011.62-.67l.5-2.33z"/>
+            <circle cx="12" cy="12" r="2.75" />
           </svg>
         </button>
       </div>
@@ -6488,9 +6594,9 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
 
         <div class="flex items-center space-x-3">
           <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all" aria-label="Configuración">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <circle cx="12" cy="12" r="3" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75h1.5l.45 2.04a6.9 6.9 0 011.62.67l1.74-1.12 1.06 1.06-1.12 1.74c.26.5.48 1.04.64 1.61l2.06.46v1.5l-2.06.46a6.94 6.94 0 01-.64 1.61l1.12 1.74-1.06 1.06-1.74-1.12a6.9 6.9 0 01-1.62.67l-.45 2.04h-1.5l-.45-2.04a6.9 6.9 0 01-1.62-.67l-1.74 1.12-1.06-1.06 1.12-1.74a6.94 6.94 0 01-.64-1.61L3.75 12v-1.5l2.06-.46c.16-.57.38-1.11.64-1.61L5.33 6.69l1.06-1.06 1.74 1.12a6.9 6.9 0 011.62-.67l.5-2.33z"/>
+              <circle cx="12" cy="12" r="2.75" />
             </svg>
           </button>
         </div>
@@ -6513,10 +6619,10 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
             <div class="flex items-center mb-2">
               <h1 id="profile-username-desktop" class="text-3xl font-bold text-white mr-3">@nombre_usuario</h1>
               <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all" aria-label="Configuración">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <circle cx="12" cy="12" r="3" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75h1.5l.45 2.04a6.9 6.9 0 011.62.67l1.74-1.12 1.06 1.06-1.12 1.74c.26.5.48 1.04.64 1.61l2.06.46v1.5l-2.06.46a6.94 6.94 0 01-.64 1.61l1.12 1.74-1.06 1.06-1.74-1.12a6.9 6.9 0 01-1.62.67l-.45 2.04h-1.5l-.45-2.04a6.9 6.9 0 01-1.62-.67l-1.74 1.12-1.06-1.06 1.12-1.74a6.94 6.94 0 01-.64-1.61L3.75 12v-1.5l2.06-.46c.16-.57.38-1.11.64-1.61L5.33 6.69l1.06-1.06 1.74 1.12a6.9 6.9 0 011.62-.67l.5-2.33z"/>
+              <circle cx="12" cy="12" r="2.75" />
+            </svg>
               </button>
             </div>
             <p id="profile-location-desktop" class="text-white text-opacity-90 mb-4">Ubicación no especificada</p>
@@ -7374,7 +7480,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </svg>
         </button>
         <h1 class="text-lg font-semibold">Nueva historia</h1>
-        <button onclick="document.getElementById('story-form').requestSubmit()" class="text-[#00A2FF] font-semibold">Publicar</button>
+        <button id="story-publish-btn" onclick="document.getElementById('story-form').requestSubmit()" class="px-4 py-2 rounded-xl bg-black text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">Publicar</button>
       </div>
     </div>
 
@@ -7413,13 +7519,15 @@ function previewCover(event) {
 
         <!-- Título -->
         <div>
-          <input id="story-title" type="text" placeholder="Título de la historia" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition" required>
+          <label for="story-title" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
+          <input id="story-title" type="text" placeholder="Título de la historia" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition" required>
         </div>
 
         <!-- Categoría -->
         <div>
-          <select id="story-category" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition appearance-none" required>
-            <option value="" disabled selected>Categoría</option>
+          <label for="story-category" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+          <select id="story-category" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition appearance-none" required>
+            <option value="" disabled selected>Selecciona una categoría</option>
             <option value="aventura">Aventura</option>
             <option value="romance">Romance</option>
             <option value="misterio">Misterio</option>
@@ -7433,7 +7541,8 @@ function previewCover(event) {
 
         <!-- Clasificación -->
         <div>
-          <select id="story-rating" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition appearance-none" required>
+          <label for="story-rating" class="block text-sm font-medium text-gray-700 mb-2">Clasificación</label>
+          <select id="story-rating" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition appearance-none" required>
             <option value="all">Todo público</option>
             <option value="13plus">Mayores de 13</option>
             <option value="18plus">Mayores de 18</option>
@@ -7442,8 +7551,9 @@ function previewCover(event) {
 
         <!-- Idioma -->
         <div>
-          <select id="story-language" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition appearance-none" required>
-            <option value="" disabled selected>Idioma</option>
+          <label for="story-language" class="block text-sm font-medium text-gray-700 mb-2">Idioma</label>
+          <select id="story-language" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition appearance-none" required>
+            <option value="" disabled selected>Selecciona idioma</option>
             <option value="Spanish">Español</option>
             <option value="English">English</option>
             <option value="Portuguese">Português</option>
@@ -7453,7 +7563,8 @@ function previewCover(event) {
 
         <!-- Sinopsis -->
         <div>
-          <textarea id="story-synopsis" placeholder="Escribe una sinopsis..." class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition resize-none" rows="4"></textarea>
+          <label for="story-synopsis" class="block text-sm font-medium text-gray-700 mb-2">Sinopsis</label>
+          <textarea id="story-synopsis" placeholder="Escribe una sinopsis..." class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition resize-none" rows="4"></textarea>
         </div>
       </form>
     </div>
@@ -7588,7 +7699,7 @@ function previewEditCover(event) {
           </svg>
         </button>
         <h2 class="text-lg font-semibold">Nuevo capítulo</h2>
-        <button onclick="document.getElementById('chapter-form').requestSubmit()" class="text-[#00A2FF] font-semibold">Publicar</button>
+        <button id="btn-save-chapter" onclick="document.getElementById('chapter-form').requestSubmit()" class="text-[#00A2FF] font-semibold">Publicar</button>
       </div>
     </div>
 
@@ -9401,8 +9512,7 @@ function closeCloseAccountConfirm() {
 }
 
 function cancelCloseAccountSession() {
-  closeMenuModal();
-  signOutUser();
+  showMenuMainSettings();
 }
 
 function cancelDeleteAccountAndBackToSettings() {
@@ -9518,12 +9628,18 @@ function openMenuAccountEditor(field) {
       title.textContent = 'Configurar contraseña';
       document.getElementById('menu-account-editor-password').classList.remove('hidden');
       const passInput = document.getElementById('menu-account-password-input');
-      if (passInput) passInput.value = '';
+      const eyeOpen = document.getElementById('menu-password-eye-open');
+      const eyeClosed = document.getElementById('menu-password-eye-closed');
+      if (passInput) {
+        passInput.value = '';
+        passInput.type = 'password';
+      }
+      if (eyeOpen) eyeOpen.classList.remove('hidden');
+      if (eyeClosed) eyeClosed.classList.add('hidden');
     } else if (field === 'birthday') {
       title.textContent = 'Cumpleaños';
       document.getElementById('menu-account-editor-birthday').classList.remove('hidden');
-      const birthday = document.getElementById('menu-account-birthday-input');
-      if (birthday) birthday.value = data.birthday || '';
+      setBirthdaySelectorsFromValue(data.birthday || '');
     }
 
     section.classList.add('hidden');
@@ -9533,8 +9649,80 @@ function openMenuAccountEditor(field) {
 
 function toggleMenuPasswordVisibility() {
   const input = document.getElementById('menu-account-password-input');
+  const eyeOpen = document.getElementById('menu-password-eye-open');
+  const eyeClosed = document.getElementById('menu-password-eye-closed');
   if (!input) return;
-  input.type = input.type === 'password' ? 'text' : 'password';
+
+  const showPassword = input.type === 'password';
+  input.type = showPassword ? 'text' : 'password';
+  if (eyeOpen) eyeOpen.classList.toggle('hidden', showPassword);
+  if (eyeClosed) eyeClosed.classList.toggle('hidden', !showPassword);
+}
+
+
+function ensureBirthdaySelectOptions() {
+  const daySelect = document.getElementById('menu-account-birthday-day');
+  const monthSelect = document.getElementById('menu-account-birthday-month');
+  const yearSelect = document.getElementById('menu-account-birthday-year');
+  if (!daySelect || !monthSelect || !yearSelect) return;
+
+  if (daySelect.options.length <= 1) {
+    for (let day = 1; day <= 31; day += 1) {
+      const option = document.createElement('option');
+      option.value = String(day).padStart(2, '0');
+      option.textContent = String(day).padStart(2, '0');
+      daySelect.appendChild(option);
+    }
+  }
+
+  if (monthSelect.options.length <= 1) {
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    months.forEach((month, idx) => {
+      const option = document.createElement('option');
+      option.value = String(idx + 1).padStart(2, '0');
+      option.textContent = month;
+      monthSelect.appendChild(option);
+    });
+  }
+
+  if (yearSelect.options.length <= 1) {
+    const currentYear = new Date().getFullYear();
+    for (let year = currentYear; year >= 1930; year -= 1) {
+      const option = document.createElement('option');
+      option.value = String(year);
+      option.textContent = String(year);
+      yearSelect.appendChild(option);
+    }
+  }
+}
+
+function setBirthdaySelectorsFromValue(birthdayValue) {
+  ensureBirthdaySelectOptions();
+  const daySelect = document.getElementById('menu-account-birthday-day');
+  const monthSelect = document.getElementById('menu-account-birthday-month');
+  const yearSelect = document.getElementById('menu-account-birthday-year');
+  if (!daySelect || !monthSelect || !yearSelect) return;
+
+  if (!birthdayValue || !birthdayValue.includes('-')) {
+    daySelect.value = '';
+    monthSelect.value = '';
+    yearSelect.value = '';
+    return;
+  }
+
+  const [year, month, day] = birthdayValue.split('-');
+  yearSelect.value = year || '';
+  monthSelect.value = month || '';
+  daySelect.value = day || '';
+}
+
+function getBirthdayValueFromSelectors() {
+  const day = document.getElementById('menu-account-birthday-day')?.value || '';
+  const month = document.getElementById('menu-account-birthday-month')?.value || '';
+  const year = document.getElementById('menu-account-birthday-year')?.value || '';
+
+  if (!day || !month || !year) return '';
+  return `${year}-${month}-${day}`;
 }
 
 async function uploadMenuProfilePhoto(file, userId) {
@@ -9619,7 +9807,11 @@ async function saveMenuAccountField() {
       alert('La verificación/cambio de correo aún no está disponible.');
       return;
     } else if (currentMenuAccountField === 'birthday') {
-      const birthday = document.getElementById('menu-account-birthday-input').value;
+      const birthday = getBirthdayValueFromSelectors();
+      if (!birthday) {
+        alert('Selecciona día, mes y año de cumpleaños.');
+        return;
+      }
       await firebase.database().ref('users/' + user.uid).update({ birthday });
       alert('Cumpleaños actualizado correctamente');
     } else if (currentMenuAccountField === 'password') {
@@ -12343,8 +12535,9 @@ async function likeNote(noteId) {
 
     if (emailError) emailError.classList.add('hidden');
     document.getElementById('email-form').classList.add('hidden');
-    document.getElementById('email-captcha-form').classList.remove('hidden');
-    resetEmailHCaptcha();
+    document.getElementById('email-captcha-form').classList.add('hidden');
+    document.getElementById('user-email-display').textContent = email;
+    document.getElementById('password-form').classList.remove('hidden');
   }
 
   function backToEmailFromCaptcha() {
@@ -13294,47 +13487,78 @@ async function likeNote(noteId) {
     }
   }
 
+  let currentStoryChaptersListenerRef = null;
+
+  function renderStoryChaptersList(chapters = []) {
+    currentChapters = [];
+    const chapterListDiv = document.getElementById('chapter-list');
+    if (!chapterListDiv) return;
+    chapterListDiv.innerHTML = "";
+
+    chapters.forEach(chapter => currentChapters.push(chapter));
+    currentChapters.sort((a, b) => Number(a.chapterNumber || 0) - Number(b.chapterNumber || 0));
+
+    currentChapters.forEach(chapter => {
+      const div = document.createElement('div');
+      div.className = "flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border border-gray-200 rounded-xl mb-2";
+      const chapterInfo = document.createElement('div');
+      chapterInfo.innerHTML = `<span class="font-semibold">${translations[currentLanguage].readChapter} ${chapter.chapterNumber || '-'}</span>`;
+      const btnContainer = document.createElement('div');
+      btnContainer.className = "flex space-x-2 mt-2 sm:mt-0";
+      const editButton = document.createElement('button');
+      editButton.className = "bg-blue-500 text-white px-2 py-1 rounded";
+      editButton.textContent = "Editar";
+      editButton.onclick = () => openChapterEditModal(chapter);
+      const deleteButton = document.createElement('button');
+      deleteButton.className = "bg-red-500 text-white px-2 py-1 rounded";
+      deleteButton.textContent = "Eliminar";
+      deleteButton.onclick = () => deleteChapter(chapter.id);
+      btnContainer.appendChild(editButton);
+      btnContainer.appendChild(deleteButton);
+      div.appendChild(chapterInfo);
+      div.appendChild(btnContainer);
+      chapterListDiv.appendChild(div);
+    });
+  }
+
+  function bindStoryChaptersRealtime(storyId) {
+    if (currentStoryChaptersListenerRef) {
+      currentStoryChaptersListenerRef.off();
+      currentStoryChaptersListenerRef = null;
+    }
+    if (!storyId) return;
+
+    currentStoryChaptersListenerRef = firebase.database().ref('chapters/' + storyId);
+    currentStoryChaptersListenerRef.on('value', snapshot => {
+      const map = snapshot.val() || {};
+      const chapters = Object.values(map).filter(Boolean);
+      renderStoryChaptersList(chapters);
+    }, error => {
+      console.error('Error en listener de capítulos:', error);
+    });
+  }
+
   function openStoryEdit(story) {
-    currentEditingStory = story;
-    document.getElementById('edit-story-language').value = story.language || "";
-    fetch(`/api/get-chapters?storyId=${story.id}`)
-      .then(response => response.json())
-      .then(data => {
-        currentChapters = [];
-        const chapterListDiv = document.getElementById('chapter-list');
-        chapterListDiv.innerHTML = "";
-        const chapters = data.chapters || [];
-        chapters.forEach(chapter => {
-          currentChapters.push(chapter);
-        });
-        currentChapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
-        currentChapters.forEach(chapter => {
-          const div = document.createElement('div');
-          div.className = "flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border border-gray-200 rounded-xl mb-2";
-          const chapterInfo = document.createElement('div');
-          chapterInfo.innerHTML = `<span class="font-semibold">${translations[currentLanguage].readChapter} ${chapter.chapterNumber}</span>`;
-          const btnContainer = document.createElement('div');
-          btnContainer.className = "flex space-x-2 mt-2 sm:mt-0";
-          const editButton = document.createElement('button');
-          editButton.className = "bg-blue-500 text-white px-2 py-1 rounded";
-          editButton.textContent = "Editar";
-          editButton.onclick = () => openChapterEditModal(chapter);
-          const deleteButton = document.createElement('button');
-          deleteButton.className = "bg-red-500 text-white px-2 py-1 rounded";
-          deleteButton.textContent = "Eliminar";
-          deleteButton.onclick = () => deleteChapter(chapter.id);
-          btnContainer.appendChild(editButton);
-          btnContainer.appendChild(deleteButton);
-          div.appendChild(chapterInfo);
-          div.appendChild(btnContainer);
-          chapterListDiv.appendChild(div);
-        });
-      })
-      .catch(error => console.error('Error cargando capítulos:', error));
+    const storyId = story?.id || story?.storyId;
+    if (!storyId) {
+      alert('No se encontró el ID de la historia.');
+      return;
+    }
+
+    currentEditingStory = { ...story, id: storyId };
+    document.getElementById('edit-story-title').value = story.title || '';
+    document.getElementById('edit-story-category').value = story.category || '';
+    document.getElementById('edit-story-language').value = story.language || '';
+    document.getElementById('edit-story-synopsis').value = story.synopsis || '';
+    bindStoryChaptersRealtime(storyId);
     document.getElementById('story-edit-view').classList.remove('hidden');
   }
 
   function closeStoryEdit() {
+    if (currentStoryChaptersListenerRef) {
+      currentStoryChaptersListenerRef.off();
+      currentStoryChaptersListenerRef = null;
+    }
     document.getElementById('story-edit-view').classList.add('hidden');
     alert(translations[currentLanguage].editLater);
   }
@@ -13390,7 +13614,7 @@ async function likeNote(noteId) {
   }
 
   function saveStoryEdits() {
-    if (!currentEditingStory) {
+    if (!currentEditingStory || !currentEditingStory.id) {
       alert(translations[currentLanguage].noEditingStory);
       return;
     }
@@ -13569,10 +13793,14 @@ async function likeNote(noteId) {
     closeCategoryFilterSheet();
   }
 
+  function normalizeSearchQuery(value) {
+    return String(value || '').trim().toLowerCase().replace(/^@+/, '');
+  }
+
   function performRealTimeSearch() {
     const searchInputEl = document.getElementById('search-input');
     const categoryFilterEl = document.getElementById('category-filter');
-    const query = (searchInputEl?.value || '').trim().toLowerCase();
+    const query = normalizeSearchQuery(searchInputEl?.value || '');
     const category = categoryFilterEl?.value || '';
     const recentRangeMs = 7 * 24 * 60 * 60 * 1000;
     const recentThreshold = Date.now() - recentRangeMs;
@@ -13583,9 +13811,10 @@ async function likeNote(noteId) {
         stories.forEach((story) => {
           const storyTimestamp = getStoryTimestamp(story);
           const isRecent = storyTimestamp >= recentThreshold;
-          const storyTitle = (story.title || '').toLowerCase();
-          const storyAuthor = (story.username || story.authorName || '').toLowerCase();
-          const matchesQuery = !query || storyTitle.includes(query) || storyAuthor.includes(query);
+          const storyTitle = normalizeSearchQuery(story.title || '');
+          const storyAuthor = normalizeSearchQuery(story.username || story.authorName || story.author || '');
+          const storySynopsis = normalizeSearchQuery(story.synopsis || '');
+          const matchesQuery = !query || storyTitle.includes(query) || storyAuthor.includes(query) || storySynopsis.includes(query);
           const matchesCategory = !category
             || (category === 'recent' && isRecent)
             || (category === 'system' && (story.category === 'sistema' || story.category === 'system' || story.type === 'sistema' || story.type === 'system'))
@@ -13606,10 +13835,12 @@ async function likeNote(noteId) {
           return response.json();
         })
         .then(data => {
-          const authors = (data.users || []).filter(user =>
-            (user.username && user.username.toLowerCase().includes(query))
-            || (user.email && user.email.toLowerCase().includes(query))
-          );
+          const authors = (data.users || []).filter(user => {
+            const username = normalizeSearchQuery(user.username || '');
+            const displayName = normalizeSearchQuery(user.name || user.displayName || '');
+            const email = normalizeSearchQuery(user.email || '');
+            return username.includes(query) || displayName.includes(query) || email.includes(query);
+          });
           renderProfilesList(authors);
         })
         .catch((error) => {
@@ -13638,9 +13869,12 @@ async function likeNote(noteId) {
     renderBooksCarousel(books);
     const usersResponse = await fetch('/api/users');
     const usersData = await usersResponse.json();
-    const authors = (usersData.users || []).filter(user =>
-      user.username && user.username.toLowerCase().includes(query)
-    );
+    const normalizedQuery = normalizeSearchQuery(query);
+    const authors = (usersData.users || []).filter(user => {
+      const username = normalizeSearchQuery(user.username || '');
+      const displayName = normalizeSearchQuery(user.name || user.displayName || '');
+      return username.includes(normalizedQuery) || displayName.includes(normalizedQuery);
+    });
     renderProfilesList(authors);
   }
 
@@ -14645,12 +14879,20 @@ async function likeNote(noteId) {
     });
   }
   /*********************** CREACIÓN DE HISTORIAS **************************/
+function setStoryPublishingState(isPublishing, label = 'Publicar') {
+  const publishBtn = document.getElementById('story-publish-btn');
+  if (!publishBtn) return;
+  publishBtn.disabled = isPublishing;
+  publishBtn.textContent = isPublishing ? 'Publicando...' : label;
+}
+
   const storyForm = document.getElementById('story-form');
   if (storyForm) storyForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    setStoryPublishingState(true);
     document.getElementById('story-upload-spinner').style.display = "flex";
-    const title = document.getElementById('story-title').value;
-    const category = document.getElementById('story-category').value;
+    const title = (document.getElementById('story-title').value || '').trim();
+    const category = (document.getElementById('story-category').value || '').trim();
     const synopsis = document.getElementById('story-synopsis').value || "";
     const language = document.getElementById('story-language').value;
     const rating = document.getElementById('story-rating').value;
@@ -14659,6 +14901,14 @@ async function likeNote(noteId) {
     if (!user) {
       alert(translations[currentLanguage].userNotAuthenticated);
       document.getElementById('story-upload-spinner').style.display = "none";
+      setStoryPublishingState(false);
+      return;
+    }
+
+    if (!title || !category || !language) {
+      alert('Completa título, categoría e idioma para publicar.');
+      document.getElementById('story-upload-spinner').style.display = "none";
+      setStoryPublishingState(false);
       return;
     }
     let newStory = {
@@ -14670,6 +14920,7 @@ async function likeNote(noteId) {
       type: storyTypeSelected,
       coverImage: "",
       createdAt: Date.now(),
+      timestamp: Date.now(),
       isPrivate: false,
       views: 0,
       rating: rating,
@@ -14690,14 +14941,14 @@ async function likeNote(noteId) {
         storyRef.set(newStory)
           .then(() => {
             document.getElementById('story-upload-spinner').style.display = "none";
-            setTimeout(() => {
-              document.getElementById('story-details-view').classList.add('hidden');
-              openStoryEdit(newStory);
-            }, 3000);
+            setStoryPublishingState(false);
+            document.getElementById('story-details-view').classList.add('hidden');
+            openStoryEdit(newStory);
           })
           .catch(error => {
             console.error("Error al guardar la historia:", error);
             document.getElementById('story-upload-spinner').style.display = "none";
+            setStoryPublishingState(false);
           });
       });
     }
@@ -14713,6 +14964,7 @@ async function likeNote(noteId) {
         .catch(errMsg => {
           alert(errMsg);
           document.getElementById('story-upload-spinner').style.display = "none";
+          setStoryPublishingState(false);
         });
     } else {
       saveStory();
@@ -14773,7 +15025,8 @@ async function likeNote(noteId) {
     document.getElementById('font-size-value').innerText = "16px";
     document.getElementById('chapter-content').style.fontSize = "16px";
     document.getElementById('chapter-content').style.fontFamily = "Arial";
-    document.getElementById('btn-save-chapter').textContent = translations[currentLanguage].btnSaveChapter;
+    const saveBtn = document.getElementById('btn-save-chapter');
+    if (saveBtn) saveBtn.textContent = 'Publicar';
     document.getElementById('chapter-creation-modal').style.display = "flex";
   }
 
@@ -14788,13 +15041,19 @@ async function likeNote(noteId) {
     document.getElementById('chapter-content').style.fontFamily = "Arial";
     document.getElementById('chapter-schedule').value = "";
     currentChapterEditId = null;
-    document.getElementById('btn-save-chapter').textContent = translations[currentLanguage].btnSaveChapter;
+    const saveBtn = document.getElementById('btn-save-chapter');
+    if (saveBtn) saveBtn.textContent = 'Publicar';
   }
   const chapterForm = document.getElementById('chapter-form');
   if (chapterForm) chapterForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    const content = document.getElementById('chapter-content').value;
+    const content = (document.getElementById('chapter-content').value || '').trim();
     const scheduledDate = document.getElementById('chapter-schedule').value;
+
+    if (!content) {
+      alert('Escribe el contenido del capítulo antes de publicar.');
+      return;
+    }
 
     if (!currentEditingStory) {
       alert(translations[currentLanguage].noEditingStory);
@@ -14824,6 +15083,7 @@ async function likeNote(noteId) {
         })
         .catch(error => {
           console.error("Error al actualizar capítulo:", error);
+          alert('Error al guardar los cambios del capítulo.');
         });
     } else {
       const chapterNumber = currentChapters.length + 1;
@@ -14862,6 +15122,7 @@ async function likeNote(noteId) {
         })
         .catch(error => {
           console.error("Error al agregar capítulo:", error);
+          alert('Error al agregar capítulo. Intenta nuevamente.');
         });
     }
   });
@@ -14869,7 +15130,8 @@ async function likeNote(noteId) {
   function openChapterEditModal(chapter) {
     currentChapterEditId = chapter.id;
     document.getElementById('chapter-content').value = chapter.content;
-    document.getElementById('btn-save-chapter').textContent = "Guardar Cambios";
+    const saveBtn = document.getElementById('btn-save-chapter');
+    if (saveBtn) saveBtn.textContent = 'Guardar cambios';
     document.getElementById('chapter-creation-modal').style.display = "flex";
   }
 

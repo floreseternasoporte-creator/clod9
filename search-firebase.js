@@ -1,5 +1,9 @@
 // search-firebase.js - Búsqueda con Firebase
 
+function normalizeSearchTerm(value) {
+  return String(value || '').trim().toLowerCase().replace(/^@+/, '');
+}
+
 function handleSearchInput() {
   const query = document.getElementById('search-input').value.trim();
   const clearBtn = document.getElementById('clear-search-btn');
@@ -254,7 +258,7 @@ async function getAllStories() {
 }
 
 async function searchContent(query) {
-  const lowerQuery = query.toLowerCase();
+  const lowerQuery = normalizeSearchTerm(query);
   
   // Buscar historias
   try {
@@ -264,10 +268,11 @@ async function searchContent(query) {
     
     let foundStories = 0;
     stories.forEach(story => {
-      const title = (story.title || '').toLowerCase();
-      const author = (story.username || story.authorName || '').toLowerCase();
+      const title = normalizeSearchTerm(story.title || '');
+      const author = normalizeSearchTerm(story.username || story.authorName || story.author || '');
+      const synopsis = normalizeSearchTerm(story.synopsis || '');
       
-      if (title.includes(lowerQuery) || author.includes(lowerQuery)) {
+      if (title.includes(lowerQuery) || author.includes(lowerQuery) || synopsis.includes(lowerQuery)) {
         const storyCard = document.createElement('div');
         storyCard.className = 'cursor-pointer';
         storyCard.innerHTML = `
@@ -301,10 +306,11 @@ async function searchContent(query) {
 
     let foundAuthors = 0;
     users.forEach((user) => {
-      const username = (user.username || '').toLowerCase();
-      const email = (user.email || '').toLowerCase();
+      const username = normalizeSearchTerm(user.username || '');
+      const name = normalizeSearchTerm(user.name || user.displayName || '');
+      const email = normalizeSearchTerm(user.email || '');
 
-      if (username.includes(lowerQuery) || email.includes(lowerQuery)) {
+      if (username.includes(lowerQuery) || name.includes(lowerQuery) || email.includes(lowerQuery)) {
         const authorCard = document.createElement('div');
         authorCard.className = 'flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer';
         authorCard.innerHTML = `
