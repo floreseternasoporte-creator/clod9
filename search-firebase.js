@@ -4,37 +4,49 @@ function normalizeSearchTerm(value) {
   return String(value || '').trim().toLowerCase().replace(/^@+/, '');
 }
 
+let searchInputDebounceTimer = null;
+let latestSearchTicket = 0;
+
 function handleSearchInput() {
   const query = document.getElementById('search-input').value.trim();
   const clearBtn = document.getElementById('clear-search-btn');
-  
+
   if (query.length > 0) {
     clearBtn.classList.remove('hidden');
   } else {
     clearBtn.classList.add('hidden');
   }
 
-  if (typeof window.performRealTimeSearch === 'function') {
-    window.performRealTimeSearch();
-    if (query.length > 0) {
-      searchInfoContent(query);
-    } else {
-      renderSearchInfoList([]);
+  if (searchInputDebounceTimer) {
+    clearTimeout(searchInputDebounceTimer);
+  }
+
+  const ticket = ++latestSearchTicket;
+  searchInputDebounceTimer = setTimeout(async () => {
+    if (ticket !== latestSearchTicket) return;
+
+    if (typeof window.performRealTimeSearch === 'function') {
+      window.performRealTimeSearch();
+      if (query.length > 0) {
+        await searchInfoContent(query);
+      } else {
+        renderSearchInfoList([]);
+        clearSearchResults();
+        loadPopularStories();
+      }
+      return;
     }
-    if (!query.length) {
+
+    if (query.length > 0) {
+      await Promise.allSettled([
+        searchContent(query),
+        searchInfoContent(query)
+      ]);
+    } else {
       clearSearchResults();
       loadPopularStories();
     }
-    return;
-  }
-
-  if (query.length > 0) {
-    searchContent(query);
-    searchInfoContent(query);
-  } else {
-    clearSearchResults();
-    loadPopularStories();
-  }
+  }, 350);
 }
 
 function clearSearchInput() {
@@ -295,7 +307,7 @@ async function searchContent(query) {
   
   // Buscar autores
   try {
-    const response = await fetch(`/api/users?q=${encodeURIComponent(query)}&limit=30`);
+    const response = await fetch(`/api/users?q=${encodeURIComponent(query)}&limit=100`);
     if (!response.ok) {
       throw new Error('No se pudieron cargar autores');
     }
@@ -309,8 +321,9 @@ async function searchContent(query) {
       const username = normalizeSearchTerm(user.username || '');
       const name = normalizeSearchTerm(user.name || user.displayName || '');
       const email = normalizeSearchTerm(user.email || '');
+      const uid = normalizeSearchTerm(user.userId || user.uid || '');
 
-      if (username.includes(lowerQuery) || name.includes(lowerQuery) || email.includes(lowerQuery)) {
+      if (username.includes(lowerQuery) || name.includes(lowerQuery) || email.includes(lowerQuery) || uid.includes(lowerQuery)) {
         const authorCard = document.createElement('div');
         authorCard.className = 'flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer';
         authorCard.innerHTML = `
