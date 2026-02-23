@@ -10896,91 +10896,93 @@ function openCreatorHub() {
     publishButton.innerHTML = '<span class="epic-loader" style="width:20px;height:20px;border-radius:7px;"></span>';
 
     try {
-      // Primero verificar límites
-      const limitsCheck = await fetch('/api/check-user-limits', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.uid,
-          action: 'note'
-        })
-      });
-
-      const limitsResult = await limitsCheck.json();
-
-      if (!limitsResult.canPerformAction) {
-        publishButton.disabled = false;
-        publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
-        alert(limitsResult.message);
-        return;
+      // Verificar límites sin bloquear si el endpoint no está disponible
+      try {
+        const limitsCheck = await fetch('/api/check-user-limits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.uid, action: 'note' })
+        });
+        if (limitsCheck.ok) {
+          const limitsResult = await limitsCheck.json();
+          if (limitsResult && limitsResult.canPerformAction === false) {
+            publishButton.disabled = false;
+            publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
+            alert(limitsResult.message || 'Has alcanzado el límite de publicaciones');
+            return;
+          }
+        }
+      } catch (limitError) {
+        console.warn('No se pudo verificar límites, se continúa con Firebase:', limitError);
       }
 
       const snapshot = await firebase.database().ref('users/' + user.uid).once('value');
-      const userData = snapshot.val();
+      const userData = snapshot.val() || {};
 
-      let imageData = null;
-      let fileName = null;
-      let contentType = null;
-
+      let imageUrl = '';
       if (imageInput.files.length > 0) {
-        const reader = new FileReader();
         const file = imageInput.files[0];
-
         const base64String = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
           reader.onload = (e) => resolve(e.target.result);
-          reader.onerror = (error) => reject(error);
+          reader.onerror = reject;
           reader.readAsDataURL(file);
         });
 
-        imageData = base64String;
-        fileName = file.name;
-        contentType = file.type;
-      }
-
-      // Subir nota a Firebase
-      const response = await fetch('/api/notes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: content,
-          userId: user.uid,
-          authorName: userData.username || 'Usuario',
-          authorImage: userData.profileImage || 'https://via.placeholder.com/150',
-          imageData: imageData,
-          fileName: fileName,
-          contentType: contentType
-        })
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 429) {
-          alert(result.message || 'Has alcanzado el límite de publicaciones');
-        } else {
-          throw new Error(result.error || 'Error al publicar nota');
+        // Intentar subir por API; fallback a base64 si falla
+        try {
+          const uploadResponse = await fetch('/api/upload-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageData: base64String,
+              fileName: file.name,
+              userId: user.uid,
+              timestamp: Date.now(),
+              contentType: file.type,
+              imageType: 'community-note'
+            })
+          });
+          const uploadResult = await uploadResponse.json();
+          if (uploadResponse.ok && uploadResult.imageUrl) {
+            imageUrl = uploadResult.imageUrl;
+          } else {
+            imageUrl = base64String;
+          }
+        } catch (uploadError) {
+          console.warn('Falló subida de imagen por API, usando base64 en Firebase:', uploadError);
+          imageUrl = base64String;
         }
-        publishButton.disabled = false;
-        publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
-        return;
       }
+
+      const newNote = {
+        content,
+        authorId: user.uid,
+        authorName: userData.username || userData.name || 'Usuario',
+        authorImage: userData.profileImage || 'https://via.placeholder.com/150',
+        timestamp: Date.now(),
+        likes: 0,
+        likedBy: {},
+        imageUrl: imageUrl || ''
+      };
+
+      const newNoteRef = await firebase.database().ref('communityNotes').push(newNote);
+      moderarContenidoAutomaticamente(newNoteRef.key, content);
 
       document.getElementById('note-content').value = '';
       imageInput.value = '';
       document.getElementById('image-preview').classList.add('hidden');
+      document.getElementById('preview-img').src = '';
+      updateNoteCharCounter();
       switchCommunityTab('feed');
+
       publishButton.disabled = false;
       publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
       alert('¡Nota publicada exitosamente!');
 
-      // Recargar notas
       loadNotes();
     } catch (error) {
-      console.error('Error al publicar:', error);
+      console.error('Error al publicar con Firebase:', error);
       alert('Error al publicar la nota. Por favor intenta de nuevo.');
       publishButton.disabled = false;
       publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
@@ -11010,15 +11012,12 @@ function openCreatorHub() {
     feedContainer.innerHTML = '<div class="text-center py-8 flex justify-center"><div class="epic-loader" aria-label="Cargando"></div></div>';
 
     try {
-      const response = await fetch('/api/notes?limit=50');
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Error al cargar notas');
-      }
+      const snap = await firebase.database().ref('communityNotes').orderByChild('timestamp').limitToLast(50).once('value');
+      const notes = [];
+      snap.forEach(child => notes.push({ noteId: child.key, ...child.val() }));
+      notes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
       feedContainer.innerHTML = '';
-      const notes = result.notes || [];
 
       if (notes.length === 0) {
         feedContainer.innerHTML = '<div class="text-center py-8 text-gray-500">No hay notas aún. ¡Sé el primero en publicar!</div>';
@@ -11030,13 +11029,13 @@ function openCreatorHub() {
         noteElement.className = 'bg-white p-4 rounded-xl shadow';
         noteElement.innerHTML = `
           <div class="flex items-center mb-3">
-            <img src="${note.authorImage}" alt="${note.authorName}" class="w-10 h-10 rounded-full mr-3">
+            <img src="${note.authorImage || 'https://via.placeholder.com/150'}" alt="${note.authorName || 'Usuario'}" class="w-10 h-10 rounded-full mr-3">
             <div>
-              <h3 class="font-bold">${note.authorName}</h3>
-              <p class="text-sm text-gray-500">${new Date(note.timestamp).toLocaleString()}</p>
+              <h3 class="font-bold">${note.authorName || 'Usuario'}</h3>
+              <p class="text-sm text-gray-500">${note.timestamp ? new Date(note.timestamp).toLocaleString() : 'Ahora'}</p>
             </div>
           </div>
-          <p class="mb-3">${note.content}</p>
+          <p class="mb-3">${note.content || ''}</p>
           ${note.imageUrl ? `<img src="${note.imageUrl}" alt="Imagen de nota" class="w-full rounded-lg mb-3 max-h-96 object-cover">` : ''}
           <div class="flex items-center space-x-4">
             <button id="like-btn-${note.noteId}" onclick="likeNote('${note.noteId}')" class="flex items-center text-[#00A2FF] hover:text-red-600 transition-colors">
@@ -11046,12 +11045,8 @@ function openCreatorHub() {
               <span id="like-count-${note.noteId}">${note.likes || 0}</span>
             </button>
             ${note.authorId === firebase.auth().currentUser?.uid ?
-              `<button onclick="deleteNote('${note.noteId}')" class="text-red-500 hover:text-red-700">
-                <i class="fas fa-trash"></i> Eliminar
-              </button>` :
-              `<button onclick="reportNote('${note.noteId}')" class="text-gray-500 hover:text-gray-700 flex items-center">
-                <i class="fas fa-flag mr-1"></i> Reportar
-              </button>`
+              `<button onclick="deleteNote('${note.noteId}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i> Eliminar</button>` :
+              `<button onclick="reportNote('${note.noteId}')" class="text-gray-500 hover:text-gray-700 flex items-center"><i class="fas fa-flag mr-1"></i> Reportar</button>`
             }
           </div>
         `;
@@ -11059,7 +11054,7 @@ function openCreatorHub() {
         feedContainer.appendChild(noteElement);
       });
     } catch (error) {
-      console.error('Error al cargar notas:', error);
+      console.error('Error al cargar notas (Firebase):', error);
       feedContainer.innerHTML = '<div class="text-center py-8 text-red-500">Error al cargar notas. Por favor recarga la página.</div>';
     }
   }
@@ -11090,8 +11085,8 @@ function openCreatorHub() {
   // Busca palabras completas, no partes de palabras
   const palabras = textoNormalizado.split(/\s+/);
   return palabras.some(palabra =>
-    palabrasOfensivas.includes(palabra) ||
-    palabrasOfensivas.some(palabraOfensiva =>
+    palabrasProhibidasNotas.includes(palabra) ||
+    palabrasProhibidasNotas.some(palabraOfensiva =>
       palabra.includes(palabraOfensiva) && palabra.length < palabraOfensiva.length + 3
     )
   );
@@ -11159,26 +11154,26 @@ function moderarNota(noteId, content) {
 	      return;
 	    }
 
-	    const response = await fetch('/api/notes', {
-	      method: 'POST',
-	      headers: {
-	        'Content-Type': 'application/json',
-	      },
-	      body: JSON.stringify({ noteId, userId: user.uid })
-	    });
+	    const noteRef = firebase.database().ref('communityNotes/' + noteId);
+	    const noteSnap = await noteRef.once('value');
+	    if (!noteSnap.exists()) {
+	      alert('La nota no existe o ya fue eliminada');
+	      return;
+	    }
 
-    const result = await response.json();
+	    const noteData = noteSnap.val() || {};
+	    if (noteData.authorId !== user.uid) {
+	      alert('No tienes permisos para eliminar esta nota');
+	      return;
+	    }
 
-    if (!response.ok) {
-      throw new Error(result.error || 'Error al eliminar nota');
-    }
-
-    alert('Nota eliminada exitosamente');
-    loadNotes(); // Recargar notas
-  } catch (error) {
-    console.error('Error al eliminar nota:', error);
-    alert('Error al eliminar la nota');
-  }
+	    await noteRef.remove();
+	    alert('Nota eliminada exitosamente');
+	    loadNotes();
+	  } catch (error) {
+	    console.error('Error al eliminar nota:', error);
+	    alert('Error al eliminar la nota');
+	  }
 }
 
 function reportNote(noteId) {
@@ -11190,35 +11185,26 @@ async function likeNote(noteId) {
     if (!user) return;
 
     try {
-      const response = await fetch('/api/likes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          noteId: noteId,
-          userId: user.uid
-        })
+      const noteRef = firebase.database().ref('communityNotes/' + noteId);
+      const tx = await noteRef.transaction(note => {
+        if (!note) return note;
+        if (!note.likedBy) note.likedBy = {};
+        if (note.likedBy[user.uid]) return note;
+        note.likedBy[user.uid] = true;
+        note.likes = (note.likes || 0) + 1;
+        return note;
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (result.error === 'User already liked this note') {
-          console.log('Ya has dado like a esta nota');
-        } else {
-          throw new Error(result.error || 'Error al dar like');
-        }
+      if (!tx.committed || !tx.snapshot.exists()) {
         return;
       }
 
-      // Actualizar el contador en la UI
+      const updatedNote = tx.snapshot.val() || {};
       const likeCountElement = document.getElementById(`like-count-${noteId}`);
       if (likeCountElement) {
-        likeCountElement.textContent = result.likes;
+        likeCountElement.textContent = updatedNote.likes || 0;
       }
 
-      // Deshabilitar el botón de like
       const likeBtn = document.getElementById(`like-btn-${noteId}`);
       if (likeBtn) {
         likeBtn.style.opacity = '0.6';
@@ -11230,7 +11216,7 @@ async function likeNote(noteId) {
     }
 }
 
-  // VARIABLES GLOBALES
+  // VARIABLES GLOBALES  // VARIABLES GLOBALES
   let tapCount = 0,
     lastTap = 0,
     heartCount = 0;
