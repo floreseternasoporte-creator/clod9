@@ -1,3 +1,5 @@
+const { runVercelHandler } = require('./vercel-adapter');
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const clampDimension = (value, fallback) => {
@@ -41,7 +43,7 @@ const resolvePathPart = (query = {}) => {
   return '';
 };
 
-module.exports = async (event = {}) => {
+exports.handler = async (event = {}) => {
   const pathPart = resolvePathPart(event?.queryStringParameters || {});
   const [rawWidth, rawHeight] = String(pathPart).split('/');
   const width = clampDimension(rawWidth, 400);
@@ -58,3 +60,8 @@ module.exports = async (event = {}) => {
     body: svg
   };
 };
+
+const placeholderVercelHandler = async (req, res) => runVercelHandler(exports.handler, req, res);
+
+module.exports = placeholderVercelHandler;
+module.exports.handler = exports.handler;
