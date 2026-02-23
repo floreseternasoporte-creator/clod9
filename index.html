@@ -2104,7 +2104,7 @@ setInterval(checkScheduledChapters, 60000);
                         class="w-full border-0 resize-none text-gray-900 placeholder-gray-500 focus:outline-none text-base bg-transparent"
                         rows="2" maxlength="200"></textarea>
               <div class="flex justify-between items-center mt-2">
-                <span id="char-counter" class="text-xs text-gray-400">0/200</span>
+                <span id="image-char-counter" class="text-xs text-gray-400">0/200</span>
                 <select id="image-style" class="text-xs bg-transparent border border-gray-300 rounded px-2 py-1 text-gray-600 focus:outline-none focus:border-[#00A2FF]">
                   <option value="realistic">Realista</option>
                   <option value="anime">Anime</option>
@@ -4655,7 +4655,7 @@ function escapeHtml(text) {
           </div>
         </div>
 
-        <div id="char-counter" class="text-xs text-uber-muted mt-2">0/280</div>
+        <div id="note-char-counter" class="text-xs text-uber-muted mt-2">0/280</div>
       </div>
 
       <div class="border-t border-uber-line p-3">
@@ -5335,7 +5335,8 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
   function useSuggestion(text) {
     document.getElementById('note-content').value = text;
     document.getElementById('ai-suggestions').classList.add('hidden');
-    document.getElementById('char-counter').textContent = (200 - text.length) + ' characters remaining';
+    const noteCounter = document.getElementById('note-char-counter');
+    if (noteCounter) noteCounter.textContent = `${text.length}/280`;
   }
 
 
@@ -5408,7 +5409,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     if (imagePrompt) {
       imagePrompt.focus();
 
-      const charCounter = document.getElementById('char-counter');
+      const charCounter = document.getElementById('image-char-counter');
       if (charCounter) {
         imagePrompt.removeEventListener('input', updateCharCounter);
         imagePrompt.addEventListener('input', updateCharCounter);
@@ -5439,7 +5440,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     if (imagePrompt) {
       imagePrompt.focus();
 
-      const charCounter = document.getElementById('char-counter');
+      const charCounter = document.getElementById('image-char-counter');
       if (charCounter) {
         imagePrompt.removeEventListener('input', updateCharCounter);
         imagePrompt.addEventListener('input', updateCharCounter);
@@ -5450,7 +5451,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
   // Función separada para actualizar contador de caracteres
   function updateCharCounter() {
     const imagePrompt = document.getElementById('image-prompt');
-    const charCounter = document.getElementById('char-counter');
+    const charCounter = document.getElementById('image-char-counter');
 
     if (imagePrompt && charCounter) {
       const count = imagePrompt.value.length;
@@ -10508,7 +10509,7 @@ async function loadPhotos() {
         <div class="flex items-center justify-between">
           <span class="text-white">Notificaciones</span>
           <label class="switch">
-            <input type="checkbox" id="notifications-toggle" checked>
+            <input type="checkbox" id="notifications-toggle-legacy" checked>
             <span class="slider round"></span>
           </label>
         </div>
@@ -10522,7 +10523,7 @@ async function loadPhotos() {
         <div class="flex items-center justify-between">
           <span class="text-white">Comentarios</span>
           <label class="switch">
-            <input type="checkbox" id="comments-toggle" checked>
+            <input type="checkbox" id="comments-toggle-legacy" checked>
             <span class="slider round"></span>
           </label>
         </div>
@@ -10537,7 +10538,7 @@ async function loadPhotos() {
         <div class="flex items-center justify-between">
           <span class="text-white">Detector de rostro (efecto belleza)</span>
           <label class="switch">
-            <input type="checkbox" id="face-detection-toggle">
+            <input type="checkbox" id="face-detection-toggle-legacy">
             <span class="slider round"></span>
           </label>
         </div>
@@ -11259,7 +11260,7 @@ function openCreatorHub() {
 
   function updateNoteCharCounter() {
     const noteContent = document.getElementById('note-content');
-    const charCounter = document.getElementById('char-counter');
+    const charCounter = document.getElementById('note-char-counter');
     if (!noteContent || !charCounter) return;
 
     const count = noteContent.value.length;
@@ -12058,7 +12059,7 @@ async function likeNote(noteId) {
     loadUserStats(user.uid);
   }
 
-  function openNotifications() {
+  function openNotificationsLegacy() {
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'none';
     document.getElementById('notifications-modal').classList.remove('hidden');
@@ -12116,13 +12117,13 @@ async function likeNote(noteId) {
   let currentChapterEditId = null;
   let currentLanguage = 'es';
 
-  function closeSearch() {
+  function closeSearchLegacy() {
     document.getElementById('search-view').classList.add('hidden');
     const mainApp = document.getElementById('main-app');
     if (mainApp) mainApp.classList.remove('hidden');
   }
 
-  function closeNotifications() {
+  function closeNotificationsLegacy() {
     document.getElementById('notifications-modal').classList.add('hidden');
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'flex';
@@ -14724,7 +14725,7 @@ async function likeNote(noteId) {
 
 
 
-  function blockAuthor() {
+  function blockAuthorLegacy() {
     const currentUser = firebase.auth().currentUser;
     if (!currentUser || !currentViewedAuthorId) return;
 
@@ -14756,7 +14757,7 @@ async function likeNote(noteId) {
     });
   }
 
-  function blockAuthor() {
+  function blockAuthorLegacy2() {
     const currentUser = firebase.auth().currentUser;
     if (!currentUser || !currentViewedAuthorId) return;
 
