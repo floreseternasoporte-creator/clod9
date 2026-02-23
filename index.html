@@ -1779,13 +1779,13 @@ setInterval(checkScheduledChapters, 60000);
     </div>
 
     <!-- Lista de opciones scrolleable -->
-    <div class="flex-1 overflow-y-auto bg-[#F6F7F8]">
+    <div id="menu-main-settings-list" class="flex-1 overflow-y-auto bg-[#F6F7F8]">
       <div class="space-y-6 p-4">
         <!-- Cuenta -->
         <div class="space-y-3">
           <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500">Cuenta</h3>
           <div class="bg-white rounded-2xl border border-black/5 divide-y divide-gray-100">
-            <button onclick="openSettingsPlaceholder('Editar perfil');" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors">
+            <button onclick="openMenuProfileSection()" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors">
               <div class="h-11 w-11 rounded-full bg-black/5 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1928,6 +1928,82 @@ setInterval(checkScheduledChapters, 60000);
         </div>
       </div>
     </div>
+
+    <!-- Sección Perfil en configuración -->
+    <div id="menu-profile-section" class="hidden flex-1 overflow-y-auto bg-white">
+      <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <button onclick="closeMenuProfileSection()" class="text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h2 class="text-base font-semibold text-gray-900">Perfil</h2>
+        <div class="w-6"></div>
+      </div>
+      <div class="p-4 space-y-2">
+        <button onclick="openMenuProfileEditor('photo')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Actualizar foto</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('name')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Nombre</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('username')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Nombre de usuario</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('location')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Dónde vives</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('pronouns')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Pronombres</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('bio')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Biografía</span><span class="text-gray-400">›</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="menu-profile-editor" class="hidden flex-1 overflow-y-auto bg-white">
+      <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <button onclick="closeMenuProfileEditor()" class="text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h2 id="menu-profile-editor-title" class="text-base font-semibold text-gray-900">Perfil</h2>
+        <button onclick="saveMenuProfileField()" class="text-[#00A2FF] font-semibold text-sm">Guardar</button>
+      </div>
+      <div class="p-4">
+        <div id="menu-profile-editor-photo" class="hidden text-center">
+          <img id="menu-profile-photo-preview" src="https://via.placeholder.com/140" class="w-32 h-32 rounded-full mx-auto object-cover border-2 border-gray-200 mb-4" alt="Foto de perfil">
+          <input type="file" id="menu-edit-photo-input" accept="image/*" class="hidden" onchange="previewMenuProfilePhoto(event)">
+          <button onclick="document.getElementById('menu-edit-photo-input').click()" class="px-5 py-2 rounded-lg bg-gray-100 text-gray-900 font-medium">Seleccionar foto</button>
+        </div>
+
+        <div id="menu-profile-editor-text" class="hidden">
+          <label id="menu-profile-editor-label" class="block text-sm font-medium text-gray-700 mb-2"></label>
+          <div class="flex items-center border border-gray-300 rounded-lg px-3">
+            <span id="menu-profile-editor-prefix" class="text-gray-500 mr-2 hidden">@</span>
+            <input id="menu-profile-editor-input" type="text" class="w-full py-3 outline-none" placeholder="">
+          </div>
+        </div>
+
+        <div id="menu-profile-editor-pronouns" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Selecciona pronombres</label>
+          <select id="menu-profile-pronouns-select" class="w-full p-3 border border-gray-300 rounded-lg">
+            <option value="hombre">Hombre</option>
+            <option value="mujer">Mujer</option>
+            <option value="no binario">No binario</option>
+            <option value="no definido">No definido</option>
+          </select>
+        </div>
+
+        <div id="menu-profile-editor-bio" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Biografía</label>
+          <textarea id="menu-profile-bio-input" rows="5" class="w-full p-3 border border-gray-300 rounded-lg resize-none" placeholder="Escribe tu biografía..."></textarea>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 </div>
@@ -6374,7 +6450,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         <h2 id="profile-username-header" class="text-base font-semibold text-gray-900">@nombre_usuario</h2>
         <button onclick="openMenuModal()" class="p-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M7 12h10M10 17h4" />
           </svg>
         </button>
       </div>
@@ -6453,7 +6529,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
           </button>
           <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M7 12h10M10 17h4" />
             </svg>
           </button>
         </div>
@@ -9243,6 +9319,7 @@ function showNotification(message, type = 'info') {
 function openMenuModal() {
   const modal = document.getElementById('menu-modal');
   modal.classList.remove('hidden');
+  showMenuMainSettings();
 
   // Actualizar foto y nombre en tiempo real
   const user = firebase.auth().currentUser;
@@ -9261,6 +9338,179 @@ function openMenuModal() {
 
 function closeMenuModal() {
   document.getElementById('menu-modal').classList.add('hidden');
+}
+
+let currentMenuProfileField = null;
+let menuProfilePendingFile = null;
+
+function showMenuMainSettings() {
+  const mainList = document.getElementById('menu-main-settings-list');
+  const profileSection = document.getElementById('menu-profile-section');
+  const profileEditor = document.getElementById('menu-profile-editor');
+  if (mainList) mainList.classList.remove('hidden');
+  if (profileSection) profileSection.classList.add('hidden');
+  if (profileEditor) profileEditor.classList.add('hidden');
+}
+
+function openMenuProfileSection() {
+  const mainList = document.getElementById('menu-main-settings-list');
+  if (mainList) mainList.classList.add('hidden');
+  document.getElementById('menu-profile-section').classList.remove('hidden');
+  document.getElementById('menu-profile-editor').classList.add('hidden');
+}
+
+function closeMenuProfileSection() {
+  showMenuMainSettings();
+}
+
+function closeMenuProfileEditor() {
+  document.getElementById('menu-profile-editor').classList.add('hidden');
+  document.getElementById('menu-profile-section').classList.remove('hidden');
+}
+
+function previewMenuProfilePhoto(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  menuProfilePendingFile = file;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const preview = document.getElementById('menu-profile-photo-preview');
+    if (preview) preview.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function openMenuProfileEditor(field) {
+  currentMenuProfileField = field;
+  const editor = document.getElementById('menu-profile-editor');
+  const section = document.getElementById('menu-profile-section');
+  const title = document.getElementById('menu-profile-editor-title');
+
+  document.getElementById('menu-profile-editor-photo').classList.add('hidden');
+  document.getElementById('menu-profile-editor-text').classList.add('hidden');
+  document.getElementById('menu-profile-editor-pronouns').classList.add('hidden');
+  document.getElementById('menu-profile-editor-bio').classList.add('hidden');
+
+  const user = firebase.auth().currentUser;
+  const userDataPromise = user
+    ? firebase.database().ref('users/' + user.uid).once('value').then(snapshot => snapshot.val() || {})
+    : Promise.resolve({});
+
+  userDataPromise.then(data => {
+    if (field === 'photo') {
+      title.textContent = 'Actualizar foto';
+      document.getElementById('menu-profile-editor-photo').classList.remove('hidden');
+      const preview = document.getElementById('menu-profile-photo-preview');
+      if (preview) preview.src = data.profileImage || 'https://via.placeholder.com/140';
+      menuProfilePendingFile = null;
+      const fileInput = document.getElementById('menu-edit-photo-input');
+      if (fileInput) fileInput.value = '';
+    } else if (field === 'name') {
+      title.textContent = 'Nombre';
+      document.getElementById('menu-profile-editor-text').classList.remove('hidden');
+      document.getElementById('menu-profile-editor-label').textContent = 'Nombre';
+      document.getElementById('menu-profile-editor-prefix').classList.add('hidden');
+      document.getElementById('menu-profile-editor-input').value = data.name || '';
+      document.getElementById('menu-profile-editor-input').placeholder = 'Escribe tu nombre';
+    } else if (field === 'username') {
+      title.textContent = 'Crear nombre de usuario';
+      document.getElementById('menu-profile-editor-text').classList.remove('hidden');
+      document.getElementById('menu-profile-editor-label').textContent = 'Nombre de usuario';
+      document.getElementById('menu-profile-editor-prefix').classList.remove('hidden');
+      document.getElementById('menu-profile-editor-input').value = data.username || '';
+      document.getElementById('menu-profile-editor-input').placeholder = 'tunombredeusuario';
+    } else if (field === 'location') {
+      title.textContent = 'Dónde vives';
+      document.getElementById('menu-profile-editor-text').classList.remove('hidden');
+      document.getElementById('menu-profile-editor-label').textContent = 'País';
+      document.getElementById('menu-profile-editor-prefix').classList.add('hidden');
+      document.getElementById('menu-profile-editor-input').value = data.city || '';
+      document.getElementById('menu-profile-editor-input').placeholder = 'Escribe tu país';
+    } else if (field === 'pronouns') {
+      title.textContent = 'Pronombres';
+      document.getElementById('menu-profile-editor-pronouns').classList.remove('hidden');
+      document.getElementById('menu-profile-pronouns-select').value = data.pronouns || 'no definido';
+    } else if (field === 'bio') {
+      title.textContent = 'Biografía';
+      document.getElementById('menu-profile-editor-bio').classList.remove('hidden');
+      document.getElementById('menu-profile-bio-input').value = data.bio || '';
+    }
+
+    section.classList.add('hidden');
+    editor.classList.remove('hidden');
+  });
+}
+
+async function uploadMenuProfilePhoto(file, userId) {
+  const base64String = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const response = await fetch('/api/upload-image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      imageData: base64String,
+      fileName: file.name,
+      userId,
+      timestamp: Date.now(),
+      contentType: file.type,
+      imageType: 'profile'
+    })
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'Error al subir imagen');
+  return result.imageUrl;
+}
+
+async function saveMenuProfileField() {
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    alert('Debes iniciar sesión');
+    return;
+  }
+
+  const updates = {};
+
+  try {
+    if (currentMenuProfileField === 'photo') {
+      if (!menuProfilePendingFile) {
+        alert('Selecciona una foto primero');
+        return;
+      }
+      const imageUrl = await uploadMenuProfilePhoto(menuProfilePendingFile, user.uid);
+      updates.profileImage = imageUrl;
+      document.getElementById('menu-profile-image').src = imageUrl;
+      const profileImage = document.getElementById('profile-image');
+      const profileImageDesktop = document.getElementById('profile-image-desktop');
+      if (profileImage) profileImage.src = imageUrl;
+      if (profileImageDesktop) profileImageDesktop.src = imageUrl;
+    } else if (currentMenuProfileField === 'name') {
+      updates.name = document.getElementById('menu-profile-editor-input').value.trim();
+    } else if (currentMenuProfileField === 'username') {
+      const username = document.getElementById('menu-profile-editor-input').value.trim().replace(/^@+/, '');
+      updates.username = username;
+      alert('Nombre de usuario actualizado correctamente');
+    } else if (currentMenuProfileField === 'location') {
+      updates.city = document.getElementById('menu-profile-editor-input').value.trim();
+    } else if (currentMenuProfileField === 'pronouns') {
+      updates.pronouns = document.getElementById('menu-profile-pronouns-select').value;
+    } else if (currentMenuProfileField === 'bio') {
+      updates.bio = document.getElementById('menu-profile-bio-input').value.trim();
+    }
+
+    await firebase.database().ref('users/' + user.uid).update(updates);
+    alert('Cambios guardados correctamente');
+    closeMenuProfileEditor();
+    openMenuModal();
+  } catch (error) {
+    console.error('Error al guardar perfil desde configuración:', error);
+    alert('No se pudo guardar: ' + error.message);
+  }
 }
 
 function openSettingsPlaceholder(sectionName) {
