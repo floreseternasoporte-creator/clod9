@@ -7471,7 +7471,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </svg>
         </button>
         <h1 class="text-lg font-semibold">Nueva historia</h1>
-        <button onclick="document.getElementById('story-form').requestSubmit()" class="text-[#00A2FF] font-semibold">Publicar</button>
+        <button id="story-publish-btn" onclick="document.getElementById('story-form').requestSubmit()" class="px-4 py-2 rounded-xl bg-black text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">Publicar</button>
       </div>
     </div>
 
@@ -7510,13 +7510,15 @@ function previewCover(event) {
 
         <!-- Título -->
         <div>
-          <input id="story-title" type="text" placeholder="Título de la historia" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition" required>
+          <label for="story-title" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
+          <input id="story-title" type="text" placeholder="Título de la historia" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition" required>
         </div>
 
         <!-- Categoría -->
         <div>
-          <select id="story-category" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition appearance-none" required>
-            <option value="" disabled selected>Categoría</option>
+          <label for="story-category" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+          <select id="story-category" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition appearance-none" required>
+            <option value="" disabled selected>Selecciona una categoría</option>
             <option value="aventura">Aventura</option>
             <option value="romance">Romance</option>
             <option value="misterio">Misterio</option>
@@ -7530,7 +7532,8 @@ function previewCover(event) {
 
         <!-- Clasificación -->
         <div>
-          <select id="story-rating" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition appearance-none" required>
+          <label for="story-rating" class="block text-sm font-medium text-gray-700 mb-2">Clasificación</label>
+          <select id="story-rating" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition appearance-none" required>
             <option value="all">Todo público</option>
             <option value="13plus">Mayores de 13</option>
             <option value="18plus">Mayores de 18</option>
@@ -7539,8 +7542,9 @@ function previewCover(event) {
 
         <!-- Idioma -->
         <div>
-          <select id="story-language" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition appearance-none" required>
-            <option value="" disabled selected>Idioma</option>
+          <label for="story-language" class="block text-sm font-medium text-gray-700 mb-2">Idioma</label>
+          <select id="story-language" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition appearance-none" required>
+            <option value="" disabled selected>Selecciona idioma</option>
             <option value="Spanish">Español</option>
             <option value="English">English</option>
             <option value="Portuguese">Português</option>
@@ -7550,7 +7554,8 @@ function previewCover(event) {
 
         <!-- Sinopsis -->
         <div>
-          <textarea id="story-synopsis" placeholder="Escribe una sinopsis..." class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] transition resize-none" rows="4"></textarea>
+          <label for="story-synopsis" class="block text-sm font-medium text-gray-700 mb-2">Sinopsis</label>
+          <textarea id="story-synopsis" placeholder="Escribe una sinopsis..." class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition resize-none" rows="4"></textarea>
         </div>
       </form>
     </div>
@@ -14824,12 +14829,20 @@ async function likeNote(noteId) {
     });
   }
   /*********************** CREACIÓN DE HISTORIAS **************************/
+function setStoryPublishingState(isPublishing, label = 'Publicar') {
+  const publishBtn = document.getElementById('story-publish-btn');
+  if (!publishBtn) return;
+  publishBtn.disabled = isPublishing;
+  publishBtn.textContent = isPublishing ? 'Publicando...' : label;
+}
+
   const storyForm = document.getElementById('story-form');
   if (storyForm) storyForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    setStoryPublishingState(true);
     document.getElementById('story-upload-spinner').style.display = "flex";
-    const title = document.getElementById('story-title').value;
-    const category = document.getElementById('story-category').value;
+    const title = (document.getElementById('story-title').value || '').trim();
+    const category = (document.getElementById('story-category').value || '').trim();
     const synopsis = document.getElementById('story-synopsis').value || "";
     const language = document.getElementById('story-language').value;
     const rating = document.getElementById('story-rating').value;
@@ -14838,6 +14851,14 @@ async function likeNote(noteId) {
     if (!user) {
       alert(translations[currentLanguage].userNotAuthenticated);
       document.getElementById('story-upload-spinner').style.display = "none";
+      setStoryPublishingState(false);
+      return;
+    }
+
+    if (!title || !category || !language) {
+      alert('Completa título, categoría e idioma para publicar.');
+      document.getElementById('story-upload-spinner').style.display = "none";
+      setStoryPublishingState(false);
       return;
     }
     let newStory = {
@@ -14869,14 +14890,14 @@ async function likeNote(noteId) {
         storyRef.set(newStory)
           .then(() => {
             document.getElementById('story-upload-spinner').style.display = "none";
-            setTimeout(() => {
-              document.getElementById('story-details-view').classList.add('hidden');
-              openStoryEdit(newStory);
-            }, 3000);
+            setStoryPublishingState(false);
+            document.getElementById('story-details-view').classList.add('hidden');
+            openStoryEdit(newStory);
           })
           .catch(error => {
             console.error("Error al guardar la historia:", error);
             document.getElementById('story-upload-spinner').style.display = "none";
+            setStoryPublishingState(false);
           });
       });
     }
@@ -14892,6 +14913,7 @@ async function likeNote(noteId) {
         .catch(errMsg => {
           alert(errMsg);
           document.getElementById('story-upload-spinner').style.display = "none";
+          setStoryPublishingState(false);
         });
     } else {
       saveStory();
