@@ -2876,6 +2876,26 @@ setInterval(checkScheduledChapters, 60000);
       animation: fadeIn 0.2s ease-out;
     }
 
+
+    body.authenticated #auth-form,
+    body.authenticated #email-form,
+    body.authenticated #sms-verification-modal,
+    body.authenticated #captcha-modal {
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    body.authenticated #main-app {
+      display: flex !important;
+      opacity: 1 !important;
+    }
+
+    body.unauthenticated #main-app {
+      display: none !important;
+      opacity: 0 !important;
+    }
+
     .sms-modal-icon {
       background: #f2f2f2;
       color: #111111;
@@ -13218,6 +13238,9 @@ async function likeNote(noteId) {
     const emailFormContainer = document.getElementById('email-form');
     const smsScreen = document.getElementById('sms-verification-modal');
     const captchaModal = document.getElementById('captcha-modal');
+
+    document.body.classList.toggle('authenticated', isAuthenticated);
+    document.body.classList.toggle('unauthenticated', !isAuthenticated);
 
     if (isAuthenticated) {
       if (authFormContainer) {
