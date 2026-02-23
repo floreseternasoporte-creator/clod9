@@ -1073,14 +1073,13 @@ setInterval(checkScheduledChapters, 60000);
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h2 class="text-base font-semibold">Notificaciones</h2>
+        <h2 class="text-base font-semibold">Avisos</h2>
         <div class="w-10"></div>
       </div>
     </div>
     <div class="flex-1 overflow-y-auto p-4">
       <div class="flex gap-2 mb-4">
-        <button class="notification-filter-button active" data-notification-filter="all" type="button">Todas</button>
-        <button class="notification-filter-button" data-notification-filter="recent" type="button">Recientes</button>
+        <button class="notification-filter-button active" data-notification-filter="notifications" type="button">Notificaciones</button>
         <button class="notification-filter-button" data-notification-filter="system" type="button">Sistema</button>
       </div>
       <div id="notifications-list" class="space-y-3">
@@ -1124,7 +1123,7 @@ setInterval(checkScheduledChapters, 60000);
         <div class="w-10"></div>
       </div>
       <div class="mt-3 grid grid-cols-2 bg-gray-100 rounded-xl p-1">
-        <button id="followers-tab-btn" onclick="switchFollowersTab('followers')" class="py-2 text-sm font-semibold rounded-lg bg-white text-gray-900">Seguidores</button>
+        <button id="followers-tab-btn" onclick="switchFollowersTab('followers')" class="py-2 text-sm font-semibold rounded-lg bg-white text-gray-900">Conexiones</button>
         <button id="following-tab-btn" onclick="switchFollowersTab('following')" class="py-2 text-sm font-semibold rounded-lg text-gray-600">Siguiendo</button>
       </div>
     </div>
@@ -2735,10 +2734,10 @@ setInterval(checkScheduledChapters, 60000);
   <div id="top-navbar" class="flex items-center justify-between px-4 py-3 sticky top-0 z-50" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 162, 255, 0.2);">
     <h1 id="app-name" class="text-2xl font-bold" style="color: #111111;">Atenis</h1>
     <div class="flex items-center space-x-4">
-      <button onclick="openNotifications()" aria-label="Notificaciones" class="relative w-6 h-6 hover:text-black transition" style="color: #111111;">
-        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M13.73 21a2 2 0 01-3.46 0" stroke-linecap="round" stroke-linejoin="round" />
+      <button onclick="openProfile()" aria-label="Perfil" class="relative w-6 h-6 hover:text-black transition" style="color: #111111;">
+        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 20c1.8-3.3 5-5 8-5s6.2 1.7 8 5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
     </div>
@@ -3063,9 +3062,12 @@ firebase.auth().onAuthStateChanged(user => {
         </svg>
         <span class="text-xs font-medium">Comunidad</span>
       </button>
-      <button id="nav-profile" data-section="profile" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
-        <img id="bottom-nav-profile-pic" src="https://via.placeholder.com/150" class="w-6 h-6 rounded-full object-cover mb-1" alt="Perfil">
-        <span class="text-xs font-medium">Perfil</span>
+      <button id="nav-alerts" data-section="alerts" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M13.73 21a2 2 0 01-3.46 0" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="text-xs font-medium">Avisos</span>
       </button>
     </div>
   </div>
@@ -3197,7 +3199,7 @@ firebase.auth().onAuthStateChanged(user => {
         case 'search': openSearch(); break;
         case 'create': openCreatorHub(); break;
         case 'community': openCommunity(); break;
-        case 'profile': openProfile(); break;
+        case 'alerts': openNotifications(); break;
       }
     }
 
@@ -6391,7 +6393,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
           </div>
           <button onclick="openMyFollowersModal()" class="rounded-xl border border-gray-200 py-2">
             <div id="profile-followers" class="font-semibold">0</div>
-            <div class="text-xs text-gray-500">Seguidores</div>
+            <div class="text-xs text-gray-500">Conexiones</div>
           </button>
         </div>
 
@@ -6477,7 +6479,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
             <div class="flex space-x-8">
               <button onclick="openMyFollowersModal()" class="text-center focus:outline-none hover:opacity-80 transition-opacity">
                 <div id="profile-followers-desktop" class="text-2xl font-bold text-white">0</div>
-                <div class="text-white text-opacity-80 text-sm">seguidores</div>
+                <div class="text-white text-opacity-80 text-sm">conexiones</div>
               </button>
               <button onclick="openMyFollowingModal()" class="text-center focus:outline-none hover:opacity-80 transition-opacity">
                 <div id="profile-following-desktop" class="text-2xl font-bold text-white">0</div>
@@ -6571,7 +6573,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
                   <span id="sidebar-total-views" class="font-bold text-[#00A2FF]">0</span>
                 </div>
                 <div class="flex items-center justify-between">
-                  <span class="text-gray-600">Seguidores</span>
+                  <span class="text-gray-600">Conexiones</span>
                   <span id="sidebar-followers-count" class="font-bold text-[#00A2FF]">0</span>
                 </div>
               </div>
@@ -7187,7 +7189,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <button onclick="openFollowersModal()" class="rounded-xl border border-gray-200 py-2">
         <div id="author-followers" class="font-semibold text-gray-900">0</div>
-        <div class="text-xs text-gray-500">Seguidores</div>
+        <div class="text-xs text-gray-500">Conexiones</div>
       </button>
     </div>
 
@@ -10537,7 +10539,7 @@ async function loadPhotos() {
               </svg>
             </div>
             <div>
-              <div class="font-semibold text-gray-900">Seguidores</div>
+              <div class="font-semibold text-gray-900">Conexiones</div>
               <div class="text-sm text-gray-500">Personas que te siguen</div>
             </div>
           </div>
@@ -11576,7 +11578,7 @@ async function likeNote(noteId) {
   });
   /*********************** NOTIFICACIONES **************************/
   let allNotifications = [];
-  let activeNotificationFilter = 'all';
+  let activeNotificationFilter = 'notifications';
   let notificationsUserId = null;
 
   function getNotificationType(notification) {
@@ -11605,7 +11607,7 @@ async function likeNote(noteId) {
     });
   }
 
-  function renderNotifications(filter = 'all') {
+  function renderNotifications(filter = 'notifications') {
     activeNotificationFilter = filter;
     const notificationsList = document.getElementById('notifications-list');
     if (!notificationsList) {
@@ -11613,9 +11615,6 @@ async function likeNote(noteId) {
     }
 
     const filteredNotifications = allNotifications.filter(notification => {
-      if (filter === 'recent') {
-        return isRecentNotification(notification);
-      }
       if (filter === 'system') {
         const type = getNotificationType(notification);
         return type === 'system' || type === 'info';
@@ -11631,7 +11630,7 @@ async function likeNote(noteId) {
     notificationsList.innerHTML = "";
 
     if (filteredNotifications.length === 0) {
-      notificationsList.innerHTML = '<div class="text-sm text-gray-500">No hay notificaciones para este filtro.</div>';
+      notificationsList.innerHTML = '<div class="text-sm text-gray-500">No hay avisos para esta sección.</div>';
       return;
     }
 
@@ -17016,7 +17015,7 @@ async function likeNote(noteId) {
         <p id="views-trend" class="text-sm text-green-500">+0%</p>
       </div>
       <div class="bg-gray-50 p-4 rounded-xl text-center">
-        <h3 class="text-[#00A2FF] text-sm mb-1">Seguidores</h3>
+        <h3 class="text-[#00A2FF] text-sm mb-1">Conexiones</h3>
         <p id="total-followers" class="text-2xl font-bold">0</p>
         <p id="followers-trend" class="text-sm text-green-500">+0%</p>
       </div>
@@ -17570,7 +17569,7 @@ function analyzeAccount() {
       <div class="grid grid-cols-3 gap-4 mb-6">
         <div class="bg-gray-50 p-4 rounded-xl text-center">
           <div class="text-2xl font-bold text-[#00A2FF]">${analysisData.followers}</div>
-          <div class="text-sm text-gray-600">Seguidores</div>
+          <div class="text-sm text-gray-600">Conexiones</div>
         </div>
         <div class="bg-gray-50 p-4 rounded-xl text-center">
           <div class="text-2xl font-bold text-[#00A2FF]">${analysisData.following}</div>
