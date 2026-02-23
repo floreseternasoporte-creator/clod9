@@ -3273,7 +3273,7 @@ firebase.auth().onAuthStateChanged(user => {
         <div class="atenis-chat-shell rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <p class="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">Workspace</p>
+              <p class="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">Atenis AI</p>
               <h3 class="text-sm font-semibold text-gray-900">Atenis AI Assistant</h3>
             </div>
             <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
@@ -4506,8 +4506,11 @@ function escapeHtml(text) {
   <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-bold">Comunidad</h1>
-      <button id="community-compose-btn" onclick="openNoteCreation()" class="bg-uber-black text-white w-11 h-11 rounded-2xl flex items-center justify-center shadow-uber-chip hover:bg-[#222222] transition-colors" aria-label="Crear post" title="Crear post">
-        <i class="fas fa-pen"></i>
+      <button id="community-compose-btn" onclick="openNoteCreation()" class="bg-white text-black border border-uber-line w-11 h-11 rounded-2xl flex items-center justify-center shadow-uber-chip hover:bg-gray-100 transition-colors" aria-label="Crear post" title="Crear post">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/>
+        </svg>
       </button>
     </div>
   </div>
@@ -4549,7 +4552,12 @@ function escapeHtml(text) {
       <div class="flex items-center justify-between p-3 border-b border-uber-line">
         <button onclick="switchCommunityTab('feed')" class="text-sm font-medium text-uber-muted">Cancelar</button>
         <h2 class="text-base font-semibold">Post</h2>
-        <button id="publish-note-btn" onclick="publishNote()" class="bg-uber-black text-white w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold hover:bg-[#222222]" aria-label="Publicar post" title="Publicar post"><i class="fas fa-paper-plane"></i></button>
+        <button id="publish-note-btn" onclick="publishNote()" class="bg-uber-black text-white w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold hover:bg-[#222222]" aria-label="Publicar post" title="Publicar post">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
       </div>
 
       <div class="p-4">
@@ -10669,6 +10677,7 @@ function openCreatorHub() {
 
     const isExplore = currentCommunityTab === 'explore';
     composeBtn.disabled = isExplore;
+    composeBtn.classList.toggle('hidden', isExplore);
     composeBtn.classList.toggle('opacity-40', isExplore);
     composeBtn.classList.toggle('cursor-not-allowed', isExplore);
     composeBtn.title = isExplore ? 'Publicar solo disponible en Para ti' : 'Crear post';
@@ -10798,7 +10807,7 @@ function openCreatorHub() {
 
       if (!limitsResult.canPerformAction) {
         publishButton.disabled = false;
-        publishButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
         alert(limitsResult.message);
         return;
       }
@@ -10851,7 +10860,7 @@ function openCreatorHub() {
           throw new Error(result.error || 'Error al publicar nota');
         }
         publishButton.disabled = false;
-        publishButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
         return;
       }
 
@@ -10860,7 +10869,7 @@ function openCreatorHub() {
       document.getElementById('image-preview').classList.add('hidden');
       switchCommunityTab('feed');
       publishButton.disabled = false;
-      publishButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+      publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
       alert('¡Nota publicada exitosamente!');
 
       // Recargar notas
@@ -10869,7 +10878,7 @@ function openCreatorHub() {
       console.error('Error al publicar:', error);
       alert('Error al publicar la nota. Por favor intenta de nuevo.');
       publishButton.disabled = false;
-      publishButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+      publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
     }
   }
 
