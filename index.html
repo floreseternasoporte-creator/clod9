@@ -13182,6 +13182,70 @@ async function likeNote(noteId) {
       submitButton.textContent = 'Crear cuenta';
     }
   }
+  let currentUserProfileRef = null;
+  let currentUserProfileListener = null;
+
+  function applyCurrentUserProfileData(data = {}) {
+    let displayName = data.username || "Usuario";
+    if (data.founder) {
+      displayName += ' <span class="founder-tag">Fundador</span>';
+    }
+    displayName += getVerificationIcon(data.email);
+
+    const profileDisplayName = document.getElementById('profile-display-name');
+    const profileHandle = document.getElementById('profile-username');
+    const profileHeaderHandle = document.getElementById('profile-username-header');
+    const menuImg = document.getElementById('menu-profile-image');
+    const menuUsername = document.getElementById('menu-profile-username');
+    const closeUsername = document.getElementById('close-account-username');
+
+    if (profileDisplayName) profileDisplayName.innerHTML = (data.name || data.username || 'Usuario') + getVerificationIcon(data.email || '');
+    if (profileHandle) profileHandle.textContent = '@' + (data.username || 'usuario');
+    if (profileHeaderHandle) profileHeaderHandle.textContent = '@' + (data.username || 'usuario');
+    if (menuUsername) menuUsername.textContent = '@' + (data.username || 'usuario');
+    if (closeUsername) closeUsername.textContent = '@' + (data.username || 'usuario');
+
+    document.getElementById('profile-followers').textContent = formatNumber(data.followersCount || 0);
+    document.getElementById('profile-following').textContent = formatNumber(data.followingCount || 0);
+
+    const usernameDesktop = document.getElementById('profile-username-desktop');
+    const followersDesktop = document.getElementById('profile-followers-desktop');
+    const followingDesktop = document.getElementById('profile-following-desktop');
+    if (usernameDesktop) usernameDesktop.innerHTML = displayName;
+    if (followersDesktop) followersDesktop.textContent = formatNumber(data.followersCount || 0);
+    if (followingDesktop) followingDesktop.textContent = formatNumber(data.followingCount || 0);
+
+    const bioElement = document.getElementById('profile-bio');
+    if (bioElement) bioElement.textContent = data.bio || '';
+
+    const userProfileImage = data.profileImage || 'https://via.placeholder.com/150';
+    const profileImage = document.getElementById('profile-image');
+    const profileImageDesktop = document.getElementById('profile-image-desktop');
+    if (profileImage) profileImage.src = userProfileImage;
+    if (profileImageDesktop) profileImageDesktop.src = userProfileImage;
+    if (menuImg) menuImg.src = userProfileImage;
+  }
+
+  function detachCurrentUserProfileListener() {
+    if (currentUserProfileRef && currentUserProfileListener) {
+      currentUserProfileRef.off('value', currentUserProfileListener);
+    }
+    currentUserProfileRef = null;
+    currentUserProfileListener = null;
+  }
+
+  function attachCurrentUserProfileListener(user) {
+    detachCurrentUserProfileListener();
+    if (!user) return;
+
+    currentUserProfileRef = firebase.database().ref('users/' + user.uid);
+    currentUserProfileListener = snapshot => {
+      const data = snapshot.val() || {};
+      applyCurrentUserProfileData(data);
+    };
+    currentUserProfileRef.on('value', currentUserProfileListener);
+  }
+
   firebase.auth().onAuthStateChanged(user => {
     const authFormContainer = document.getElementById('auth-form');
     const mainAppContainer = document.getElementById('main-app');
@@ -13200,6 +13264,8 @@ async function likeNote(noteId) {
         }
       }, 1000);
 
+      attachCurrentUserProfileListener(user);
+
       firebase.database().ref('users/' + user.uid).once('value').then(snapshot => {
         const data = snapshot.val();
         if (data && data.blocked && data.blockedUntil && Date.now() < data.blockedUntil) {
@@ -13215,47 +13281,13 @@ async function likeNote(noteId) {
         initializeFeedSections();
 
         if (data) {
-          let displayName = data.username || "Usuario";
-          if (data.founder) {
-            displayName += ' <span class="founder-tag">Fundador</span>';
-          }
-          displayName += getVerificationIcon(data.email);
-
-          // Actualizar perfil móvil
-          const profileDisplayName = document.getElementById('profile-display-name');
-          const profileHandle = document.getElementById('profile-username');
-          const profileHeaderHandle = document.getElementById('profile-username-header');
-          if (profileDisplayName) profileDisplayName.innerHTML = (data.name || data.username || 'Usuario') + getVerificationIcon(data.email || '');
-          if (profileHandle) profileHandle.textContent = '@' + (data.username || 'usuario');
-          if (profileHeaderHandle) profileHeaderHandle.textContent = '@' + (data.username || 'usuario');
-          document.getElementById('profile-followers').textContent = formatNumber(data.followersCount || 0);
-          document.getElementById('profile-following').textContent = formatNumber(data.followingCount || 0);
-
-          // Actualizar perfil desktop
-          const usernameDesktop = document.getElementById('profile-username-desktop');
-          const followersDesktop = document.getElementById('profile-followers-desktop');
-          const followingDesktop = document.getElementById('profile-following-desktop');
-
-          if (usernameDesktop) usernameDesktop.innerHTML = displayName;
-          if (followersDesktop) followersDesktop.textContent = formatNumber(data.followersCount || 0);
-          if (followingDesktop) followingDesktop.textContent = formatNumber(data.followingCount || 0);
-
-          if (data.bio) {
-            const bioElement = document.getElementById('profile-bio');
-            if (bioElement) bioElement.textContent = data.bio;
-          }
-          if (data.profileImage) {
-            document.getElementById('profile-image').src = data.profileImage;
-            const profileImageDesktop = document.getElementById('profile-image-desktop');
-            if (profileImageDesktop) profileImageDesktop.src = data.profileImage;
-          }
-
           // Cargar marco del perfil del usuario
           loadUserFrame(user.uid, 'profile-frame');
           loadUserFrame(user.uid, 'profile-frame-desktop');
         }
       });
     } else {
+      detachCurrentUserProfileListener();
       authFormContainer.style.display = 'flex';
       mainAppContainer.style.display = 'none';
     }
