@@ -35,7 +35,7 @@ exports.handler = async (event) => {
     const current = await firebaseRequest(path);
     if (!current) return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Story not found' }) };
 
-    const allowed = ['title', 'category', 'rating', 'language', 'synopsis', 'views', 'likes', 'coverImage'];
+    const allowed = ['title', 'category', 'rating', 'language', 'synopsis', 'views', 'likes', 'coverImage', 'isPrivate', 'timestamp'];
     const payload = { updatedAt: Date.now() };
     for (const key of allowed) if (Object.prototype.hasOwnProperty.call(updates, key)) payload[key] = updates[key];
 
