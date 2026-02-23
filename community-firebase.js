@@ -58,6 +58,38 @@ function setPublishButtonState(isLoading) {
     : '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>';
 }
 
+async function fetchFirebaseNotes(path, limit = 50) {
+  const notes = [];
+  const snap = await firebase.database().ref(path).orderByChild('timestamp').limitToLast(limit).once('value');
+  snap.forEach(child => notes.push({ id: child.key, noteId: child.key, ...child.val() }));
+  return notes;
+}
+
+function normalizeNoteShape(note) {
+  return {
+    ...note,
+    id: note.id || note.noteId,
+    noteId: note.id || note.noteId,
+    userId: note.userId || note.authorId,
+    authorId: note.authorId || note.userId
+  };
+}
+
+function mergeNotesDedup(notes) {
+  const map = new Map();
+  notes.forEach(raw => {
+    const note = normalizeNoteShape(raw);
+    if (!note.id) return;
+
+    const current = map.get(note.id);
+    if (!current || Number(note.timestamp || 0) >= Number(current.timestamp || 0)) {
+      map.set(note.id, note);
+    }
+  });
+
+  return Array.from(map.values()).sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
+}
+
 async function publishNote() {
   const content = document.getElementById('note-content')?.value.trim() || '';
   const imageInput = document.getElementById('note-image');
@@ -96,10 +128,32 @@ async function publishNote() {
       timestamp: Date.now()
     };
 
-    const ref = await firebase.database().ref('communityNotes').push(noteData);
+    let noteId = null;
 
-    if (typeof moderarContenidoAutomaticamente === 'function') {
-      moderarContenidoAutomaticamente(ref.key, content);
+    // Priorizar API server-side para evitar bloqueos por reglas de Firebase en cliente.
+    try {
+      const response = await fetch('/api/community-notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(noteData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API community-notes devolvió ${response.status}`);
+      }
+
+      const payload = await response.json();
+      noteId = payload?.note?.id || null;
+    } catch (apiError) {
+      console.warn('No se pudo publicar por API; fallback a Firebase cliente:', apiError);
+      // Guardar en snake_case para alinearse con API y también espejar en camelCase para compatibilidad.
+      const ref = await firebase.database().ref('community_notes').push(noteData);
+      await firebase.database().ref(`communityNotes/${ref.key}`).set(noteData);
+      noteId = ref.key;
+    }
+
+    if (noteId && typeof moderarContenidoAutomaticamente === 'function') {
+      moderarContenidoAutomaticamente(noteId, content);
     }
 
     const noteContent = document.getElementById('note-content');
@@ -130,10 +184,31 @@ async function loadNotes() {
   feedContainer.innerHTML = '<div class="p-4 text-center text-gray-500">Cargando...</div>';
 
   try {
-    const snap = await firebase.database().ref('communityNotes').orderByChild('timestamp').limitToLast(50).once('value');
-    const notes = [];
-    snap.forEach(child => notes.push({ id: child.key, noteId: child.key, ...child.val() }));
-    notes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    let notes = [];
+
+    try {
+      const response = await fetch('/api/community-notes?limit=50');
+      if (!response.ok) {
+        throw new Error(`API community-notes devolvió ${response.status}`);
+      }
+
+      const payload = await response.json();
+      notes = (payload.notes || []).map(normalizeNoteShape);
+
+      const [snakeCaseNotes, camelCaseNotes] = await Promise.all([
+        fetchFirebaseNotes('community_notes', 50).catch(() => []),
+        fetchFirebaseNotes('communityNotes', 50).catch(() => [])
+      ]);
+
+      notes = mergeNotesDedup([...notes, ...snakeCaseNotes, ...camelCaseNotes]);
+    } catch (apiError) {
+      console.warn('No se pudo cargar feed por API; fallback a Firebase cliente:', apiError);
+      const [snakeCaseNotes, camelCaseNotes] = await Promise.all([
+        fetchFirebaseNotes('community_notes', 50).catch(() => []),
+        fetchFirebaseNotes('communityNotes', 50).catch(() => [])
+      ]);
+      notes = mergeNotesDedup([...snakeCaseNotes, ...camelCaseNotes]);
+    }
 
     feedContainer.innerHTML = '';
 
@@ -182,23 +257,50 @@ async function likeNote(noteId) {
   }
 
   try {
-    const noteRef = firebase.database().ref('communityNotes/' + noteId);
-    const tx = await noteRef.transaction(note => {
-      if (!note) return note;
-      if (!note.likedBy) note.likedBy = {};
-      if (note.likedBy[user.uid]) return note;
-      note.likedBy[user.uid] = true;
-      note.likes = (note.likes || 0) + 1;
-      return note;
-    });
+    let updated = null;
 
-    if (!tx.committed || !tx.snapshot.exists()) return;
+    try {
+      const response = await fetch('/api/community-notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'like', noteId, userId: user.uid })
+      });
 
-    const updated = tx.snapshot.val() || {};
+      if (!response.ok) {
+        throw new Error(`API community-notes devolvió ${response.status}`);
+      }
+
+      const payload = await response.json();
+      updated = payload.note || null;
+    } catch (apiError) {
+      console.warn('No se pudo dar like por API; fallback a Firebase cliente:', apiError);
+
+      const runLikeTransaction = async (path) => {
+        const tx = await firebase.database().ref(path + '/' + noteId).transaction(note => {
+          if (!note) return note;
+          if (!note.likedBy) note.likedBy = {};
+          if (note.likedBy[user.uid]) return note;
+          note.likedBy[user.uid] = true;
+          note.likes = (note.likes || 0) + 1;
+          return note;
+        });
+        if (!tx.committed || !tx.snapshot.exists()) return null;
+        return tx.snapshot.val() || null;
+      };
+
+      updated = await runLikeTransaction('community_notes');
+      if (!updated) {
+        updated = await runLikeTransaction('communityNotes');
+      }
+      if (!updated) return;
+    }
+
+    if (!updated) return;
+
     const likeCount = document.getElementById(`like-count-${noteId}`);
     const likeBtn = document.getElementById(`like-btn-${noteId}`);
     if (likeCount) likeCount.textContent = updated.likes || 0;
-    if (likeBtn && updated.likedBy && updated.likedBy[user.uid]) {
+    if (likeBtn) {
       likeBtn.style.opacity = '0.6';
       likeBtn.style.pointerEvents = 'none';
     }
