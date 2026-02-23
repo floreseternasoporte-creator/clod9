@@ -67,18 +67,23 @@ exports.handler = async (event) => {
 
       const payload = body.chapter || {};
       const nextChapterId = chapterId || `chapter_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const chapterPath = `${base}/${encodeURIComponent(nextChapterId)}`;
+      const existingChapter = chapterId ? (await firebaseRequest(chapterPath)) || {} : {};
+
       const chapter = {
+        ...existingChapter,
         id: nextChapterId,
         storyId,
-        chapterNumber: payload.chapterNumber,
-        content: payload.content || '',
-        createdAt: payload.createdAt || Date.now(),
-        status: payload.status || 'published',
-        ratings: payload.ratings || {},
-        views: payload.views || 0
+        chapterNumber: payload.chapterNumber ?? existingChapter.chapterNumber ?? 1,
+        content: payload.content ?? existingChapter.content ?? '',
+        createdAt: payload.createdAt ?? existingChapter.createdAt ?? Date.now(),
+        status: payload.status ?? existingChapter.status ?? 'published',
+        ratings: payload.ratings ?? existingChapter.ratings ?? {},
+        views: payload.views ?? existingChapter.views ?? 0,
+        updatedAt: Date.now()
       };
 
-      await firebaseRequest(`${base}/${encodeURIComponent(nextChapterId)}`, { method: 'PUT', body: chapter });
+      await firebaseRequest(chapterPath, { method: 'PUT', body: chapter });
       return response(200, { success: true, chapter });
     }
 
