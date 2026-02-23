@@ -3915,7 +3915,7 @@ function enhanceTranscriptPrecision(rawText, finalize = false) {
   };
 
   Object.entries(cleanupMap).forEach(([needle, replacement]) => {
-    const escaped = needle.replace(/[.*+?^${}()|[\]\]/g, '\\$&');
+    const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     text = text.replace(new RegExp(escaped, 'gi'), replacement);
   });
 
@@ -5298,8 +5298,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
   // Función mejorada para abrir el generador
   function openImageGenerator() {
     document.getElementById('image-generator-modal').style.display = 'block';
-  }
-
     // Cambiar el botón para modo publicación (comunidad)
     const useImageSection = document.getElementById('use-image-section');
     if (useImageSection) {
@@ -5331,8 +5329,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
 
   function openImageGeneratorForCreation() {
     document.getElementById('image-generator-modal').style.display = 'block';
-  }
-
     // Cambiar el botón para modo creación (descargar/compartir)
     const useImageSection = document.getElementById('use-image-section');
     if (useImageSection) {
