@@ -13,6 +13,7 @@ const allowedRoutes = new Set([
   'likes',
   'notes',
   'notifications',
+  'placeholder',
   'scheduled-chapters',
   'send-support-email',
   'update-story',
@@ -24,7 +25,9 @@ const allowedRoutes = new Set([
 
 const getRoute = (query) => {
   const rawPath = query?.path || query?.fn || [];
-  return Array.isArray(rawPath) ? rawPath[0] : rawPath;
+  const route = Array.isArray(rawPath) ? rawPath[0] : rawPath;
+  if (typeof route !== 'string') return route;
+  return route.split('/')[0];
 };
 
 const loadRouteModule = (route) => {
