@@ -13053,7 +13053,7 @@ async function likeNote(noteId) {
       });
   }
 
-  function loginUser() {
+  async function loginUser() {
     const email = document.getElementById('emailInput').value;
     const password = document.getElementById('passwordInput').value;
     const submitButton = document.getElementById('submitButton');
@@ -13063,16 +13063,31 @@ async function likeNote(noteId) {
     submitButton.textContent = 'Iniciando...';
     authError.classList.add('hidden');
 
-    firebase.auth().signInWithEmailAndPassword(email, password)
-      .then(() => {
-        // Login exitoso
-      })
-      .catch(error => {
-        authError.textContent = 'Correo o contraseña incorrectos';
-        authError.classList.remove('hidden');
-        submitButton.disabled = false;
-        submitButton.textContent = 'Iniciar sesión';
-      });
+    try {
+      await firebase.auth().signInWithEmailAndPassword(email, password);
+
+      // Fallback inmediato: evita quedar pegado en "Iniciando..." si el listener tarda o falla.
+      setAuthScreensVisibility(true);
+      const mainAppContainer = document.getElementById('main-app');
+      if (mainAppContainer) {
+        mainAppContainer.style.display = 'flex';
+        mainAppContainer.style.opacity = '1';
+      }
+
+      if (typeof openHome === 'function') {
+        openHome();
+      }
+    } catch (error) {
+      authError.textContent = 'Correo o contraseña incorrectos';
+      authError.classList.remove('hidden');
+      submitButton.disabled = false;
+      submitButton.textContent = 'Iniciar sesión';
+      return;
+    }
+
+    // El usuario ya entró; reactivar el botón por limpieza de estado UI.
+    submitButton.disabled = false;
+    submitButton.textContent = 'Continuar';
   }
 
   function switchLoginTab(tab) {
