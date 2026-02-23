@@ -1110,7 +1110,7 @@ setInterval(checkScheduledChapters, 60000);
   <img src="https://ideogram.ai/assets/image/lossless/response/0-Re3lMzQ6mmstIxlRxb4Q" alt="Usuario bloqueado">
 </div>
 
-<!-- MODAL DE LISTA DE SEGUIDORES -->
+<!-- MODAL DE CONEXIONES (SEGUIDORES / SIGUIENDO) -->
 <div id="followers-modal" class="fixed inset-0 overflow-y-auto z-50 hidden bg-white" style="z-index: 9999;">
   <div class="h-full flex flex-col">
     <div class="sticky top-0 bg-white border-b border-gray-200 p-3 z-10">
@@ -1120,32 +1120,17 @@ setInterval(checkScheduledChapters, 60000);
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h2 class="text-base font-semibold">Seguidores</h2>
+        <h2 class="text-base font-semibold">Conexiones</h2>
         <div class="w-10"></div>
+      </div>
+      <div class="mt-3 grid grid-cols-2 bg-gray-100 rounded-xl p-1">
+        <button id="followers-tab-btn" onclick="switchFollowersTab('followers')" class="py-2 text-sm font-semibold rounded-lg bg-white text-gray-900">Seguidores</button>
+        <button id="following-tab-btn" onclick="switchFollowersTab('following')" class="py-2 text-sm font-semibold rounded-lg text-gray-600">Siguiendo</button>
       </div>
     </div>
     <div class="flex-1 overflow-y-auto p-4">
       <div id="followers-list" class="space-y-3"></div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL DE LISTA DE SIGUIENDO -->
-<div id="following-modal" class="fixed inset-0 overflow-y-auto z-50 hidden bg-white" style="z-index: 9999;">
-  <div class="h-full flex flex-col">
-    <div class="sticky top-0 bg-white border-b border-gray-200 p-3 z-10">
-      <div class="flex items-center justify-between">
-        <button onclick="closeFollowingModal()" class="p-2">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h2 class="text-base font-semibold">Siguiendo</h2>
-        <div class="w-10"></div>
-      </div>
-    </div>
-    <div class="flex-1 overflow-y-auto p-4">
-      <div id="following-list" class="space-y-3"></div>
+      <div id="following-list" class="space-y-3 hidden"></div>
     </div>
   </div>
 </div>
@@ -4544,14 +4529,14 @@ function escapeHtml(text) {
       <section>
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-base font-bold text-uber-black">Historias en tendencia</h3>
-          <span class="text-xs text-uber-muted">Tiempo real</span>
+
         </div>
         <div id="explore-stories" class="grid grid-cols-2 gap-3"></div>
       </section>
       <section>
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-base font-bold text-uber-black">Autores populares</h3>
-          <span class="text-xs text-uber-muted">Actualizado ahora</span>
+
         </div>
         <div id="explore-authors" class="space-y-2"></div>
       </section>
@@ -6393,29 +6378,28 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     <div class="p-4">
       <!-- Sección de perfil -->
       <div class="mb-4">
-        <div class="flex items-start mb-4">
-          <img id="profile-image" src="https://via.placeholder.com/150" class="w-20 h-20 rounded-full object-cover mr-4" style="border: 2px solid #00A2FF;" alt="Foto de perfil">
-
-          <div class="flex-1">
-            <div class="flex justify-around mb-3">
-              <button onclick="openMyStoriesModal()" class="text-center">
-                <div id="profile-stories-count" class="font-semibold">0</div>
-                <div class="text-xs text-gray-500">Historias</div>
-              </button>
-              <button onclick="openMyFollowersModal()" class="text-center">
-                <div id="profile-followers" class="font-semibold">0</div>
-                <div class="text-xs text-gray-500">Seguidores</div>
-              </button>
-              <button onclick="openMyFollowingModal()" class="text-center">
-                <div id="profile-following" class="font-semibold">0</div>
-                <div class="text-xs text-gray-500">Siguiendo</div>
-              </button>
-            </div>
-          </div>
+        <div class="flex flex-col items-center text-center mb-4">
+          <img id="profile-image" src="https://via.placeholder.com/150" class="w-24 h-24 rounded-full object-cover" style="border: 2px solid #00A2FF;" alt="Foto de perfil">
+          <h2 id="profile-display-name" class="font-semibold text-gray-900 mt-3">Nombre</h2>
+          <p id="profile-username" class="text-sm text-gray-600">@nombre_usuario</p>
         </div>
 
-        <h2 id="profile-username" class="font-semibold mb-1">@nombre_usuario</h2>
-        <p id="profile-bio" class="text-sm text-gray-600 mb-3"></p>
+        <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+          <button onclick="openMyStoriesModal()" class="rounded-xl border border-gray-200 py-2">
+            <div id="profile-stories-count" class="font-semibold">0</div>
+            <div class="text-xs text-gray-500">Historias</div>
+          </button>
+          <div class="rounded-xl border border-gray-200 py-2">
+            <div id="profile-notes-count" class="font-semibold">0</div>
+            <div class="text-xs text-gray-500">Notas</div>
+          </div>
+          <button onclick="openMyFollowersModal()" class="rounded-xl border border-gray-200 py-2">
+            <div id="profile-followers" class="font-semibold">0</div>
+            <div class="text-xs text-gray-500">Seguidores</div>
+          </button>
+        </div>
+
+        <p id="profile-bio" class="text-sm text-gray-600 mb-3 text-center"></p>
 
         <div class="flex space-x-2">
           <button onclick="openProfileEdit()" class="flex-1 bg-gray-100 text-black text-sm font-semibold py-2 rounded-lg">
@@ -7190,28 +7174,30 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 
   <div class="p-4">
-    <div class="flex items-center mb-4">
-      <img id="author-profile-image" src="https://via.placeholder.com/150" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
-      <div class="flex-1 grid grid-cols-3 gap-4 ml-6 text-center">
-        <div>
-          <div id="author-stories-count" class="font-semibold text-gray-900">0</div>
-          <div class="text-xs text-gray-500">historias</div>
-        </div>
-        <div onclick="openFollowersModal()" class="cursor-pointer">
-          <div id="author-followers" class="font-semibold text-gray-900">0</div>
-          <div class="text-xs text-gray-500">seguidores</div>
-        </div>
-        <div onclick="openFollowingModal()" class="cursor-pointer">
-          <div id="author-following" class="font-semibold text-gray-900">0</div>
-          <div class="text-xs text-gray-500">siguiendo</div>
-        </div>
+    <div class="flex flex-col items-center text-center mb-4">
+      <img id="author-profile-image" src="https://via.placeholder.com/150" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200">
+      <h2 id="author-profile-name" class="font-semibold text-base text-gray-900 mt-3"></h2>
+      <p id="author-profile-handle" class="text-sm text-gray-600 mt-0.5">@usuario</p>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+      <div class="rounded-xl border border-gray-200 py-2">
+        <div id="author-stories-count" class="font-semibold text-gray-900">0</div>
+        <div class="text-xs text-gray-500">Historias</div>
       </div>
+      <div class="rounded-xl border border-gray-200 py-2">
+        <div id="author-notes-count" class="font-semibold text-gray-900">0</div>
+        <div class="text-xs text-gray-500">Notas</div>
+      </div>
+      <button onclick="openFollowersModal()" class="rounded-xl border border-gray-200 py-2">
+        <div id="author-followers" class="font-semibold text-gray-900">0</div>
+        <div class="text-xs text-gray-500">Seguidores</div>
+      </button>
     </div>
 
     <div class="mb-4">
-      <h2 id="author-profile-name" class="font-semibold text-sm text-gray-900"></h2>
-      <div id="author-bio" class="text-sm text-gray-900 mt-1"></div>
-      <div id="author-social-links" class="flex space-x-2 mt-2"></div>
+      <div id="author-bio" class="text-sm text-gray-900 mt-1 text-center"></div>
+      <div id="author-social-links" class="flex space-x-2 mt-2 justify-center"></div>
     </div>
 
     <button id="follow-button" onclick="followAuthor()" class="w-full bg-[#00A2FF] text-white text-sm font-semibold py-2 rounded-lg">
@@ -10332,6 +10318,12 @@ async function loadPhotos() {
         profileFollowing.textContent = formatNumber(stats.followingCount);
       }
 
+      // Cargar contador de notas en comunidad
+      firebase.database().ref('communityNotes').orderByChild('authorId').equalTo(userId).once('value').then((notesSnap) => {
+        const notesCountEl = document.getElementById('profile-notes-count');
+        if (notesCountEl) notesCountEl.textContent = formatNumber(notesSnap.numChildren() || 0);
+      });
+
       // Cargar las historias del usuario
       loadUserStoriesFromFirebase(userId);
     } catch (error) {
@@ -12576,7 +12568,12 @@ async function likeNote(noteId) {
           displayName += getVerificationIcon(data.email);
 
           // Actualizar perfil móvil
-          document.getElementById('profile-username').innerHTML = displayName;
+          const profileDisplayName = document.getElementById('profile-display-name');
+          const profileHandle = document.getElementById('profile-username');
+          const profileHeaderHandle = document.getElementById('profile-username-header');
+          if (profileDisplayName) profileDisplayName.innerHTML = (data.name || data.username || 'Usuario') + getVerificationIcon(data.email || '');
+          if (profileHandle) profileHandle.textContent = '@' + (data.username || 'usuario');
+          if (profileHeaderHandle) profileHeaderHandle.textContent = '@' + (data.username || 'usuario');
           document.getElementById('profile-followers').textContent = formatNumber(data.followersCount || 0);
           document.getElementById('profile-following').textContent = formatNumber(data.followingCount || 0);
 
@@ -12591,7 +12588,7 @@ async function likeNote(noteId) {
 
           if (data.bio) {
             const bioElement = document.getElementById('profile-bio');
-            if (bioElement) bioElement.value = data.bio;
+            if (bioElement) bioElement.textContent = data.bio;
           }
           if (data.profileImage) {
             document.getElementById('profile-image').src = data.profileImage;
@@ -13695,16 +13692,25 @@ async function likeNote(noteId) {
         document.getElementById('blocked-error-modal').style.display = "flex";
         return;
       }
-      let authorNameHTML = authorData.username || 'Autor desconocido';
+      let authorNameHTML = authorData.name || authorData.username || 'Autor desconocido';
       if (authorData.founder) {
         authorNameHTML += ' <span class="founder-tag">Fundador</span>';
       }
       authorNameHTML += getVerificationIcon(authorData.email || "");
       document.getElementById('author-profile-name').innerHTML = authorNameHTML;
+      const authorHandle = document.getElementById('author-profile-handle');
+      if (authorHandle) authorHandle.textContent = '@' + (authorData.username || 'usuario');
       document.getElementById('author-profile-image').src = authorData.profileImage || 'https://via.placeholder.com/150';
       document.getElementById('author-followers').textContent = formatNumber(authorData.followersCount || 0);
-      document.getElementById('author-following').textContent = formatNumber(authorData.followingCount || 0);
-      document.getElementById('author-rated').textContent = authorData.ratedCount || 0;
+      const authorFollowingEl = document.getElementById('author-following');
+      if (authorFollowingEl) authorFollowingEl.textContent = formatNumber(authorData.followingCount || 0);
+      const authorRatedEl = document.getElementById('author-rated');
+      if (authorRatedEl) authorRatedEl.textContent = authorData.ratedCount || 0;
+
+      firebase.database().ref('communityNotes').orderByChild('authorId').equalTo(authorId).once('value').then((notesSnap) => {
+        const authorNotesCount = document.getElementById('author-notes-count');
+        if (authorNotesCount) authorNotesCount.textContent = formatNumber(notesSnap.numChildren() || 0);
+      });
 
       // Cargar marco del perfil del autor en tiempo real
       loadUserFrame(authorId, 'author-profile-frame');
@@ -13975,57 +13981,124 @@ async function likeNote(noteId) {
     });
   }
 
+  function loadFollowersForCurrentProfile() {
+    const followersListDiv = document.getElementById('followers-list');
+    if (!followersListDiv || !currentViewedAuthorId) return;
+
+    followersListDiv.innerHTML = '';
+    firebase.database().ref('followers/' + currentViewedAuthorId).once('value').then(snapshot => {
+      if (snapshot.numChildren() === 0) {
+        followersListDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Este autor aún no tiene seguidores.</p>';
+        return;
+      }
+
+      snapshot.forEach(child => {
+        const followerUserId = child.key;
+        firebase.database().ref('users/' + followerUserId).once('value').then(userSnap => {
+          const userData = userSnap.val();
+          if (!userData) return;
+
+          const followerDiv = document.createElement('div');
+          followerDiv.className = 'flex items-center justify-between p-4 bg-white hover:bg-gray-50 rounded-xl border border-gray-200 transition-all';
+          const verifiedIcon = getVerificationIcon(userData.email || "");
+
+          followerDiv.innerHTML = `
+            <div class="flex items-center space-x-3">
+              <img src="${userData.profileImage || 'https://via.placeholder.com/50'}"
+                   alt="${userData.username}"
+                   class="w-12 h-12 rounded-full object-cover border-2 border-[#00A2FF]"
+                   onclick="closeFollowersModal(); viewAuthorProfile('${followerUserId}');">
+              <div onclick="closeFollowersModal(); viewAuthorProfile('${followerUserId}');" class="cursor-pointer">
+                <p class="font-semibold text-gray-800">${userData.username || 'Usuario'}${verifiedIcon}</p>
+                <p class="text-sm text-gray-500">@${userData.username || 'usuario'}</p>
+              </div>
+            </div>
+            <button onclick="followUser('${followerUserId}')" class="bg-[#00A2FF] hover:bg-[#e02849] text-white px-4 py-2 rounded-full transition-colors">
+              <i class="fa-solid fa-user-plus"></i><span class="ml-1">Seguir</span>
+            </button>
+          `;
+          followersListDiv.appendChild(followerDiv);
+        });
+      });
+    });
+  }
+
+  function loadFollowingForCurrentProfile() {
+    const followingListDiv = document.getElementById('following-list');
+    if (!followingListDiv || !currentViewedAuthorId) return;
+
+    followingListDiv.innerHTML = '';
+    firebase.database().ref('following/' + currentViewedAuthorId).once('value').then(snapshot => {
+      if (snapshot.numChildren() === 0) {
+        followingListDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Este autor aún no sigue a nadie.</p>';
+        return;
+      }
+
+      snapshot.forEach(child => {
+        const followingUserId = child.key;
+        firebase.database().ref('users/' + followingUserId).once('value').then(userSnap => {
+          const userData = userSnap.val();
+          if (!userData) return;
+
+          const followingDiv = document.createElement('div');
+          followingDiv.className = 'flex items-center justify-between p-4 bg-white hover:bg-gray-50 rounded-xl border border-gray-200 transition-all';
+          const verifiedIcon = getVerificationIcon(userData.email || "");
+
+          followingDiv.innerHTML = `
+            <div class="flex items-center space-x-3">
+              <img src="${userData.profileImage || 'https://via.placeholder.com/50'}"
+                   alt="${userData.username}"
+                   class="w-12 h-12 rounded-full object-cover border-2 border-[#00A2FF]"
+                   onclick="closeFollowingModal(); viewAuthorProfile('${followingUserId}');">
+              <div onclick="closeFollowingModal(); viewAuthorProfile('${followingUserId}');" class="cursor-pointer">
+                <p class="font-semibold text-gray-800">${userData.username || 'Usuario'}${verifiedIcon}</p>
+                <p class="text-sm text-gray-500">@${userData.username || 'usuario'}</p>
+              </div>
+            </div>
+            <button onclick="followUser('${followingUserId}')" class="bg-[#00A2FF] hover:bg-[#e02849] text-white px-4 py-2 rounded-full transition-colors">
+              <i class="fa-solid fa-user-plus"></i><span class="ml-1">Seguir</span>
+            </button>
+          `;
+          followingListDiv.appendChild(followingDiv);
+        });
+      });
+    });
+  }
+
+  function switchFollowersTab(tab) {
+    const followersList = document.getElementById('followers-list');
+    const followingList = document.getElementById('following-list');
+    const followersBtn = document.getElementById('followers-tab-btn');
+    const followingBtn = document.getElementById('following-tab-btn');
+
+    if (!followersList || !followingList || !followersBtn || !followingBtn) return;
+
+    const followersActive = tab === 'followers';
+    if (followersActive) {
+      loadFollowersForCurrentProfile();
+    } else {
+      loadFollowingForCurrentProfile();
+    }
+    followersList.classList.toggle('hidden', !followersActive);
+    followingList.classList.toggle('hidden', followersActive);
+
+    followersBtn.className = `py-2 text-sm font-semibold rounded-lg ${followersActive ? 'bg-white text-gray-900' : 'text-gray-600'}`;
+    followingBtn.className = `py-2 text-sm font-semibold rounded-lg ${!followersActive ? 'bg-white text-gray-900' : 'text-gray-600'}`;
+  }
+
   function openFollowingModal() {
     if (!currentViewedAuthorId) {
       alert("Por favor, selecciona un perfil primero.");
       return;
     }
 
-    firebase.database().ref('following/' + currentViewedAuthorId).once('value').then(snapshot => {
-      const followingListDiv = document.getElementById('following-list');
-      followingListDiv.innerHTML = '';
-
-      if (snapshot.numChildren() === 0) {
-        followingListDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Este autor aún no sigue a nadie.</p>';
-      } else {
-        snapshot.forEach(child => {
-          const followingUserId = child.key;
-          firebase.database().ref('users/' + followingUserId).once('value').then(userSnap => {
-            const userData = userSnap.val();
-            if (!userData) return;
-
-            const followingDiv = document.createElement('div');
-            followingDiv.className = 'flex items-center justify-between p-4 bg-white hover:bg-gray-50 rounded-xl border border-gray-200 transition-all';
-            let verifiedIcon = getVerificationIcon(userData.email || "");
-
-            followingDiv.innerHTML = `
-              <div class="flex items-center space-x-3">
-                <img src="${userData.profileImage || 'https://via.placeholder.com/50'}"
-                     alt="${userData.username}"
-                     class="w-12 h-12 rounded-full object-cover border-2 border-[#00A2FF]"
-                     onclick="closeFollowingModal(); viewAuthorProfile('${followingUserId}');">
-                <div onclick="closeFollowingModal(); viewAuthorProfile('${followingUserId}');" class="cursor-pointer">
-                  <p class="font-semibold text-gray-800">${userData.username || 'Usuario'}${verifiedIcon}</p>
-                  <p class="text-sm text-gray-500">@${userData.username || 'usuario'}</p>
-                </div>
-              </div>
-              <button onclick="followUser('${followingUserId}')"
-                      class="bg-[#00A2FF] hover:bg-[#e02849] text-white px-4 py-2 rounded-full transition-colors">
-                <i class="fa-solid fa-user-plus"></i>
-                <span class="ml-1">Seguir</span>
-              </button>
-            `;
-            followingListDiv.appendChild(followingDiv);
-          });
-        });
-      }
-
-      document.getElementById('following-modal').style.display = "block";
-    });
+    document.getElementById('followers-modal').style.display = "block";
+    loadFollowingForCurrentProfile();
+    switchFollowersTab('following');
   }
 
   function closeFollowingModal() {
-    document.getElementById('following-modal').style.display = "none";
+    closeFollowersModal();
   }
 
   function openFollowersModal() {
@@ -14034,47 +14107,9 @@ async function likeNote(noteId) {
       return;
     }
 
-    firebase.database().ref('followers/' + currentViewedAuthorId).once('value').then(snapshot => {
-      const followersListDiv = document.getElementById('followers-list');
-      followersListDiv.innerHTML = '';
-
-      if (snapshot.numChildren() === 0) {
-        followersListDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Este autor aún no tiene seguidores.</p>';
-      } else {
-        snapshot.forEach(child => {
-          const followerUserId = child.key;
-          firebase.database().ref('users/' + followerUserId).once('value').then(userSnap => {
-            const userData = userSnap.val();
-            if (!userData) return;
-
-            const followerDiv = document.createElement('div');
-            followerDiv.className = 'flex items-center justify-between p-4 bg-white hover:bg-gray-50 rounded-xl border border-gray-200 transition-all';
-            let verifiedIcon = getVerificationIcon(userData.email || "");
-
-            followerDiv.innerHTML = `
-              <div class="flex items-center space-x-3">
-                <img src="${userData.profileImage || 'https://via.placeholder.com/50'}"
-                     alt="${userData.username}"
-                     class="w-12 h-12 rounded-full object-cover border-2 border-[#00A2FF]"
-                     onclick="closeFollowersModal(); viewAuthorProfile('${followerUserId}');">
-                <div onclick="closeFollowersModal(); viewAuthorProfile('${followerUserId}');" class="cursor-pointer">
-                  <p class="font-semibold text-gray-800">${userData.username || 'Usuario'}${verifiedIcon}</p>
-                  <p class="text-sm text-gray-500">@${userData.username || 'usuario'}</p>
-                </div>
-              </div>
-              <button onclick="followUser('${followerUserId}')"
-                      class="bg-[#00A2FF] hover:bg-[#e02849] text-white px-4 py-2 rounded-full transition-colors">
-                <i class="fa-solid fa-user-plus"></i>
-                <span class="ml-1">Seguir</span>
-              </button>
-            `;
-            followersListDiv.appendChild(followerDiv);
-          });
-        });
-      }
-
-      document.getElementById('followers-modal').style.display = "block";
-    });
+    document.getElementById('followers-modal').style.display = "block";
+    loadFollowersForCurrentProfile();
+    switchFollowersTab('followers');
   }
 
   function closeFollowersModal() {
