@@ -4,37 +4,49 @@ function normalizeSearchTerm(value) {
   return String(value || '').trim().toLowerCase().replace(/^@+/, '');
 }
 
+let searchInputDebounceTimer = null;
+let latestSearchTicket = 0;
+
 function handleSearchInput() {
   const query = document.getElementById('search-input').value.trim();
   const clearBtn = document.getElementById('clear-search-btn');
-  
+
   if (query.length > 0) {
     clearBtn.classList.remove('hidden');
   } else {
     clearBtn.classList.add('hidden');
   }
 
-  if (typeof window.performRealTimeSearch === 'function') {
-    window.performRealTimeSearch();
-    if (query.length > 0) {
-      searchInfoContent(query);
-    } else {
-      renderSearchInfoList([]);
+  if (searchInputDebounceTimer) {
+    clearTimeout(searchInputDebounceTimer);
+  }
+
+  const ticket = ++latestSearchTicket;
+  searchInputDebounceTimer = setTimeout(async () => {
+    if (ticket !== latestSearchTicket) return;
+
+    if (typeof window.performRealTimeSearch === 'function') {
+      window.performRealTimeSearch();
+      if (query.length > 0) {
+        await searchInfoContent(query);
+      } else {
+        renderSearchInfoList([]);
+        clearSearchResults();
+        loadPopularStories();
+      }
+      return;
     }
-    if (!query.length) {
+
+    if (query.length > 0) {
+      await Promise.allSettled([
+        searchContent(query),
+        searchInfoContent(query)
+      ]);
+    } else {
       clearSearchResults();
       loadPopularStories();
     }
-    return;
-  }
-
-  if (query.length > 0) {
-    searchContent(query);
-    searchInfoContent(query);
-  } else {
-    clearSearchResults();
-    loadPopularStories();
-  }
+  }, 350);
 }
 
 function clearSearchInput() {

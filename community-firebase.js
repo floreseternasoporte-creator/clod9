@@ -195,12 +195,17 @@ async function loadNotes() {
       const payload = await response.json();
       notes = (payload.notes || []).map(normalizeNoteShape);
 
-      const [snakeCaseNotes, camelCaseNotes] = await Promise.all([
-        fetchFirebaseNotes('community_notes', 50).catch(() => []),
-        fetchFirebaseNotes('communityNotes', 50).catch(() => [])
-      ]);
+      // Evitar lecturas extra pesadas cuando la API ya devolvió suficientes datos.
+      if (notes.length === 0) {
+        const [snakeCaseNotes, camelCaseNotes] = await Promise.all([
+          fetchFirebaseNotes('community_notes', 50).catch(() => []),
+          fetchFirebaseNotes('communityNotes', 50).catch(() => [])
+        ]);
 
-      notes = mergeNotesDedup([...notes, ...snakeCaseNotes, ...camelCaseNotes]);
+        notes = mergeNotesDedup([...notes, ...snakeCaseNotes, ...camelCaseNotes]);
+      } else {
+        notes = mergeNotesDedup(notes);
+      }
     } catch (apiError) {
       console.warn('No se pudo cargar feed por API; fallback a Firebase cliente:', apiError);
       const [snakeCaseNotes, camelCaseNotes] = await Promise.all([
