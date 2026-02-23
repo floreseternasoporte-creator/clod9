@@ -1073,14 +1073,13 @@ setInterval(checkScheduledChapters, 60000);
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h2 class="text-base font-semibold">Notificaciones</h2>
+        <h2 class="text-base font-semibold">Avisos</h2>
         <div class="w-10"></div>
       </div>
     </div>
     <div class="flex-1 overflow-y-auto p-4">
       <div class="flex gap-2 mb-4">
-        <button class="notification-filter-button active" data-notification-filter="all" type="button">Todas</button>
-        <button class="notification-filter-button" data-notification-filter="recent" type="button">Recientes</button>
+        <button class="notification-filter-button active" data-notification-filter="notifications" type="button">Notificaciones</button>
         <button class="notification-filter-button" data-notification-filter="system" type="button">Sistema</button>
       </div>
       <div id="notifications-list" class="space-y-3">
@@ -1124,7 +1123,7 @@ setInterval(checkScheduledChapters, 60000);
         <div class="w-10"></div>
       </div>
       <div class="mt-3 grid grid-cols-2 bg-gray-100 rounded-xl p-1">
-        <button id="followers-tab-btn" onclick="switchFollowersTab('followers')" class="py-2 text-sm font-semibold rounded-lg bg-white text-gray-900">Seguidores</button>
+        <button id="followers-tab-btn" onclick="switchFollowersTab('followers')" class="py-2 text-sm font-semibold rounded-lg bg-white text-gray-900">Conexiones</button>
         <button id="following-tab-btn" onclick="switchFollowersTab('following')" class="py-2 text-sm font-semibold rounded-lg text-gray-600">Siguiendo</button>
       </div>
     </div>
@@ -1758,177 +1757,114 @@ setInterval(checkScheduledChapters, 60000);
       <div class="w-6"></div>
     </div>
 
-    <!-- Tu cuenta con foto y nombre -->
-    <div class="p-4 border-b border-gray-100">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Tu cuenta</h2>
-        <div class="flex items-center space-x-2">
-          <img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-5 h-5 rounded-full">
-          <span class="text-xs font-semibold text-blue-500">Baro</span>
-        </div>
-      </div>
-      <div class="flex items-center space-x-3">
-        <img id="menu-profile-image" src="https://via.placeholder.com/150" class="w-14 h-14 rounded-full object-cover border-2 border-gray-200" alt="Foto de perfil">
-        <div class="flex-1">
-          <p id="menu-profile-username" class="font-semibold text-gray-900">@usuario</p>
-          <p class="text-sm text-gray-500">Ver perfil</p>
-        </div>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    <!-- Lista principal rediseñada -->
+    <div id="menu-main-settings-list" class="flex-1 overflow-y-auto bg-[#F6F7F8] p-4 space-y-4">
+      <button onclick="openMenuProfileSection()" class="w-full bg-white rounded-2xl border border-black/5 px-4 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+        <span class="font-semibold text-gray-900">Perfil</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
         </svg>
+      </button>
+
+      <button onclick="openSupportModal(); closeMenuModal();" class="w-full bg-white rounded-2xl border border-black/5 px-4 py-4 flex items-center gap-3 hover:bg-gray-50 transition-colors">
+        <div class="h-10 w-10 rounded-full bg-[#00A2FF] bg-opacity-10 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#00A2FF]" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="text-left">
+          <p class="font-semibold text-gray-900">Centro de soporte</p>
+          <p class="text-sm text-gray-500">Ayuda, reportes y estado</p>
+        </div>
+      </button>
+
+      <button onclick="signOutUser(); closeMenuModal();" class="w-full bg-white rounded-2xl border border-black/5 px-4 py-4 flex items-center gap-3 hover:bg-red-50 transition-colors">
+        <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </div>
+        <div class="text-left">
+          <p class="font-semibold text-red-600">Cerrar sesión</p>
+        </div>
+      </button>
+    </div>
+
+    <!-- Sección Perfil en configuración -->
+    <div id="menu-profile-section" class="hidden absolute inset-0 bg-white z-20 flex flex-col">
+      <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <button onclick="closeMenuProfileSection()" class="text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h2 class="text-base font-semibold text-gray-900">Perfil</h2>
+        <div class="w-6"></div>
+      </div>
+      <div class="p-4 space-y-2">
+        <button onclick="openMenuProfileEditor('photo')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Actualizar foto</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('name')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Nombre</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('username')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Nombre de usuario</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('location')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Dónde vives</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('pronouns')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Pronombres</span><span class="text-gray-400">›</span>
+        </button>
+        <button onclick="openMenuProfileEditor('bio')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
+          <span class="font-medium text-gray-900">Biografía</span><span class="text-gray-400">›</span>
+        </button>
       </div>
     </div>
 
-    <!-- Lista de opciones scrolleable -->
-    <div class="flex-1 overflow-y-auto bg-[#F6F7F8]">
-      <div class="space-y-6 p-4">
-        <!-- Cuenta -->
-        <div class="space-y-3">
-          <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500">Cuenta</h3>
-          <div class="bg-white rounded-2xl border border-black/5 divide-y divide-gray-100">
-            <button onclick="openSettingsPlaceholder('Editar perfil');" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors">
-              <div class="h-11 w-11 rounded-full bg-black/5 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-              <div class="text-left">
-                <p class="font-semibold text-gray-900">Editar perfil</p>
-                <p class="text-sm text-gray-500">Nombre, bio y foto</p>
-              </div>
-              <span class="ml-auto text-xs font-medium text-gray-400">Próximo</span>
-            </button>
-            <button onclick="openSettingsPlaceholder('Privacidad y seguridad');" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors">
-              <div class="h-11 w-11 rounded-full bg-black/5 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.866-3.582 7-8 7a9 9 0 008-7z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.866 3.582 7 8 7a9 9 0 01-8-7z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V6a3 3 0 116 0v1" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V5a3 3 0 10-6 0v2" />
-                </svg>
-              </div>
-              <div class="text-left">
-                <p class="font-semibold text-gray-900">Privacidad y seguridad</p>
-                <p class="text-sm text-gray-500">Cuenta privada y bloqueos</p>
-              </div>
-              <span class="ml-auto text-xs font-medium text-gray-400">Próximo</span>
-            </button>
-            <button onclick="openVerificationModal(); closeMenuModal();" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-blue-50 transition-colors">
-              <div class="h-11 w-11 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div class="text-left">
-                <p class="font-semibold text-gray-900">Consigue tu verificación</p>
-                <p class="text-sm text-gray-500">Distintivo oficial para tu perfil</p>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+    <div id="menu-profile-editor" class="hidden absolute inset-0 bg-white z-30 flex flex-col">
+      <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <button onclick="closeMenuProfileEditor()" class="text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h2 id="menu-profile-editor-title" class="text-base font-semibold text-gray-900">Perfil</h2>
+        <button onclick="saveMenuProfileField()" class="text-[#00A2FF] font-semibold text-sm">Guardar</button>
+      </div>
+      <div class="p-4">
+        <div id="menu-profile-editor-photo" class="hidden text-center">
+          <img id="menu-profile-photo-preview" src="https://via.placeholder.com/140" class="w-32 h-32 rounded-full mx-auto object-cover border-2 border-gray-200 mb-4" alt="Foto de perfil">
+          <input type="file" id="menu-edit-photo-input" accept="image/*" class="hidden" onchange="previewMenuProfilePhoto(event)">
+          <button onclick="document.getElementById('menu-edit-photo-input').click()" class="px-5 py-2 rounded-lg bg-gray-100 text-gray-900 font-medium">Seleccionar foto</button>
+        </div>
+
+        <div id="menu-profile-editor-text" class="hidden">
+          <label id="menu-profile-editor-label" class="block text-sm font-medium text-gray-700 mb-2"></label>
+          <div class="flex items-center border border-gray-300 rounded-lg px-3">
+            <span id="menu-profile-editor-prefix" class="text-gray-500 mr-2 hidden">@</span>
+            <input id="menu-profile-editor-input" type="text" class="w-full py-3 outline-none" placeholder="">
           </div>
         </div>
 
-        <!-- Preferencias -->
-        <div class="space-y-3">
-          <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500">Preferencias</h3>
-          <div class="bg-white rounded-2xl border border-black/5 divide-y divide-gray-100">
-            <button onclick="openSettingsPlaceholder('Notificaciones');" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors">
-              <div class="h-11 w-11 rounded-full bg-black/5 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-              </div>
-              <div class="text-left">
-                <p class="font-semibold text-gray-900">Notificaciones</p>
-                <p class="text-sm text-gray-500">Push, correo y menciones</p>
-              </div>
-              <span class="ml-auto text-xs font-medium text-gray-400">Próximo</span>
-            </button>
-            <button onclick="openSettingsPlaceholder('Apariencia');" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors">
-              <div class="h-11 w-11 rounded-full bg-black/5 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12a8 8 0 11-16 0 8 8 0 0116 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16" />
-                </svg>
-              </div>
-              <div class="text-left">
-                <p class="font-semibold text-gray-900">Apariencia</p>
-                <p class="text-sm text-gray-500">Modo oscuro y tamaño de texto</p>
-              </div>
-              <span class="ml-auto text-xs font-medium text-gray-400">Próximo</span>
-            </button>
-            <button onclick="openSettingsPlaceholder('Idioma');" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors">
-              <div class="h-11 w-11 rounded-full bg-black/5 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m0 4v8m0 0H5m4 0h4m7 0l-5-5m5 5l-5 5" />
-                </svg>
-              </div>
-              <div class="text-left">
-                <p class="font-semibold text-gray-900">Idioma</p>
-                <p class="text-sm text-gray-500">Español (Latam)</p>
-              </div>
-              <span class="ml-auto text-xs font-medium text-gray-400">Próximo</span>
-            </button>
-          </div>
+        <div id="menu-profile-editor-pronouns" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Selecciona pronombres</label>
+          <select id="menu-profile-pronouns-select" class="w-full p-3 border border-gray-300 rounded-lg">
+            <option value="hombre">Hombre</option>
+            <option value="mujer">Mujer</option>
+            <option value="no binario">No binario</option>
+            <option value="no definido">No definido</option>
+          </select>
         </div>
 
-        <!-- Soporte -->
-        <div class="space-y-3">
-          <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500">Soporte</h3>
-          <div class="bg-white rounded-2xl border border-black/5 divide-y divide-gray-100">
-            <button onclick="openSupportModal(); closeMenuModal();" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors">
-              <div class="h-11 w-11 rounded-full bg-[#00A2FF] bg-opacity-10 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#00A2FF]" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <div class="text-left">
-                <p class="font-semibold text-gray-900">Centro de soporte</p>
-                <p class="text-sm text-gray-500">Ayuda, reportes y estado</p>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            <button onclick="openSettingsPlaceholder('Centro de seguridad');" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors">
-              <div class="h-11 w-11 rounded-full bg-black/5 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.866-3.582 7-8 7a9 9 0 008-7z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.866 3.582 7 8 7a9 9 0 01-8-7z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V6a3 3 0 116 0v1" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V5a3 3 0 10-6 0v2" />
-                </svg>
-              </div>
-              <div class="text-left">
-                <p class="font-semibold text-gray-900">Centro de seguridad</p>
-                <p class="text-sm text-gray-500">Revisa inicios y permisos</p>
-              </div>
-              <span class="ml-auto text-xs font-medium text-gray-400">Próximo</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Sesión -->
-        <div class="space-y-3">
-          <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500">Sesión</h3>
-          <div class="bg-white rounded-2xl border border-black/5">
-            <button onclick="signOutUser(); closeMenuModal();" class="w-full flex items-center gap-4 px-4 py-4 hover:bg-red-50 transition-colors">
-              <div class="h-11 w-11 rounded-full bg-red-100 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </div>
-              <div class="text-left">
-                <p class="font-semibold text-red-600">Cerrar sesión</p>
-                <p class="text-sm text-red-500">Salir de tu cuenta</p>
-              </div>
-            </button>
-          </div>
+        <div id="menu-profile-editor-bio" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Biografía</label>
+          <textarea id="menu-profile-bio-input" rows="5" class="w-full p-3 border border-gray-300 rounded-lg resize-none" placeholder="Escribe tu biografía..."></textarea>
         </div>
       </div>
     </div>
+
   </div>
 </div>
 </div>
@@ -1990,15 +1926,15 @@ setInterval(checkScheduledChapters, 60000);
 <!-- Modal de Generador de Imágenes IA estilo Instagram -->
 <div id="image-generator-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 10000;">
   <div class="w-full h-full flex flex-col">
-    <!-- Header estilo Instagram -->
-    <div class="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+    <!-- Header estilo Uber -->
+    <div class="sticky top-0 bg-white border-b border-uber-line p-4 z-10 shadow-uber-header">
       <div class="flex items-center justify-between">
         <button onclick="document.getElementById('image-generator-modal').style.display='none'" class="text-gray-700 hover:text-black transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold text-gray-900">Generar con IA</h1>
+        <h1 class="text-lg font-semibold text-uber-black flex items-center gap-2"><img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-6 h-6 rounded-full">Generar con Baro</h1>
         <div class="w-6"></div>
       </div>
     </div>
@@ -2735,10 +2671,10 @@ setInterval(checkScheduledChapters, 60000);
   <div id="top-navbar" class="flex items-center justify-between px-4 py-3 sticky top-0 z-50" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 162, 255, 0.2);">
     <h1 id="app-name" class="text-2xl font-bold" style="color: #111111;">Atenis</h1>
     <div class="flex items-center space-x-4">
-      <button onclick="openNotifications()" aria-label="Notificaciones" class="relative w-6 h-6 hover:text-black transition" style="color: #111111;">
-        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M13.73 21a2 2 0 01-3.46 0" stroke-linecap="round" stroke-linejoin="round" />
+      <button onclick="openProfile()" aria-label="Perfil" class="relative w-6 h-6 hover:text-black transition" style="color: #111111;">
+        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 20c1.8-3.3 5-5 8-5s6.2 1.7 8 5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
     </div>
@@ -3063,9 +2999,12 @@ firebase.auth().onAuthStateChanged(user => {
         </svg>
         <span class="text-xs font-medium">Comunidad</span>
       </button>
-      <button id="nav-profile" data-section="profile" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
-        <img id="bottom-nav-profile-pic" src="https://via.placeholder.com/150" class="w-6 h-6 rounded-full object-cover mb-1" alt="Perfil">
-        <span class="text-xs font-medium">Perfil</span>
+      <button id="nav-alerts" data-section="alerts" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M13.73 21a2 2 0 01-3.46 0" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="text-xs font-medium">Avisos</span>
       </button>
     </div>
   </div>
@@ -3197,7 +3136,7 @@ firebase.auth().onAuthStateChanged(user => {
         case 'search': openSearch(); break;
         case 'create': openCreatorHub(); break;
         case 'community': openCommunity(); break;
-        case 'profile': openProfile(); break;
+        case 'alerts': openNotifications(); break;
       }
     }
 
@@ -3271,7 +3210,7 @@ firebase.auth().onAuthStateChanged(user => {
         <div class="atenis-chat-shell rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <p class="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">Workspace</p>
+              <p class="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">Atenis AI</p>
               <h3 class="text-sm font-semibold text-gray-900">Atenis AI Assistant</h3>
             </div>
             <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
@@ -3915,7 +3854,7 @@ function enhanceTranscriptPrecision(rawText, finalize = false) {
   };
 
   Object.entries(cleanupMap).forEach(([needle, replacement]) => {
-    const escaped = needle.replace(/[.*+?^${}()|[\]\]/g, '\\$&');
+    const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     text = text.replace(new RegExp(escaped, 'gi'), replacement);
   });
 
@@ -4504,8 +4443,11 @@ function escapeHtml(text) {
   <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-bold">Comunidad</h1>
-      <button onclick="openNoteCreation()" class="bg-uber-black text-white px-4 py-2 rounded-full font-semibold hover:bg-[#222222] transition-colors">
-        Publicar
+      <button id="community-compose-btn" onclick="openNoteCreation()" class="bg-white text-black border border-uber-line w-11 h-11 rounded-2xl flex items-center justify-center shadow-uber-chip hover:bg-gray-100 transition-colors" aria-label="Crear post" title="Crear post">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/>
+        </svg>
       </button>
     </div>
   </div>
@@ -4546,8 +4488,13 @@ function escapeHtml(text) {
     <div id="add-note-form" class="hidden bg-white">
       <div class="flex items-center justify-between p-3 border-b border-uber-line">
         <button onclick="switchCommunityTab('feed')" class="text-sm font-medium text-uber-muted">Cancelar</button>
-        <h2 class="text-base font-semibold">Nueva publicación</h2>
-        <button onclick="publishNote()" class="bg-uber-black text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-[#222222]">Publicar</button>
+        <h2 class="text-base font-semibold">Post</h2>
+        <button id="publish-note-btn" onclick="publishNote()" class="bg-uber-black text-white w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold hover:bg-[#222222]" aria-label="Publicar post" title="Publicar post">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
       </div>
 
       <div class="p-4">
@@ -5298,8 +5245,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
   // Función mejorada para abrir el generador
   function openImageGenerator() {
     document.getElementById('image-generator-modal').style.display = 'block';
-  }
-
     // Cambiar el botón para modo publicación (comunidad)
     const useImageSection = document.getElementById('use-image-section');
     if (useImageSection) {
@@ -5331,8 +5276,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
 
   function openImageGeneratorForCreation() {
     document.getElementById('image-generator-modal').style.display = 'block';
-  }
-
     // Cambiar el botón para modo creación (descargar/compartir)
     const useImageSection = document.getElementById('use-image-section');
     if (useImageSection) {
@@ -6366,9 +6309,10 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
           </svg>
         </button>
         <h2 id="profile-username-header" class="text-base font-semibold text-gray-900">@nombre_usuario</h2>
-        <button onclick="openMenuModal()" class="p-2">
+        <button onclick="openMenuModal()" class="p-2" aria-label="Configuración">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <circle cx="12" cy="12" r="3" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
           </svg>
         </button>
       </div>
@@ -6395,16 +6339,13 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
           </div>
           <button onclick="openMyFollowersModal()" class="rounded-xl border border-gray-200 py-2">
             <div id="profile-followers" class="font-semibold">0</div>
-            <div class="text-xs text-gray-500">Seguidores</div>
+            <div class="text-xs text-gray-500">Conexiones</div>
           </button>
         </div>
 
         <p id="profile-bio" class="text-sm text-gray-600 mb-3 text-center"></p>
 
         <div class="flex space-x-2">
-          <button onclick="openProfileEdit()" class="flex-1 bg-gray-100 text-black text-sm font-semibold py-2 rounded-lg">
-            Editar perfil
-          </button>
           <button onclick="openQRModal()" class="bg-gray-100 text-black text-sm font-semibold px-4 py-2 rounded-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -6439,15 +6380,10 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         </button>
 
         <div class="flex items-center space-x-3">
-          <button onclick="openProfileEdit()" class="bg-white text-[#00A2FF] px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-all flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-            </svg>
-            Editar perfil
-          </button>
-          <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all" aria-label="Configuración">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <circle cx="12" cy="12" r="3" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
             </svg>
           </button>
         </div>
@@ -6469,9 +6405,10 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
           <div class="flex-1">
             <div class="flex items-center mb-2">
               <h1 id="profile-username-desktop" class="text-3xl font-bold text-white mr-3">@nombre_usuario</h1>
-              <button onclick="openProfileEdit()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all" aria-label="Configuración">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <circle cx="12" cy="12" r="3" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
                 </svg>
               </button>
             </div>
@@ -6481,7 +6418,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
             <div class="flex space-x-8">
               <button onclick="openMyFollowersModal()" class="text-center focus:outline-none hover:opacity-80 transition-opacity">
                 <div id="profile-followers-desktop" class="text-2xl font-bold text-white">0</div>
-                <div class="text-white text-opacity-80 text-sm">seguidores</div>
+                <div class="text-white text-opacity-80 text-sm">conexiones</div>
               </button>
               <button onclick="openMyFollowingModal()" class="text-center focus:outline-none hover:opacity-80 transition-opacity">
                 <div id="profile-following-desktop" class="text-2xl font-bold text-white">0</div>
@@ -6575,7 +6512,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
                   <span id="sidebar-total-views" class="font-bold text-[#00A2FF]">0</span>
                 </div>
                 <div class="flex items-center justify-between">
-                  <span class="text-gray-600">Seguidores</span>
+                  <span class="text-gray-600">Conexiones</span>
                   <span id="sidebar-followers-count" class="font-bold text-[#00A2FF]">0</span>
                 </div>
               </div>
@@ -7191,7 +7128,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <button onclick="openFollowersModal()" class="rounded-xl border border-gray-200 py-2">
         <div id="author-followers" class="font-semibold text-gray-900">0</div>
-        <div class="text-xs text-gray-500">Seguidores</div>
+        <div class="text-xs text-gray-500">Conexiones</div>
       </button>
     </div>
 
@@ -9237,6 +9174,7 @@ function showNotification(message, type = 'info') {
 function openMenuModal() {
   const modal = document.getElementById('menu-modal');
   modal.classList.remove('hidden');
+  showMenuMainSettings();
 
   // Actualizar foto y nombre en tiempo real
   const user = firebase.auth().currentUser;
@@ -9255,6 +9193,179 @@ function openMenuModal() {
 
 function closeMenuModal() {
   document.getElementById('menu-modal').classList.add('hidden');
+}
+
+let currentMenuProfileField = null;
+let menuProfilePendingFile = null;
+
+function showMenuMainSettings() {
+  const mainList = document.getElementById('menu-main-settings-list');
+  const profileSection = document.getElementById('menu-profile-section');
+  const profileEditor = document.getElementById('menu-profile-editor');
+  if (mainList) mainList.classList.remove('hidden');
+  if (profileSection) profileSection.classList.add('hidden');
+  if (profileEditor) profileEditor.classList.add('hidden');
+}
+
+function openMenuProfileSection() {
+  const mainList = document.getElementById('menu-main-settings-list');
+  if (mainList) mainList.classList.add('hidden');
+  document.getElementById('menu-profile-section').classList.remove('hidden');
+  document.getElementById('menu-profile-editor').classList.add('hidden');
+}
+
+function closeMenuProfileSection() {
+  showMenuMainSettings();
+}
+
+function closeMenuProfileEditor() {
+  document.getElementById('menu-profile-editor').classList.add('hidden');
+  document.getElementById('menu-profile-section').classList.remove('hidden');
+}
+
+function previewMenuProfilePhoto(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  menuProfilePendingFile = file;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const preview = document.getElementById('menu-profile-photo-preview');
+    if (preview) preview.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function openMenuProfileEditor(field) {
+  currentMenuProfileField = field;
+  const editor = document.getElementById('menu-profile-editor');
+  const section = document.getElementById('menu-profile-section');
+  const title = document.getElementById('menu-profile-editor-title');
+
+  document.getElementById('menu-profile-editor-photo').classList.add('hidden');
+  document.getElementById('menu-profile-editor-text').classList.add('hidden');
+  document.getElementById('menu-profile-editor-pronouns').classList.add('hidden');
+  document.getElementById('menu-profile-editor-bio').classList.add('hidden');
+
+  const user = firebase.auth().currentUser;
+  const userDataPromise = user
+    ? firebase.database().ref('users/' + user.uid).once('value').then(snapshot => snapshot.val() || {})
+    : Promise.resolve({});
+
+  userDataPromise.then(data => {
+    if (field === 'photo') {
+      title.textContent = 'Actualizar foto';
+      document.getElementById('menu-profile-editor-photo').classList.remove('hidden');
+      const preview = document.getElementById('menu-profile-photo-preview');
+      if (preview) preview.src = data.profileImage || 'https://via.placeholder.com/140';
+      menuProfilePendingFile = null;
+      const fileInput = document.getElementById('menu-edit-photo-input');
+      if (fileInput) fileInput.value = '';
+    } else if (field === 'name') {
+      title.textContent = 'Nombre';
+      document.getElementById('menu-profile-editor-text').classList.remove('hidden');
+      document.getElementById('menu-profile-editor-label').textContent = 'Nombre';
+      document.getElementById('menu-profile-editor-prefix').classList.add('hidden');
+      document.getElementById('menu-profile-editor-input').value = data.name || '';
+      document.getElementById('menu-profile-editor-input').placeholder = 'Escribe tu nombre';
+    } else if (field === 'username') {
+      title.textContent = 'Crear nombre de usuario';
+      document.getElementById('menu-profile-editor-text').classList.remove('hidden');
+      document.getElementById('menu-profile-editor-label').textContent = 'Nombre de usuario';
+      document.getElementById('menu-profile-editor-prefix').classList.remove('hidden');
+      document.getElementById('menu-profile-editor-input').value = data.username || '';
+      document.getElementById('menu-profile-editor-input').placeholder = 'tunombredeusuario';
+    } else if (field === 'location') {
+      title.textContent = 'Dónde vives';
+      document.getElementById('menu-profile-editor-text').classList.remove('hidden');
+      document.getElementById('menu-profile-editor-label').textContent = 'País';
+      document.getElementById('menu-profile-editor-prefix').classList.add('hidden');
+      document.getElementById('menu-profile-editor-input').value = data.city || '';
+      document.getElementById('menu-profile-editor-input').placeholder = 'Escribe tu país';
+    } else if (field === 'pronouns') {
+      title.textContent = 'Pronombres';
+      document.getElementById('menu-profile-editor-pronouns').classList.remove('hidden');
+      document.getElementById('menu-profile-pronouns-select').value = data.pronouns || 'no definido';
+    } else if (field === 'bio') {
+      title.textContent = 'Biografía';
+      document.getElementById('menu-profile-editor-bio').classList.remove('hidden');
+      document.getElementById('menu-profile-bio-input').value = data.bio || '';
+    }
+
+    section.classList.add('hidden');
+    editor.classList.remove('hidden');
+  });
+}
+
+async function uploadMenuProfilePhoto(file, userId) {
+  const base64String = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const response = await fetch('/api/upload-image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      imageData: base64String,
+      fileName: file.name,
+      userId,
+      timestamp: Date.now(),
+      contentType: file.type,
+      imageType: 'profile'
+    })
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'Error al subir imagen');
+  return result.imageUrl;
+}
+
+async function saveMenuProfileField() {
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    alert('Debes iniciar sesión');
+    return;
+  }
+
+  const updates = {};
+
+  try {
+    if (currentMenuProfileField === 'photo') {
+      if (!menuProfilePendingFile) {
+        alert('Selecciona una foto primero');
+        return;
+      }
+      const imageUrl = await uploadMenuProfilePhoto(menuProfilePendingFile, user.uid);
+      updates.profileImage = imageUrl;
+      document.getElementById('menu-profile-image').src = imageUrl;
+      const profileImage = document.getElementById('profile-image');
+      const profileImageDesktop = document.getElementById('profile-image-desktop');
+      if (profileImage) profileImage.src = imageUrl;
+      if (profileImageDesktop) profileImageDesktop.src = imageUrl;
+    } else if (currentMenuProfileField === 'name') {
+      updates.name = document.getElementById('menu-profile-editor-input').value.trim();
+    } else if (currentMenuProfileField === 'username') {
+      const username = document.getElementById('menu-profile-editor-input').value.trim().replace(/^@+/, '');
+      updates.username = username;
+      alert('Nombre de usuario actualizado correctamente');
+    } else if (currentMenuProfileField === 'location') {
+      updates.city = document.getElementById('menu-profile-editor-input').value.trim();
+    } else if (currentMenuProfileField === 'pronouns') {
+      updates.pronouns = document.getElementById('menu-profile-pronouns-select').value;
+    } else if (currentMenuProfileField === 'bio') {
+      updates.bio = document.getElementById('menu-profile-bio-input').value.trim();
+    }
+
+    await firebase.database().ref('users/' + user.uid).update(updates);
+    alert('Cambios guardados correctamente');
+    closeMenuProfileEditor();
+    openMenuModal();
+  } catch (error) {
+    console.error('Error al guardar perfil desde configuración:', error);
+    alert('No se pudo guardar: ' + error.message);
+  }
 }
 
 function openSettingsPlaceholder(sectionName) {
@@ -10541,7 +10652,7 @@ async function loadPhotos() {
               </svg>
             </div>
             <div>
-              <div class="font-semibold text-gray-900">Seguidores</div>
+              <div class="font-semibold text-gray-900">Conexiones</div>
               <div class="text-sm text-gray-500">Personas que te siguen</div>
             </div>
           </div>
@@ -10584,23 +10695,36 @@ function openCreatorHub() {
     openHome();
   }
 
-  function openNoteCreation() {
-    document.getElementById('add-note-form').classList.remove('hidden');
-    document.getElementById('note-content').focus();
-
+  function updateNoteCharCounter() {
     const noteContent = document.getElementById('note-content');
     const charCounter = document.getElementById('char-counter');
-    noteContent.addEventListener('input', function() {
-      const count = this.value.length;
-      charCounter.textContent = count + '/280';
-      if (count > 260) {
-        charCounter.style.color = '#ef4444';
-      } else if (count > 240) {
-        charCounter.style.color = '#f59e0b';
-      } else {
-        charCounter.style.color = '#9ca3af';
-      }
-    });
+    if (!noteContent || !charCounter) return;
+
+    const count = noteContent.value.length;
+    charCounter.textContent = `${count}/280`;
+    if (count > 260) {
+      charCounter.style.color = '#ef4444';
+    } else if (count > 240) {
+      charCounter.style.color = '#f59e0b';
+    } else {
+      charCounter.style.color = '#9ca3af';
+    }
+  }
+
+  function openNoteCreation() {
+    if (currentCommunityTab === 'explore') {
+      alert('La creación de posts está disponible solo en la pestaña Para ti.');
+      return;
+    }
+
+    document.getElementById('add-note-form').classList.remove('hidden');
+    const noteContent = document.getElementById('note-content');
+    if (noteContent) {
+      noteContent.focus();
+      noteContent.removeEventListener('input', updateNoteCharCounter);
+      noteContent.addEventListener('input', updateNoteCharCounter);
+    }
+    updateNoteCharCounter();
   }
 
   async function loadCreatorStats() {
@@ -10650,6 +10774,20 @@ function openCreatorHub() {
     }
   }
 
+  let currentCommunityTab = 'feed';
+
+  function updateCommunityComposerState() {
+    const composeBtn = document.getElementById('community-compose-btn');
+    if (!composeBtn) return;
+
+    const isExplore = currentCommunityTab === 'explore';
+    composeBtn.disabled = isExplore;
+    composeBtn.classList.toggle('hidden', isExplore);
+    composeBtn.classList.toggle('opacity-40', isExplore);
+    composeBtn.classList.toggle('cursor-not-allowed', isExplore);
+    composeBtn.title = isExplore ? 'Publicar solo disponible en Para ti' : 'Crear post';
+  }
+
   function openCommunity() {
     // Ocultar TODAS las vistas
     const mainApp = document.getElementById('main-app');
@@ -10666,6 +10804,8 @@ function openCreatorHub() {
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'none';
 
+    currentCommunityTab = 'feed';
+    updateCommunityComposerState();
     loadNotes();
   }
 
@@ -10675,6 +10815,7 @@ function openCreatorHub() {
   }
 
   function switchCommunityTab(tab) {
+    currentCommunityTab = tab;
     const feedTab = document.getElementById('feed-tab');
     const exploreTab = document.getElementById('explore-tab');
     const notesFeed = document.getElementById('notes-feed');
@@ -10688,12 +10829,14 @@ function openCreatorHub() {
       exploreFeed?.classList.add('hidden');
       if (addNoteForm) addNoteForm.classList.add('hidden');
       loadNotes();
+      updateCommunityComposerState();
     } else if (tab === 'explore') {
       exploreTab?.classList.add('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
       feedTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
       exploreFeed?.classList.remove('hidden');
       notesFeed?.classList.add('hidden');
       if (addNoteForm) addNoteForm.classList.add('hidden');
+      updateCommunityComposerState();
       loadExploreTrends();
     } else if (tab === 'add') {
       feedTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
@@ -10701,6 +10844,7 @@ function openCreatorHub() {
       notesFeed?.classList.add('hidden');
       exploreFeed?.classList.add('hidden');
       if (addNoteForm) addNoteForm.classList.remove('hidden');
+      updateCommunityComposerState();
     }
   }
 
@@ -10725,14 +10869,11 @@ function openCreatorHub() {
   // Actualizar contador de caracteres en tiempo real
   document.addEventListener('DOMContentLoaded', function() {
     const noteContent = document.getElementById('note-content');
-    const charCounter = document.getElementById('char-counter');
-
-    if (noteContent && charCounter) {
-      noteContent.addEventListener('input', function() {
-        const remaining = 200 - this.value.length;
-        charCounter.textContent = remaining;
-      });
+    if (noteContent) {
+      noteContent.addEventListener('input', updateNoteCharCounter);
     }
+    updateNoteCharCounter();
+    updateCommunityComposerState();
   });
 
   async function publishNote() {
@@ -10750,9 +10891,9 @@ function openCreatorHub() {
       return;
     }
 
-    const publishButton = document.querySelector('button[onclick="publishNote()"]');
+    const publishButton = document.getElementById('publish-note-btn');
     publishButton.disabled = true;
-    publishButton.innerHTML = '<span class="inline-flex items-center gap-2"><span class="epic-loader" style="width:24px;height:24px;border-radius:8px;"></span><span>Publicando</span></span>';
+    publishButton.innerHTML = '<span class="epic-loader" style="width:20px;height:20px;border-radius:7px;"></span>';
 
     try {
       // Primero verificar límites
@@ -10771,7 +10912,7 @@ function openCreatorHub() {
 
       if (!limitsResult.canPerformAction) {
         publishButton.disabled = false;
-        publishButton.innerHTML = 'Publicar';
+        publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
         alert(limitsResult.message);
         return;
       }
@@ -10824,7 +10965,7 @@ function openCreatorHub() {
           throw new Error(result.error || 'Error al publicar nota');
         }
         publishButton.disabled = false;
-        publishButton.innerHTML = 'Publicar';
+        publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
         return;
       }
 
@@ -10833,7 +10974,7 @@ function openCreatorHub() {
       document.getElementById('image-preview').classList.add('hidden');
       switchCommunityTab('feed');
       publishButton.disabled = false;
-      publishButton.innerHTML = 'Publicar';
+      publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
       alert('¡Nota publicada exitosamente!');
 
       // Recargar notas
@@ -10842,7 +10983,7 @@ function openCreatorHub() {
       console.error('Error al publicar:', error);
       alert('Error al publicar la nota. Por favor intenta de nuevo.');
       publishButton.disabled = false;
-      publishButton.innerHTML = 'Publicar';
+      publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
     }
   }
 
@@ -11551,7 +11692,7 @@ async function likeNote(noteId) {
   });
   /*********************** NOTIFICACIONES **************************/
   let allNotifications = [];
-  let activeNotificationFilter = 'all';
+  let activeNotificationFilter = 'notifications';
   let notificationsUserId = null;
 
   function getNotificationType(notification) {
@@ -11580,7 +11721,7 @@ async function likeNote(noteId) {
     });
   }
 
-  function renderNotifications(filter = 'all') {
+  function renderNotifications(filter = 'notifications') {
     activeNotificationFilter = filter;
     const notificationsList = document.getElementById('notifications-list');
     if (!notificationsList) {
@@ -11588,9 +11729,6 @@ async function likeNote(noteId) {
     }
 
     const filteredNotifications = allNotifications.filter(notification => {
-      if (filter === 'recent') {
-        return isRecentNotification(notification);
-      }
       if (filter === 'system') {
         const type = getNotificationType(notification);
         return type === 'system' || type === 'info';
@@ -11606,7 +11744,7 @@ async function likeNote(noteId) {
     notificationsList.innerHTML = "";
 
     if (filteredNotifications.length === 0) {
-      notificationsList.innerHTML = '<div class="text-sm text-gray-500">No hay notificaciones para este filtro.</div>';
+      notificationsList.innerHTML = '<div class="text-sm text-gray-500">No hay avisos para esta sección.</div>';
       return;
     }
 
@@ -16991,7 +17129,7 @@ async function likeNote(noteId) {
         <p id="views-trend" class="text-sm text-green-500">+0%</p>
       </div>
       <div class="bg-gray-50 p-4 rounded-xl text-center">
-        <h3 class="text-[#00A2FF] text-sm mb-1">Seguidores</h3>
+        <h3 class="text-[#00A2FF] text-sm mb-1">Conexiones</h3>
         <p id="total-followers" class="text-2xl font-bold">0</p>
         <p id="followers-trend" class="text-sm text-green-500">+0%</p>
       </div>
@@ -17545,7 +17683,7 @@ function analyzeAccount() {
       <div class="grid grid-cols-3 gap-4 mb-6">
         <div class="bg-gray-50 p-4 rounded-xl text-center">
           <div class="text-2xl font-bold text-[#00A2FF]">${analysisData.followers}</div>
-          <div class="text-sm text-gray-600">Seguidores</div>
+          <div class="text-sm text-gray-600">Conexiones</div>
         </div>
         <div class="bg-gray-50 p-4 rounded-xl text-center">
           <div class="text-2xl font-bold text-[#00A2FF]">${analysisData.following}</div>
