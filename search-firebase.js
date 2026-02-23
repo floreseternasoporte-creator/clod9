@@ -295,7 +295,7 @@ async function searchContent(query) {
   
   // Buscar autores
   try {
-    const response = await fetch(`/api/users?q=${encodeURIComponent(query)}&limit=30`);
+    const response = await fetch(`/api/users?q=${encodeURIComponent(query)}&limit=100`);
     if (!response.ok) {
       throw new Error('No se pudieron cargar autores');
     }
@@ -309,8 +309,9 @@ async function searchContent(query) {
       const username = normalizeSearchTerm(user.username || '');
       const name = normalizeSearchTerm(user.name || user.displayName || '');
       const email = normalizeSearchTerm(user.email || '');
+      const uid = normalizeSearchTerm(user.userId || user.uid || '');
 
-      if (username.includes(lowerQuery) || name.includes(lowerQuery) || email.includes(lowerQuery)) {
+      if (username.includes(lowerQuery) || name.includes(lowerQuery) || email.includes(lowerQuery) || uid.includes(lowerQuery)) {
         const authorCard = document.createElement('div');
         authorCard.className = 'flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer';
         authorCard.innerHTML = `

@@ -13967,7 +13967,7 @@ async function likeNote(noteId) {
       .catch((error) => console.error('Error buscando historias:', error));
 
     if (query) {
-      fetch('/api/users')
+      fetch(`/api/users?q=${encodeURIComponent(query)}&limit=100`)
         .then((response) => {
           if (!response.ok) throw new Error('No se pudieron cargar perfiles');
           return response.json();
@@ -13977,7 +13977,8 @@ async function likeNote(noteId) {
             const username = normalizeSearchQuery(user.username || '');
             const displayName = normalizeSearchQuery(user.name || user.displayName || '');
             const email = normalizeSearchQuery(user.email || '');
-            return username.includes(query) || displayName.includes(query) || email.includes(query);
+            const uid = normalizeSearchQuery(user.userId || user.uid || '');
+            return username.includes(query) || displayName.includes(query) || email.includes(query) || uid.includes(query);
           });
           renderProfilesList(authors);
         })
@@ -14005,13 +14006,15 @@ async function likeNote(noteId) {
       if (story.title && story.title.toLowerCase().includes(query)) books.push(story);
     });
     renderBooksCarousel(books);
-    const usersResponse = await fetch('/api/users');
-    const usersData = await usersResponse.json();
     const normalizedQuery = normalizeSearchQuery(query);
+    const usersResponse = await fetch(`/api/users?q=${encodeURIComponent(normalizedQuery)}&limit=100`);
+    const usersData = await usersResponse.json();
     const authors = (usersData.users || []).filter(user => {
       const username = normalizeSearchQuery(user.username || '');
       const displayName = normalizeSearchQuery(user.name || user.displayName || '');
-      return username.includes(normalizedQuery) || displayName.includes(normalizedQuery);
+      const email = normalizeSearchQuery(user.email || '');
+      const uid = normalizeSearchQuery(user.userId || user.uid || '');
+      return username.includes(normalizedQuery) || displayName.includes(normalizedQuery) || email.includes(normalizedQuery) || uid.includes(normalizedQuery);
     });
     renderProfilesList(authors);
   }
