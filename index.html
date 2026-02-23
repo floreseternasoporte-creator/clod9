@@ -1990,15 +1990,15 @@ setInterval(checkScheduledChapters, 60000);
 <!-- Modal de Generador de Imágenes IA estilo Instagram -->
 <div id="image-generator-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 10000;">
   <div class="w-full h-full flex flex-col">
-    <!-- Header estilo Instagram -->
-    <div class="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+    <!-- Header estilo Uber -->
+    <div class="sticky top-0 bg-white border-b border-uber-line p-4 z-10 shadow-uber-header">
       <div class="flex items-center justify-between">
         <button onclick="document.getElementById('image-generator-modal').style.display='none'" class="text-gray-700 hover:text-black transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold text-gray-900">Generar con IA</h1>
+        <h1 class="text-lg font-semibold text-uber-black flex items-center gap-2"><img src="https://i.ibb.co/21fZ5Wkp/IMG-7701.png" alt="Baro" class="w-6 h-6 rounded-full">Generar con Baro</h1>
         <div class="w-6"></div>
       </div>
     </div>
@@ -4504,8 +4504,8 @@ function escapeHtml(text) {
   <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-bold">Comunidad</h1>
-      <button onclick="openNoteCreation()" class="bg-uber-black text-white px-4 py-2 rounded-full font-semibold hover:bg-[#222222] transition-colors">
-        Publicar
+      <button id="community-compose-btn" onclick="openNoteCreation()" class="bg-uber-black text-white w-11 h-11 rounded-2xl flex items-center justify-center shadow-uber-chip hover:bg-[#222222] transition-colors" aria-label="Crear post" title="Crear post">
+        <i class="fas fa-pen"></i>
       </button>
     </div>
   </div>
@@ -4546,8 +4546,8 @@ function escapeHtml(text) {
     <div id="add-note-form" class="hidden bg-white">
       <div class="flex items-center justify-between p-3 border-b border-uber-line">
         <button onclick="switchCommunityTab('feed')" class="text-sm font-medium text-uber-muted">Cancelar</button>
-        <h2 class="text-base font-semibold">Nueva publicación</h2>
-        <button onclick="publishNote()" class="bg-uber-black text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-[#222222]">Publicar</button>
+        <h2 class="text-base font-semibold">Post</h2>
+        <button id="publish-note-btn" onclick="publishNote()" class="bg-uber-black text-white w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold hover:bg-[#222222]" aria-label="Publicar post" title="Publicar post"><i class="fas fa-paper-plane"></i></button>
       </div>
 
       <div class="p-4">
@@ -10580,23 +10580,36 @@ function openCreatorHub() {
     openHome();
   }
 
-  function openNoteCreation() {
-    document.getElementById('add-note-form').classList.remove('hidden');
-    document.getElementById('note-content').focus();
-
+  function updateNoteCharCounter() {
     const noteContent = document.getElementById('note-content');
     const charCounter = document.getElementById('char-counter');
-    noteContent.addEventListener('input', function() {
-      const count = this.value.length;
-      charCounter.textContent = count + '/280';
-      if (count > 260) {
-        charCounter.style.color = '#ef4444';
-      } else if (count > 240) {
-        charCounter.style.color = '#f59e0b';
-      } else {
-        charCounter.style.color = '#9ca3af';
-      }
-    });
+    if (!noteContent || !charCounter) return;
+
+    const count = noteContent.value.length;
+    charCounter.textContent = `${count}/280`;
+    if (count > 260) {
+      charCounter.style.color = '#ef4444';
+    } else if (count > 240) {
+      charCounter.style.color = '#f59e0b';
+    } else {
+      charCounter.style.color = '#9ca3af';
+    }
+  }
+
+  function openNoteCreation() {
+    if (currentCommunityTab === 'explore') {
+      alert('La creación de posts está disponible solo en la pestaña Para ti.');
+      return;
+    }
+
+    document.getElementById('add-note-form').classList.remove('hidden');
+    const noteContent = document.getElementById('note-content');
+    if (noteContent) {
+      noteContent.focus();
+      noteContent.removeEventListener('input', updateNoteCharCounter);
+      noteContent.addEventListener('input', updateNoteCharCounter);
+    }
+    updateNoteCharCounter();
   }
 
   async function loadCreatorStats() {
@@ -10646,6 +10659,19 @@ function openCreatorHub() {
     }
   }
 
+  let currentCommunityTab = 'feed';
+
+  function updateCommunityComposerState() {
+    const composeBtn = document.getElementById('community-compose-btn');
+    if (!composeBtn) return;
+
+    const isExplore = currentCommunityTab === 'explore';
+    composeBtn.disabled = isExplore;
+    composeBtn.classList.toggle('opacity-40', isExplore);
+    composeBtn.classList.toggle('cursor-not-allowed', isExplore);
+    composeBtn.title = isExplore ? 'Publicar solo disponible en Para ti' : 'Crear post';
+  }
+
   function openCommunity() {
     // Ocultar TODAS las vistas
     const mainApp = document.getElementById('main-app');
@@ -10662,6 +10688,8 @@ function openCreatorHub() {
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'none';
 
+    currentCommunityTab = 'feed';
+    updateCommunityComposerState();
     loadNotes();
   }
 
@@ -10671,6 +10699,7 @@ function openCreatorHub() {
   }
 
   function switchCommunityTab(tab) {
+    currentCommunityTab = tab;
     const feedTab = document.getElementById('feed-tab');
     const exploreTab = document.getElementById('explore-tab');
     const notesFeed = document.getElementById('notes-feed');
@@ -10684,12 +10713,14 @@ function openCreatorHub() {
       exploreFeed?.classList.add('hidden');
       if (addNoteForm) addNoteForm.classList.add('hidden');
       loadNotes();
+      updateCommunityComposerState();
     } else if (tab === 'explore') {
       exploreTab?.classList.add('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
       feedTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
       exploreFeed?.classList.remove('hidden');
       notesFeed?.classList.add('hidden');
       if (addNoteForm) addNoteForm.classList.add('hidden');
+      updateCommunityComposerState();
       loadExploreTrends();
     } else if (tab === 'add') {
       feedTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
@@ -10697,6 +10728,7 @@ function openCreatorHub() {
       notesFeed?.classList.add('hidden');
       exploreFeed?.classList.add('hidden');
       if (addNoteForm) addNoteForm.classList.remove('hidden');
+      updateCommunityComposerState();
     }
   }
 
@@ -10721,14 +10753,11 @@ function openCreatorHub() {
   // Actualizar contador de caracteres en tiempo real
   document.addEventListener('DOMContentLoaded', function() {
     const noteContent = document.getElementById('note-content');
-    const charCounter = document.getElementById('char-counter');
-
-    if (noteContent && charCounter) {
-      noteContent.addEventListener('input', function() {
-        const remaining = 200 - this.value.length;
-        charCounter.textContent = remaining;
-      });
+    if (noteContent) {
+      noteContent.addEventListener('input', updateNoteCharCounter);
     }
+    updateNoteCharCounter();
+    updateCommunityComposerState();
   });
 
   async function publishNote() {
@@ -10746,9 +10775,9 @@ function openCreatorHub() {
       return;
     }
 
-    const publishButton = document.querySelector('button[onclick="publishNote()"]');
+    const publishButton = document.getElementById('publish-note-btn');
     publishButton.disabled = true;
-    publishButton.innerHTML = '<span class="inline-flex items-center gap-2"><span class="epic-loader" style="width:24px;height:24px;border-radius:8px;"></span><span>Publicando</span></span>';
+    publishButton.innerHTML = '<span class="epic-loader" style="width:20px;height:20px;border-radius:7px;"></span>';
 
     try {
       // Primero verificar límites
@@ -10767,7 +10796,7 @@ function openCreatorHub() {
 
       if (!limitsResult.canPerformAction) {
         publishButton.disabled = false;
-        publishButton.innerHTML = 'Publicar';
+        publishButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
         alert(limitsResult.message);
         return;
       }
@@ -10820,7 +10849,7 @@ function openCreatorHub() {
           throw new Error(result.error || 'Error al publicar nota');
         }
         publishButton.disabled = false;
-        publishButton.innerHTML = 'Publicar';
+        publishButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
         return;
       }
 
@@ -10829,7 +10858,7 @@ function openCreatorHub() {
       document.getElementById('image-preview').classList.add('hidden');
       switchCommunityTab('feed');
       publishButton.disabled = false;
-      publishButton.innerHTML = 'Publicar';
+      publishButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
       alert('¡Nota publicada exitosamente!');
 
       // Recargar notas
@@ -10838,7 +10867,7 @@ function openCreatorHub() {
       console.error('Error al publicar:', error);
       alert('Error al publicar la nota. Por favor intenta de nuevo.');
       publishButton.disabled = false;
-      publishButton.innerHTML = 'Publicar';
+      publishButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
     }
   }
 
