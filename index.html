@@ -7699,7 +7699,7 @@ function previewEditCover(event) {
           </svg>
         </button>
         <h2 class="text-lg font-semibold">Nuevo capítulo</h2>
-        <button onclick="document.getElementById('chapter-form').requestSubmit()" class="text-[#00A2FF] font-semibold">Publicar</button>
+        <button id="btn-save-chapter" onclick="document.getElementById('chapter-form').requestSubmit()" class="text-[#00A2FF] font-semibold">Publicar</button>
       </div>
     </div>
 
@@ -13487,47 +13487,78 @@ async function likeNote(noteId) {
     }
   }
 
+  let currentStoryChaptersListenerRef = null;
+
+  function renderStoryChaptersList(chapters = []) {
+    currentChapters = [];
+    const chapterListDiv = document.getElementById('chapter-list');
+    if (!chapterListDiv) return;
+    chapterListDiv.innerHTML = "";
+
+    chapters.forEach(chapter => currentChapters.push(chapter));
+    currentChapters.sort((a, b) => Number(a.chapterNumber || 0) - Number(b.chapterNumber || 0));
+
+    currentChapters.forEach(chapter => {
+      const div = document.createElement('div');
+      div.className = "flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border border-gray-200 rounded-xl mb-2";
+      const chapterInfo = document.createElement('div');
+      chapterInfo.innerHTML = `<span class="font-semibold">${translations[currentLanguage].readChapter} ${chapter.chapterNumber || '-'}</span>`;
+      const btnContainer = document.createElement('div');
+      btnContainer.className = "flex space-x-2 mt-2 sm:mt-0";
+      const editButton = document.createElement('button');
+      editButton.className = "bg-blue-500 text-white px-2 py-1 rounded";
+      editButton.textContent = "Editar";
+      editButton.onclick = () => openChapterEditModal(chapter);
+      const deleteButton = document.createElement('button');
+      deleteButton.className = "bg-red-500 text-white px-2 py-1 rounded";
+      deleteButton.textContent = "Eliminar";
+      deleteButton.onclick = () => deleteChapter(chapter.id);
+      btnContainer.appendChild(editButton);
+      btnContainer.appendChild(deleteButton);
+      div.appendChild(chapterInfo);
+      div.appendChild(btnContainer);
+      chapterListDiv.appendChild(div);
+    });
+  }
+
+  function bindStoryChaptersRealtime(storyId) {
+    if (currentStoryChaptersListenerRef) {
+      currentStoryChaptersListenerRef.off();
+      currentStoryChaptersListenerRef = null;
+    }
+    if (!storyId) return;
+
+    currentStoryChaptersListenerRef = firebase.database().ref('chapters/' + storyId);
+    currentStoryChaptersListenerRef.on('value', snapshot => {
+      const map = snapshot.val() || {};
+      const chapters = Object.values(map).filter(Boolean);
+      renderStoryChaptersList(chapters);
+    }, error => {
+      console.error('Error en listener de capítulos:', error);
+    });
+  }
+
   function openStoryEdit(story) {
-    currentEditingStory = story;
-    document.getElementById('edit-story-language').value = story.language || "";
-    fetch(`/api/get-chapters?storyId=${story.id}`)
-      .then(response => response.json())
-      .then(data => {
-        currentChapters = [];
-        const chapterListDiv = document.getElementById('chapter-list');
-        chapterListDiv.innerHTML = "";
-        const chapters = data.chapters || [];
-        chapters.forEach(chapter => {
-          currentChapters.push(chapter);
-        });
-        currentChapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
-        currentChapters.forEach(chapter => {
-          const div = document.createElement('div');
-          div.className = "flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border border-gray-200 rounded-xl mb-2";
-          const chapterInfo = document.createElement('div');
-          chapterInfo.innerHTML = `<span class="font-semibold">${translations[currentLanguage].readChapter} ${chapter.chapterNumber}</span>`;
-          const btnContainer = document.createElement('div');
-          btnContainer.className = "flex space-x-2 mt-2 sm:mt-0";
-          const editButton = document.createElement('button');
-          editButton.className = "bg-blue-500 text-white px-2 py-1 rounded";
-          editButton.textContent = "Editar";
-          editButton.onclick = () => openChapterEditModal(chapter);
-          const deleteButton = document.createElement('button');
-          deleteButton.className = "bg-red-500 text-white px-2 py-1 rounded";
-          deleteButton.textContent = "Eliminar";
-          deleteButton.onclick = () => deleteChapter(chapter.id);
-          btnContainer.appendChild(editButton);
-          btnContainer.appendChild(deleteButton);
-          div.appendChild(chapterInfo);
-          div.appendChild(btnContainer);
-          chapterListDiv.appendChild(div);
-        });
-      })
-      .catch(error => console.error('Error cargando capítulos:', error));
+    const storyId = story?.id || story?.storyId;
+    if (!storyId) {
+      alert('No se encontró el ID de la historia.');
+      return;
+    }
+
+    currentEditingStory = { ...story, id: storyId };
+    document.getElementById('edit-story-title').value = story.title || '';
+    document.getElementById('edit-story-category').value = story.category || '';
+    document.getElementById('edit-story-language').value = story.language || '';
+    document.getElementById('edit-story-synopsis').value = story.synopsis || '';
+    bindStoryChaptersRealtime(storyId);
     document.getElementById('story-edit-view').classList.remove('hidden');
   }
 
   function closeStoryEdit() {
+    if (currentStoryChaptersListenerRef) {
+      currentStoryChaptersListenerRef.off();
+      currentStoryChaptersListenerRef = null;
+    }
     document.getElementById('story-edit-view').classList.add('hidden');
     alert(translations[currentLanguage].editLater);
   }
@@ -13583,7 +13614,7 @@ async function likeNote(noteId) {
   }
 
   function saveStoryEdits() {
-    if (!currentEditingStory) {
+    if (!currentEditingStory || !currentEditingStory.id) {
       alert(translations[currentLanguage].noEditingStory);
       return;
     }
@@ -14993,7 +15024,8 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
     document.getElementById('font-size-value').innerText = "16px";
     document.getElementById('chapter-content').style.fontSize = "16px";
     document.getElementById('chapter-content').style.fontFamily = "Arial";
-    document.getElementById('btn-save-chapter').textContent = translations[currentLanguage].btnSaveChapter;
+    const saveBtn = document.getElementById('btn-save-chapter');
+    if (saveBtn) saveBtn.textContent = 'Publicar';
     document.getElementById('chapter-creation-modal').style.display = "flex";
   }
 
@@ -15008,13 +15040,19 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
     document.getElementById('chapter-content').style.fontFamily = "Arial";
     document.getElementById('chapter-schedule').value = "";
     currentChapterEditId = null;
-    document.getElementById('btn-save-chapter').textContent = translations[currentLanguage].btnSaveChapter;
+    const saveBtn = document.getElementById('btn-save-chapter');
+    if (saveBtn) saveBtn.textContent = 'Publicar';
   }
   const chapterForm = document.getElementById('chapter-form');
   if (chapterForm) chapterForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    const content = document.getElementById('chapter-content').value;
+    const content = (document.getElementById('chapter-content').value || '').trim();
     const scheduledDate = document.getElementById('chapter-schedule').value;
+
+    if (!content) {
+      alert('Escribe el contenido del capítulo antes de publicar.');
+      return;
+    }
 
     if (!currentEditingStory) {
       alert(translations[currentLanguage].noEditingStory);
@@ -15044,6 +15082,7 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
         })
         .catch(error => {
           console.error("Error al actualizar capítulo:", error);
+          alert('Error al guardar los cambios del capítulo.');
         });
     } else {
       const chapterNumber = currentChapters.length + 1;
@@ -15082,6 +15121,7 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
         })
         .catch(error => {
           console.error("Error al agregar capítulo:", error);
+          alert('Error al agregar capítulo. Intenta nuevamente.');
         });
     }
   });
@@ -15089,7 +15129,8 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
   function openChapterEditModal(chapter) {
     currentChapterEditId = chapter.id;
     document.getElementById('chapter-content').value = chapter.content;
-    document.getElementById('btn-save-chapter').textContent = "Guardar Cambios";
+    const saveBtn = document.getElementById('btn-save-chapter');
+    if (saveBtn) saveBtn.textContent = 'Guardar cambios';
     document.getElementById('chapter-creation-modal').style.display = "flex";
   }
 
