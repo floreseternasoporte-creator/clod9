@@ -28,8 +28,21 @@ const buildPlaceholderSvg = (width, height) => {
 </svg>`;
 };
 
+const resolvePathPart = (query = {}) => {
+  const fromPath = query.path;
+  if (typeof fromPath === 'string' && fromPath.length > 0) return fromPath;
+
+  const fromFn = query.fn;
+  if (typeof fromFn === 'string' && fromFn.length > 0) {
+    const prefix = 'placeholder/';
+    return fromFn.startsWith(prefix) ? fromFn.slice(prefix.length) : fromFn;
+  }
+
+  return '';
+};
+
 module.exports = async (event = {}) => {
-  const pathPart = event?.queryStringParameters?.path || '';
+  const pathPart = resolvePathPart(event?.queryStringParameters || {});
   const [rawWidth, rawHeight] = String(pathPart).split('/');
   const width = clampDimension(rawWidth, 400);
   const height = clampDimension(rawHeight, 600);
