@@ -6523,7 +6523,10 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         </button>
         <h2 id="profile-username-header" class="text-base font-semibold text-gray-900">@nombre_usuario</h2>
         <button onclick="openMenuModal()" class="p-2" aria-label="Configuración">
-          <i class="fas fa-cog h-6 w-6 text-gray-700 text-xl" aria-hidden="true"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75h1.5l.45 2.04a6.9 6.9 0 011.62.67l1.74-1.12 1.06 1.06-1.12 1.74c.26.5.48 1.04.64 1.61l2.06.46v1.5l-2.06.46a6.94 6.94 0 01-.64 1.61l1.12 1.74-1.06 1.06-1.74-1.12a6.9 6.9 0 01-1.62.67l-.45 2.04h-1.5l-.45-2.04a6.9 6.9 0 01-1.62-.67l-1.74 1.12-1.06-1.06 1.12-1.74a6.94 6.94 0 01-.64-1.61L3.75 12v-1.5l2.06-.46c.16-.57.38-1.11.64-1.61L5.33 6.69l1.06-1.06 1.74 1.12a6.9 6.9 0 011.62-.67l.5-2.33z"/>
+            <circle cx="12" cy="12" r="2.75" />
+          </svg>
         </button>
       </div>
     </div>
@@ -6591,7 +6594,10 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
 
         <div class="flex items-center space-x-3">
           <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all" aria-label="Configuración">
-            <i class="fas fa-cog h-5 w-5" aria-hidden="true"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75h1.5l.45 2.04a6.9 6.9 0 011.62.67l1.74-1.12 1.06 1.06-1.12 1.74c.26.5.48 1.04.64 1.61l2.06.46v1.5l-2.06.46a6.94 6.94 0 01-.64 1.61l1.12 1.74-1.06 1.06-1.74-1.12a6.9 6.9 0 01-1.62.67l-.45 2.04h-1.5l-.45-2.04a6.9 6.9 0 01-1.62-.67l-1.74 1.12-1.06-1.06 1.12-1.74a6.94 6.94 0 01-.64-1.61L3.75 12v-1.5l2.06-.46c.16-.57.38-1.11.64-1.61L5.33 6.69l1.06-1.06 1.74 1.12a6.9 6.9 0 011.62-.67l.5-2.33z"/>
+              <circle cx="12" cy="12" r="2.75" />
+            </svg>
           </button>
         </div>
       </div>
@@ -6613,7 +6619,10 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
             <div class="flex items-center mb-2">
               <h1 id="profile-username-desktop" class="text-3xl font-bold text-white mr-3">@nombre_usuario</h1>
               <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all" aria-label="Configuración">
-                <i class="fas fa-cog h-5 w-5" aria-hidden="true"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75h1.5l.45 2.04a6.9 6.9 0 011.62.67l1.74-1.12 1.06 1.06-1.12 1.74c.26.5.48 1.04.64 1.61l2.06.46v1.5l-2.06.46a6.94 6.94 0 01-.64 1.61l1.12 1.74-1.06 1.06-1.74-1.12a6.9 6.9 0 01-1.62.67l-.45 2.04h-1.5l-.45-2.04a6.9 6.9 0 01-1.62-.67l-1.74 1.12-1.06-1.06 1.12-1.74a6.94 6.94 0 01-.64-1.61L3.75 12v-1.5l2.06-.46c.16-.57.38-1.11.64-1.61L5.33 6.69l1.06-1.06 1.74 1.12a6.9 6.9 0 011.62-.67l.5-2.33z"/>
+              <circle cx="12" cy="12" r="2.75" />
+            </svg>
               </button>
             </div>
             <p id="profile-location-desktop" class="text-white text-opacity-90 mb-4">Ubicación no especificada</p>
@@ -13753,10 +13762,14 @@ async function likeNote(noteId) {
     closeCategoryFilterSheet();
   }
 
+  function normalizeSearchQuery(value) {
+    return String(value || '').trim().toLowerCase().replace(/^@+/, '');
+  }
+
   function performRealTimeSearch() {
     const searchInputEl = document.getElementById('search-input');
     const categoryFilterEl = document.getElementById('category-filter');
-    const query = (searchInputEl?.value || '').trim().toLowerCase();
+    const query = normalizeSearchQuery(searchInputEl?.value || '');
     const category = categoryFilterEl?.value || '';
     const recentRangeMs = 7 * 24 * 60 * 60 * 1000;
     const recentThreshold = Date.now() - recentRangeMs;
@@ -13767,9 +13780,10 @@ async function likeNote(noteId) {
         stories.forEach((story) => {
           const storyTimestamp = getStoryTimestamp(story);
           const isRecent = storyTimestamp >= recentThreshold;
-          const storyTitle = (story.title || '').toLowerCase();
-          const storyAuthor = (story.username || story.authorName || '').toLowerCase();
-          const matchesQuery = !query || storyTitle.includes(query) || storyAuthor.includes(query);
+          const storyTitle = normalizeSearchQuery(story.title || '');
+          const storyAuthor = normalizeSearchQuery(story.username || story.authorName || story.author || '');
+          const storySynopsis = normalizeSearchQuery(story.synopsis || '');
+          const matchesQuery = !query || storyTitle.includes(query) || storyAuthor.includes(query) || storySynopsis.includes(query);
           const matchesCategory = !category
             || (category === 'recent' && isRecent)
             || (category === 'system' && (story.category === 'sistema' || story.category === 'system' || story.type === 'sistema' || story.type === 'system'))
@@ -13790,10 +13804,12 @@ async function likeNote(noteId) {
           return response.json();
         })
         .then(data => {
-          const authors = (data.users || []).filter(user =>
-            (user.username && user.username.toLowerCase().includes(query))
-            || (user.email && user.email.toLowerCase().includes(query))
-          );
+          const authors = (data.users || []).filter(user => {
+            const username = normalizeSearchQuery(user.username || '');
+            const displayName = normalizeSearchQuery(user.name || user.displayName || '');
+            const email = normalizeSearchQuery(user.email || '');
+            return username.includes(query) || displayName.includes(query) || email.includes(query);
+          });
           renderProfilesList(authors);
         })
         .catch((error) => {
@@ -13822,9 +13838,12 @@ async function likeNote(noteId) {
     renderBooksCarousel(books);
     const usersResponse = await fetch('/api/users');
     const usersData = await usersResponse.json();
-    const authors = (usersData.users || []).filter(user =>
-      user.username && user.username.toLowerCase().includes(query)
-    );
+    const normalizedQuery = normalizeSearchQuery(query);
+    const authors = (usersData.users || []).filter(user => {
+      const username = normalizeSearchQuery(user.username || '');
+      const displayName = normalizeSearchQuery(user.name || user.displayName || '');
+      return username.includes(normalizedQuery) || displayName.includes(normalizedQuery);
+    });
     renderProfilesList(authors);
   }
 
