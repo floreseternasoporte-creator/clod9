@@ -8,7 +8,9 @@ const response = (statusCode, body) => ({ statusCode, headers: {
 
 const toClientUser = (userId, row = {}) => ({
   userId,
-  username: row.username || 'Usuario',
+  username: row.username || row.displayName || row.name || 'Usuario',
+  name: row.name || row.displayName || row.username || '',
+  displayName: row.displayName || row.name || row.username || '',
   bio: row.bio || '',
   profileImage: row.profileImage || '',
   followersCount: Number(row.followersCount || 0),
@@ -34,10 +36,18 @@ exports.handler = async (event) => {
       }
 
       const safeLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
-      const needle = String(q).trim().toLowerCase();
+      const needle = String(q).trim().toLowerCase().replace(/^@+/, '');
       const users = Object.entries(await getCollection('users'))
         .map(([id, row]) => toClientUser(id, row))
-        .filter((u) => !needle || u.username.toLowerCase().includes(needle) || u.email.toLowerCase().includes(needle))
+        .filter((u) => {
+          if (!needle) return true;
+          const username = String(u.username || '').toLowerCase().replace(/^@+/, '');
+          const name = String(u.name || '').toLowerCase().replace(/^@+/, '');
+          const displayName = String(u.displayName || '').toLowerCase().replace(/^@+/, '');
+          const email = String(u.email || '').toLowerCase();
+          const uid = String(u.userId || '').toLowerCase();
+          return username.includes(needle) || name.includes(needle) || displayName.includes(needle) || email.includes(needle) || uid.includes(needle);
+        })
         .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
         .slice(0, safeLimit);
 
@@ -52,7 +62,9 @@ exports.handler = async (event) => {
       const existing = await firebaseRequest(`users/${encodeURIComponent(userId)}`) || {};
       const merged = {
         ...existing,
-        username: body.username || body.displayName || existing.username || 'Usuario',
+        username: body.username || body.displayName || body.name || existing.username || existing.displayName || existing.name || 'Usuario',
+        name: body.name ?? body.displayName ?? existing.name ?? existing.displayName ?? '',
+        displayName: body.displayName ?? body.name ?? existing.displayName ?? existing.name ?? '',
         bio: body.bio ?? existing.bio ?? '',
         profileImage: body.profileImage ?? existing.profileImage ?? '',
         followersCount: body.followersCount ?? existing.followersCount ?? 0,
