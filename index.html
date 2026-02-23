@@ -2776,7 +2776,6 @@ setInterval(checkScheduledChapters, 60000);
       <div id="sms-error" class="mt-4 text-red-500 text-center text-sm hidden"></div>
     </div>
   </div>
-</body>
 
 <!-- APLICACIÓN PRINCIPAL ESTILO TIKTOK (MODO CLARO) -->
 <div id="main-app" class="h-screen flex flex-col font-sans text-black" style="display: none; opacity: 0; background: #F2F4F5;">
@@ -13185,6 +13184,32 @@ async function likeNote(noteId) {
   let currentUserProfileRef = null;
   let currentUserProfileListener = null;
 
+  function setAuthScreensVisibility(isAuthenticated) {
+    const authFormContainer = document.getElementById('auth-form');
+    const emailFormContainer = document.getElementById('email-form');
+    const smsScreen = document.getElementById('sms-verification-modal');
+    const captchaModal = document.getElementById('captcha-modal');
+
+    if (isAuthenticated) {
+      if (authFormContainer) {
+        authFormContainer.style.display = 'none';
+        authFormContainer.style.opacity = '0';
+      }
+      if (emailFormContainer) emailFormContainer.classList.add('hidden');
+      if (smsScreen) smsScreen.classList.add('hidden');
+      if (captchaModal) captchaModal.classList.add('hidden');
+      return;
+    }
+
+    if (authFormContainer) {
+      authFormContainer.style.display = 'flex';
+      authFormContainer.style.opacity = '1';
+    }
+    if (emailFormContainer) emailFormContainer.classList.add('hidden');
+    if (smsScreen) smsScreen.classList.add('hidden');
+    if (captchaModal) captchaModal.classList.add('hidden');
+  }
+
   function applyCurrentUserProfileData(data = {}) {
     let displayName = data.username || "Usuario";
     if (data.founder) {
@@ -13247,7 +13272,6 @@ async function likeNote(noteId) {
   }
 
   firebase.auth().onAuthStateChanged(user => {
-    const authFormContainer = document.getElementById('auth-form');
     const mainAppContainer = document.getElementById('main-app');
 
     if (user) {
@@ -13274,8 +13298,9 @@ async function likeNote(noteId) {
           return;
         }
         syncUserProfileToFirebase(user, data || {});
-        authFormContainer.style.display = 'none';
+        setAuthScreensVisibility(true);
         mainAppContainer.style.display = 'flex';
+        mainAppContainer.style.opacity = '1';
         loadStories();
         loadUserStories(user.uid);
         initializeFeedSections();
@@ -13288,8 +13313,9 @@ async function likeNote(noteId) {
       });
     } else {
       detachCurrentUserProfileListener();
-      authFormContainer.style.display = 'flex';
+      setAuthScreensVisibility(false);
       mainAppContainer.style.display = 'none';
+      mainAppContainer.style.opacity = '0';
     }
   });
   /*********************** AUTENTICACIÓN CON GOOGLE Y FACEBOOK **************************/
@@ -18421,7 +18447,6 @@ function closeZenvioStudio() {
   }
 </script>
 
-</body>
 
 <!-- Story Viewer Modal -->
 <div id="story-viewer">
