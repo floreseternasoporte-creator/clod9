@@ -3092,7 +3092,7 @@ firebase.auth().onAuthStateChanged(user => {
 
     .nav-button.active {
       color: #111111;
-      background-color: #f3f4f6;
+      background-color: transparent;
     }
 
     .nav-button:hover {
@@ -3105,6 +3105,27 @@ firebase.auth().onAuthStateChanged(user => {
 
     #bottom-nav.hide {
       transform: translateY(100%);
+    }
+
+    .search-filter-icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid #e6e6e6;
+      background: #ffffff;
+      color: #111111;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(17, 17, 17, 0.06);
+    }
+
+    #search-view,
+    #community-view,
+    #creator-hub-view,
+    #zenvio-chat-view {
+      background-color: #f6f6f6 !important;
+      opacity: 1;
     }
   </style>
 
@@ -3493,17 +3514,15 @@ function openZenvioChat() {
   initVoiceHoldRecorder();
   
   // Ocultar barra de navegación inferior
-  const bottomNav = document.getElementById('bottom-nav');
-  if (bottomNav) bottomNav.style.display = 'none';
+  setBottomNavVisibility(false, 'zenvio-chat');
 }
 
 function closeZenvioChat() {
   document.getElementById('zenvio-chat-view').classList.add('hidden');
   document.getElementById('creator-hub-view').classList.remove('hidden');
   
-  // Mostrar barra de navegación inferior
-  const bottomNav = document.getElementById('bottom-nav');
-  if (bottomNav) bottomNav.style.display = 'block';
+  // Mantener barra inferior oculta porque seguimos en Creator Hub
+  setBottomNavVisibility(false, 'creator-hub');
 }
 
 // Función para cambiar entre tabs de Atenis AI
@@ -4614,12 +4633,8 @@ function escapeHtml(text) {
       <a id="search-ai-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-uber-black hover:underline">Ver en Wikipedia</a>
     </div>
 
-    <div class="flex items-center justify-between mb-4">
+    <div class="mb-4">
       <div id="active-search-filters" class="flex flex-wrap gap-2"></div>
-      <button type="button" onclick="openCategoryFilterSheet()" class="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-uber-line bg-white text-sm font-semibold text-uber-black shadow-uber-chip">
-        <i class="fa-solid fa-sliders"></i>
-        Filtrar por categorías
-      </button>
     </div>
     <select id="category-filter" class="hidden" aria-hidden="true">
       <option value="">Todas</option>
@@ -4640,6 +4655,12 @@ function escapeHtml(text) {
     </div>
 
     <div id="search-stories-section">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-semibold text-uber-black">Historias</h3>
+        <button type="button" onclick="openCategoryFilterSheet()" class="search-filter-icon-btn" aria-label="Filtrar categorías">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+      </div>
       <div id="search-books-carousel" class="grid grid-cols-3 gap-1"></div>
     </div>
 
@@ -10492,14 +10513,15 @@ function openCreatorHub() {
     // Mostrar creator hub
     document.getElementById('creator-hub-view').classList.remove('hidden');
     
-    // Ocultar top navbar
+    // Ocultar top navbar y barra inferior
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'none';
+    setBottomNavVisibility(false, 'creator-hub');
   }
 
   function closeCreatorHub() {
     document.getElementById('creator-hub-view').classList.add('hidden');
-    mainApp.classList.remove('hidden');
+    openHome();
   }
 
   function openNoteCreation() {
@@ -11244,6 +11266,7 @@ async function likeNote(noteId) {
     // Mostrar top navbar
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'flex';
+    setBottomNavVisibility(true);
   }
 
   function openSearch() {
@@ -11261,6 +11284,7 @@ async function likeNote(noteId) {
     // Mostrar top navbar
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'flex';
+    setBottomNavVisibility(true);
   }
 
   function openProfile() {
@@ -11281,6 +11305,7 @@ async function likeNote(noteId) {
     // Ocultar top navbar
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'none';
+    setBottomNavVisibility(true);
     
     loadUserStats(user.uid);
   }
@@ -12981,17 +13006,35 @@ async function likeNote(noteId) {
     }).join('');
   }
 
+  function setBottomNavVisibility(isVisible, reason = '') {
+    const bottomNav = document.getElementById('bottom-nav');
+    if (!bottomNav) return;
+
+    if (isVisible) {
+      if (!reason || bottomNav.dataset.hiddenBy === reason) {
+        bottomNav.style.display = 'block';
+        if (reason) delete bottomNav.dataset.hiddenBy;
+      }
+      return;
+    }
+
+    bottomNav.style.display = 'none';
+    if (reason) bottomNav.dataset.hiddenBy = reason;
+  }
+
   function openCategoryFilterSheet() {
     renderCategoryFilterSheetOptions();
     document.getElementById('category-filter-sheet-backdrop')?.classList.remove('hidden');
     const sheet = document.getElementById('category-filter-sheet');
     if (sheet) sheet.classList.remove('translate-y-full');
+    setBottomNavVisibility(false, 'category-filter');
   }
 
   function closeCategoryFilterSheet() {
     document.getElementById('category-filter-sheet-backdrop')?.classList.add('hidden');
     const sheet = document.getElementById('category-filter-sheet');
     if (sheet) sheet.classList.add('translate-y-full');
+    setBottomNavVisibility(true, 'category-filter');
   }
 
   function selectCategoryFilter(value) {
@@ -13011,6 +13054,7 @@ async function likeNote(noteId) {
     renderActiveSearchFilters();
     renderCategoryFilterSheetOptions();
     performRealTimeSearch();
+    closeCategoryFilterSheet();
   }
 
   function performRealTimeSearch() {
