@@ -1766,6 +1766,20 @@ setInterval(checkScheduledChapters, 60000);
         </svg>
       </button>
 
+      <button onclick="openMenuAccountSection()" class="w-full bg-white rounded-2xl border border-black/5 px-4 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+        <span class="font-semibold text-gray-900">Cuenta</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      <button onclick="openCloseAccountSection()" class="w-full bg-white rounded-2xl border border-black/5 px-4 py-4 flex items-center justify-between hover:bg-red-50 transition-colors">
+        <span class="font-semibold text-red-600">Cerrar cuenta</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
       <button onclick="openSupportModal(); closeMenuModal();" class="w-full bg-white rounded-2xl border border-black/5 px-4 py-4 flex items-center gap-3 hover:bg-gray-50 transition-colors">
         <div class="h-10 w-10 rounded-full bg-[#00A2FF] bg-opacity-10 flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#00A2FF]" viewBox="0 0 20 20" fill="currentColor">
@@ -1808,9 +1822,6 @@ setInterval(checkScheduledChapters, 60000);
         <button onclick="openMenuProfileEditor('name')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
           <span class="font-medium text-gray-900">Nombre</span><span class="text-gray-400">›</span>
         </button>
-        <button onclick="openMenuProfileEditor('username')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
-          <span class="font-medium text-gray-900">Nombre de usuario</span><span class="text-gray-400">›</span>
-        </button>
         <button onclick="openMenuProfileEditor('location')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
           <span class="font-medium text-gray-900">Dónde vives</span><span class="text-gray-400">›</span>
         </button>
@@ -1820,6 +1831,102 @@ setInterval(checkScheduledChapters, 60000);
         <button onclick="openMenuProfileEditor('bio')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between">
           <span class="font-medium text-gray-900">Biografía</span><span class="text-gray-400">›</span>
         </button>
+      </div>
+    </div>
+
+    <div id="menu-account-section" class="hidden absolute inset-0 bg-white z-20 flex flex-col">
+      <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <button onclick="closeMenuAccountSection()" class="text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h2 class="text-base font-semibold text-gray-900">Cuenta</h2>
+        <div class="w-6"></div>
+      </div>
+      <div class="p-4 space-y-2">
+        <button onclick="openMenuAccountEditor('username')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between"><span class="font-medium text-gray-900">Nombre de usuario</span><span class="text-gray-400">›</span></button>
+        <button onclick="openMenuAccountEditor('email')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between"><span class="font-medium text-gray-900">Correo electrónico</span><span class="text-gray-400">›</span></button>
+        <button onclick="openMenuAccountEditor('password')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between"><span class="font-medium text-gray-900">Contraseña</span><span class="text-gray-400">›</span></button>
+        <button onclick="openMenuAccountEditor('birthday')" class="w-full text-left bg-white border border-gray-200 rounded-xl px-4 py-4 flex items-center justify-between"><span class="font-medium text-gray-900">Cumpleaños</span><span class="text-gray-400">›</span></button>
+      </div>
+    </div>
+
+    <div id="menu-account-editor" class="hidden absolute inset-0 bg-white z-30 flex flex-col">
+      <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <button onclick="closeMenuAccountEditor()" class="text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h2 id="menu-account-editor-title" class="text-base font-semibold text-gray-900">Cuenta</h2>
+        <button onclick="saveMenuAccountField()" class="text-[#00A2FF] font-semibold text-sm">Guardar</button>
+      </div>
+      <div class="p-4 space-y-4">
+        <div id="menu-account-editor-text" class="hidden">
+          <label id="menu-account-editor-label" class="block text-sm font-medium text-gray-700 mb-2"></label>
+          <div class="flex items-center border border-gray-300 rounded-lg px-3">
+            <span id="menu-account-editor-prefix" class="text-gray-500 mr-2 hidden">@</span>
+            <input id="menu-account-editor-input" type="text" class="w-full py-3 outline-none" placeholder="">
+          </div>
+          <p id="menu-account-editor-help" class="text-xs text-gray-500 mt-2"></p>
+        </div>
+
+        <div id="menu-account-editor-password" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Nueva contraseña</label>
+          <div class="flex items-center border border-gray-300 rounded-lg px-3">
+            <input id="menu-account-password-input" type="password" class="w-full py-3 outline-none" placeholder="Escribe tu nueva contraseña">
+            <button type="button" onclick="toggleMenuPasswordVisibility()" class="text-gray-500">
+              <svg id="menu-password-eye-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
+          </div>
+          <p class="text-xs text-gray-500 mt-2">La contraseña se puede cambiar cada 14 días.</p>
+          <p class="text-xs text-gray-500">Si quieres hacerlo de manera rápida debes verificar el correo electrónico (aún no disponible).</p>
+        </div>
+
+        <div id="menu-account-editor-birthday" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Cumpleaños</label>
+          <input id="menu-account-birthday-input" type="date" class="w-full p-3 border border-gray-300 rounded-lg">
+        </div>
+      </div>
+    </div>
+
+    <div id="menu-close-account-section" class="hidden absolute inset-0 bg-white z-20 flex flex-col">
+      <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <button onclick="closeCloseAccountSection()" class="text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg></button>
+        <h2 class="text-base font-semibold text-gray-900">Cerrar cuenta</h2>
+        <div class="w-6"></div>
+      </div>
+      <div class="p-4 space-y-4">
+        <h3 class="font-semibold text-gray-900">¿Cerrar tu cuenta de Atenis?</h3>
+        <p id="close-account-username" class="text-sm text-gray-600">@usuario</p>
+        <p class="text-sm text-gray-700">¿Por qué te quieres ir? Cuéntanos por favor</p>
+        <div class="space-y-2 text-sm">
+          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Quiero cambiar mi nombre de usuario">Quiero cambiar mi nombre de usuario</label>
+          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Quiero cambiar mi dirección de correo electrónico">Quiero cambiar mi dirección de correo electrónico</label>
+          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Recibo demasiado spam por el equipo de Atenis">Recibo demasiado spam por el equipo de Atenis</label>
+          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Tengo problemas con mi cuenta">Tengo problemas con mi cuenta</label>
+          <label class="flex items-center gap-2"><input type="radio" name="close-account-reason" value="Prefiero no contestar a esta pregunta">Prefiero no contestar a esta pregunta</label>
+        </div>
+        <div class="grid grid-cols-2 gap-3 pt-4">
+          <button onclick="cancelCloseAccountSession()" class="py-3 rounded-xl border border-gray-300 font-semibold">No la eliminaré</button>
+          <button onclick="openCloseAccountConfirm()" class="py-3 rounded-xl bg-red-600 text-white font-semibold">Continuar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="menu-close-account-confirm" class="hidden absolute inset-0 bg-white z-30 flex flex-col">
+      <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <button onclick="closeCloseAccountConfirm()" class="text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg></button>
+        <h2 class="text-base font-semibold text-gray-900">Confirmación</h2>
+        <div class="w-6"></div>
+      </div>
+      <div class="p-4 space-y-4">
+        <h3 class="font-semibold text-gray-900">¿Confirmas que quieres eliminar tu cuenta ahora?</h3>
+        <div class="grid grid-cols-2 gap-3 pt-4">
+          <button onclick="cancelDeleteAccountAndBackToSettings()" class="py-3 rounded-xl border border-gray-300 font-semibold">No</button>
+          <button onclick="confirmDeleteAccount()" class="py-3 rounded-xl bg-red-600 text-white font-semibold">Sí</button>
+        </div>
       </div>
     </div>
 
@@ -9184,8 +9291,10 @@ function openMenuModal() {
       if (userData) {
         const menuImg = document.getElementById('menu-profile-image');
         const menuUsername = document.getElementById('menu-profile-username');
+        const closeUsername = document.getElementById('close-account-username');
         if (menuImg) menuImg.src = userData.profileImage || 'https://via.placeholder.com/150';
         if (menuUsername) menuUsername.textContent = '@' + (userData.username || 'usuario');
+        if (closeUsername) closeUsername.textContent = '@' + (userData.username || 'usuario');
       }
     });
   }
@@ -9197,21 +9306,34 @@ function closeMenuModal() {
 
 let currentMenuProfileField = null;
 let menuProfilePendingFile = null;
+let currentMenuAccountField = null;
+
+function hideAllSettingsSubSections() {
+  const ids = [
+    'menu-profile-section',
+    'menu-profile-editor',
+    'menu-account-section',
+    'menu-account-editor',
+    'menu-close-account-section',
+    'menu-close-account-confirm'
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+}
 
 function showMenuMainSettings() {
   const mainList = document.getElementById('menu-main-settings-list');
-  const profileSection = document.getElementById('menu-profile-section');
-  const profileEditor = document.getElementById('menu-profile-editor');
   if (mainList) mainList.classList.remove('hidden');
-  if (profileSection) profileSection.classList.add('hidden');
-  if (profileEditor) profileEditor.classList.add('hidden');
+  hideAllSettingsSubSections();
 }
 
 function openMenuProfileSection() {
   const mainList = document.getElementById('menu-main-settings-list');
   if (mainList) mainList.classList.add('hidden');
+  hideAllSettingsSubSections();
   document.getElementById('menu-profile-section').classList.remove('hidden');
-  document.getElementById('menu-profile-editor').classList.add('hidden');
 }
 
 function closeMenuProfileSection() {
@@ -9221,6 +9343,70 @@ function closeMenuProfileSection() {
 function closeMenuProfileEditor() {
   document.getElementById('menu-profile-editor').classList.add('hidden');
   document.getElementById('menu-profile-section').classList.remove('hidden');
+}
+
+function openMenuAccountSection() {
+  const mainList = document.getElementById('menu-main-settings-list');
+  if (mainList) mainList.classList.add('hidden');
+  hideAllSettingsSubSections();
+  const user = firebase.auth().currentUser;
+  if (user) {
+    const usernameRef = document.getElementById('close-account-username');
+    firebase.database().ref('users/' + user.uid).once('value').then(snap => {
+      const data = snap.val() || {};
+      if (usernameRef) usernameRef.textContent = '@' + (data.username || 'usuario');
+    });
+  }
+  document.getElementById('menu-account-section').classList.remove('hidden');
+}
+
+function closeMenuAccountSection() {
+  showMenuMainSettings();
+}
+
+function closeMenuAccountEditor() {
+  document.getElementById('menu-account-editor').classList.add('hidden');
+  document.getElementById('menu-account-section').classList.remove('hidden');
+}
+
+function openCloseAccountSection() {
+  const mainList = document.getElementById('menu-main-settings-list');
+  if (mainList) mainList.classList.add('hidden');
+  hideAllSettingsSubSections();
+
+  const user = firebase.auth().currentUser;
+  if (user) {
+    firebase.database().ref('users/' + user.uid).once('value').then(snap => {
+      const data = snap.val() || {};
+      const usernameRef = document.getElementById('close-account-username');
+      if (usernameRef) usernameRef.textContent = '@' + (data.username || 'usuario');
+    });
+  }
+
+  document.getElementById('menu-close-account-section').classList.remove('hidden');
+}
+
+function closeCloseAccountSection() {
+  showMenuMainSettings();
+}
+
+function openCloseAccountConfirm() {
+  document.getElementById('menu-close-account-section').classList.add('hidden');
+  document.getElementById('menu-close-account-confirm').classList.remove('hidden');
+}
+
+function closeCloseAccountConfirm() {
+  document.getElementById('menu-close-account-confirm').classList.add('hidden');
+  document.getElementById('menu-close-account-section').classList.remove('hidden');
+}
+
+function cancelCloseAccountSession() {
+  closeMenuModal();
+  signOutUser();
+}
+
+function cancelDeleteAccountAndBackToSettings() {
+  showMenuMainSettings();
 }
 
 function previewMenuProfilePhoto(event) {
@@ -9267,13 +9453,6 @@ function openMenuProfileEditor(field) {
       document.getElementById('menu-profile-editor-prefix').classList.add('hidden');
       document.getElementById('menu-profile-editor-input').value = data.name || '';
       document.getElementById('menu-profile-editor-input').placeholder = 'Escribe tu nombre';
-    } else if (field === 'username') {
-      title.textContent = 'Crear nombre de usuario';
-      document.getElementById('menu-profile-editor-text').classList.remove('hidden');
-      document.getElementById('menu-profile-editor-label').textContent = 'Nombre de usuario';
-      document.getElementById('menu-profile-editor-prefix').classList.remove('hidden');
-      document.getElementById('menu-profile-editor-input').value = data.username || '';
-      document.getElementById('menu-profile-editor-input').placeholder = 'tunombredeusuario';
     } else if (field === 'location') {
       title.textContent = 'Dónde vives';
       document.getElementById('menu-profile-editor-text').classList.remove('hidden');
@@ -9294,6 +9473,68 @@ function openMenuProfileEditor(field) {
     section.classList.add('hidden');
     editor.classList.remove('hidden');
   });
+}
+
+function openMenuAccountEditor(field) {
+  currentMenuAccountField = field;
+  const editor = document.getElementById('menu-account-editor');
+  const section = document.getElementById('menu-account-section');
+  const title = document.getElementById('menu-account-editor-title');
+
+  document.getElementById('menu-account-editor-text').classList.add('hidden');
+  document.getElementById('menu-account-editor-password').classList.add('hidden');
+  document.getElementById('menu-account-editor-birthday').classList.add('hidden');
+
+  const input = document.getElementById('menu-account-editor-input');
+  const label = document.getElementById('menu-account-editor-label');
+  const prefix = document.getElementById('menu-account-editor-prefix');
+  const help = document.getElementById('menu-account-editor-help');
+
+  const user = firebase.auth().currentUser;
+  const userDataPromise = user
+    ? firebase.database().ref('users/' + user.uid).once('value').then(snapshot => snapshot.val() || {})
+    : Promise.resolve({});
+
+  userDataPromise.then(data => {
+    if (field === 'username') {
+      title.textContent = 'Nombre de usuario';
+      document.getElementById('menu-account-editor-text').classList.remove('hidden');
+      label.textContent = 'Nombre de usuario';
+      prefix.classList.remove('hidden');
+      input.value = data.username || '';
+      input.placeholder = 'tunombredeusuario';
+      input.readOnly = false;
+      help.textContent = '';
+    } else if (field === 'email') {
+      title.textContent = 'Correo electrónico';
+      document.getElementById('menu-account-editor-text').classList.remove('hidden');
+      label.textContent = 'Correo electrónico';
+      prefix.classList.add('hidden');
+      input.value = user?.email || data.email || '';
+      input.placeholder = 'correo@ejemplo.com';
+      input.readOnly = true;
+      help.textContent = 'Verificación/cambio de correo aún no disponible.';
+    } else if (field === 'password') {
+      title.textContent = 'Configurar contraseña';
+      document.getElementById('menu-account-editor-password').classList.remove('hidden');
+      const passInput = document.getElementById('menu-account-password-input');
+      if (passInput) passInput.value = '';
+    } else if (field === 'birthday') {
+      title.textContent = 'Cumpleaños';
+      document.getElementById('menu-account-editor-birthday').classList.remove('hidden');
+      const birthday = document.getElementById('menu-account-birthday-input');
+      if (birthday) birthday.value = data.birthday || '';
+    }
+
+    section.classList.add('hidden');
+    editor.classList.remove('hidden');
+  });
+}
+
+function toggleMenuPasswordVisibility() {
+  const input = document.getElementById('menu-account-password-input');
+  if (!input) return;
+  input.type = input.type === 'password' ? 'text' : 'password';
 }
 
 async function uploadMenuProfilePhoto(file, userId) {
@@ -9339,17 +9580,12 @@ async function saveMenuProfileField() {
       }
       const imageUrl = await uploadMenuProfilePhoto(menuProfilePendingFile, user.uid);
       updates.profileImage = imageUrl;
-      document.getElementById('menu-profile-image').src = imageUrl;
       const profileImage = document.getElementById('profile-image');
       const profileImageDesktop = document.getElementById('profile-image-desktop');
       if (profileImage) profileImage.src = imageUrl;
       if (profileImageDesktop) profileImageDesktop.src = imageUrl;
     } else if (currentMenuProfileField === 'name') {
       updates.name = document.getElementById('menu-profile-editor-input').value.trim();
-    } else if (currentMenuProfileField === 'username') {
-      const username = document.getElementById('menu-profile-editor-input').value.trim().replace(/^@+/, '');
-      updates.username = username;
-      alert('Nombre de usuario actualizado correctamente');
     } else if (currentMenuProfileField === 'location') {
       updates.city = document.getElementById('menu-profile-editor-input').value.trim();
     } else if (currentMenuProfileField === 'pronouns') {
@@ -9361,13 +9597,101 @@ async function saveMenuProfileField() {
     await firebase.database().ref('users/' + user.uid).update(updates);
     alert('Cambios guardados correctamente');
     closeMenuProfileEditor();
-    openMenuModal();
   } catch (error) {
     console.error('Error al guardar perfil desde configuración:', error);
     alert('No se pudo guardar: ' + error.message);
   }
 }
 
+async function saveMenuAccountField() {
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    alert('Debes iniciar sesión');
+    return;
+  }
+
+  try {
+    if (currentMenuAccountField === 'username') {
+      const username = (document.getElementById('menu-account-editor-input').value || '').trim().replace(/^@+/, '');
+      await firebase.database().ref('users/' + user.uid).update({ username });
+      alert('Nombre de usuario actualizado correctamente');
+    } else if (currentMenuAccountField === 'email') {
+      alert('La verificación/cambio de correo aún no está disponible.');
+      return;
+    } else if (currentMenuAccountField === 'birthday') {
+      const birthday = document.getElementById('menu-account-birthday-input').value;
+      await firebase.database().ref('users/' + user.uid).update({ birthday });
+      alert('Cumpleaños actualizado correctamente');
+    } else if (currentMenuAccountField === 'password') {
+      const pass = (document.getElementById('menu-account-password-input').value || '').trim();
+      if (pass.length < 6) {
+        alert('La contraseña debe tener al menos 6 caracteres');
+        return;
+      }
+      const userSnap = await firebase.database().ref('users/' + user.uid).once('value');
+      const data = userSnap.val() || {};
+      const lastChange = data.lastPasswordChangeAt || 0;
+      const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+      if (lastChange && (Date.now() - lastChange) < fourteenDaysMs) {
+        alert('Solo puedes cambiar la contraseña cada 14 días. Para hacerlo rápido, verifica tu correo (aún no disponible).');
+        return;
+      }
+      await user.updatePassword(pass);
+      await firebase.database().ref('users/' + user.uid).update({ lastPasswordChangeAt: Date.now() });
+      alert('Contraseña actualizada correctamente');
+    }
+
+    closeMenuAccountEditor();
+  } catch (error) {
+    console.error('Error guardando datos de cuenta:', error);
+    alert('No se pudo guardar: ' + (error.message || 'error desconocido'));
+  }
+}
+
+async function removeCommunityNotesByUser(userId) {
+  const snap = await firebase.database().ref('communityNotes').orderByChild('authorId').equalTo(userId).once('value');
+  const updates = {};
+  snap.forEach(child => {
+    updates[child.key] = null;
+  });
+  if (Object.keys(updates).length) {
+    await firebase.database().ref('communityNotes').update(updates);
+  }
+}
+
+async function confirmDeleteAccount() {
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    alert('Debes iniciar sesión');
+    return;
+  }
+
+  try {
+    const uid = user.uid;
+    const rootUpdates = {};
+    rootUpdates[`users/${uid}`] = null;
+    rootUpdates[`followers/${uid}`] = null;
+    rootUpdates[`following/${uid}`] = null;
+    rootUpdates[`blocks/${uid}`] = null;
+    rootUpdates[`userWarnings/${uid}`] = null;
+    rootUpdates[`profileNotes/${uid}`] = null;
+    rootUpdates[`notifications/${uid}`] = null;
+    await firebase.database().ref().update(rootUpdates);
+    await removeCommunityNotesByUser(uid);
+
+    await user.delete();
+    alert('Tu cuenta fue eliminada completamente de la plataforma.');
+    closeMenuModal();
+    openHome();
+  } catch (error) {
+    console.error('Error eliminando cuenta:', error);
+    if ((error.code || '').includes('requires-recent-login')) {
+      alert('Por seguridad, vuelve a iniciar sesión y luego intenta eliminar la cuenta otra vez.');
+    } else {
+      alert('No se pudo eliminar la cuenta: ' + (error.message || 'error desconocido'));
+    }
+  }
+}
 function openSettingsPlaceholder(sectionName) {
   closeMenuModal();
   alert(`${sectionName} estará disponible pronto.`);
@@ -10896,91 +11220,93 @@ function openCreatorHub() {
     publishButton.innerHTML = '<span class="epic-loader" style="width:20px;height:20px;border-radius:7px;"></span>';
 
     try {
-      // Primero verificar límites
-      const limitsCheck = await fetch('/api/check-user-limits', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.uid,
-          action: 'note'
-        })
-      });
-
-      const limitsResult = await limitsCheck.json();
-
-      if (!limitsResult.canPerformAction) {
-        publishButton.disabled = false;
-        publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
-        alert(limitsResult.message);
-        return;
+      // Verificar límites sin bloquear si el endpoint no está disponible
+      try {
+        const limitsCheck = await fetch('/api/check-user-limits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.uid, action: 'note' })
+        });
+        if (limitsCheck.ok) {
+          const limitsResult = await limitsCheck.json();
+          if (limitsResult && limitsResult.canPerformAction === false) {
+            publishButton.disabled = false;
+            publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
+            alert(limitsResult.message || 'Has alcanzado el límite de publicaciones');
+            return;
+          }
+        }
+      } catch (limitError) {
+        console.warn('No se pudo verificar límites, se continúa con Firebase:', limitError);
       }
 
       const snapshot = await firebase.database().ref('users/' + user.uid).once('value');
-      const userData = snapshot.val();
+      const userData = snapshot.val() || {};
 
-      let imageData = null;
-      let fileName = null;
-      let contentType = null;
-
+      let imageUrl = '';
       if (imageInput.files.length > 0) {
-        const reader = new FileReader();
         const file = imageInput.files[0];
-
         const base64String = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
           reader.onload = (e) => resolve(e.target.result);
-          reader.onerror = (error) => reject(error);
+          reader.onerror = reject;
           reader.readAsDataURL(file);
         });
 
-        imageData = base64String;
-        fileName = file.name;
-        contentType = file.type;
-      }
-
-      // Subir nota a Firebase
-      const response = await fetch('/api/notes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: content,
-          userId: user.uid,
-          authorName: userData.username || 'Usuario',
-          authorImage: userData.profileImage || 'https://via.placeholder.com/150',
-          imageData: imageData,
-          fileName: fileName,
-          contentType: contentType
-        })
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 429) {
-          alert(result.message || 'Has alcanzado el límite de publicaciones');
-        } else {
-          throw new Error(result.error || 'Error al publicar nota');
+        // Intentar subir por API; fallback a base64 si falla
+        try {
+          const uploadResponse = await fetch('/api/upload-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageData: base64String,
+              fileName: file.name,
+              userId: user.uid,
+              timestamp: Date.now(),
+              contentType: file.type,
+              imageType: 'community-note'
+            })
+          });
+          const uploadResult = await uploadResponse.json();
+          if (uploadResponse.ok && uploadResult.imageUrl) {
+            imageUrl = uploadResult.imageUrl;
+          } else {
+            imageUrl = base64String;
+          }
+        } catch (uploadError) {
+          console.warn('Falló subida de imagen por API, usando base64 en Firebase:', uploadError);
+          imageUrl = base64String;
         }
-        publishButton.disabled = false;
-        publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
-        return;
       }
+
+      const newNote = {
+        content,
+        authorId: user.uid,
+        authorName: userData.username || userData.name || 'Usuario',
+        authorImage: userData.profileImage || 'https://via.placeholder.com/150',
+        timestamp: Date.now(),
+        likes: 0,
+        likedBy: {},
+        imageUrl: imageUrl || ''
+      };
+
+      const newNoteRef = await firebase.database().ref('communityNotes').push(newNote);
+      moderarContenidoAutomaticamente(newNoteRef.key, content);
 
       document.getElementById('note-content').value = '';
       imageInput.value = '';
       document.getElementById('image-preview').classList.add('hidden');
+      document.getElementById('preview-img').src = '';
+      updateNoteCharCounter();
       switchCommunityTab('feed');
+
       publishButton.disabled = false;
       publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
       alert('¡Nota publicada exitosamente!');
 
-      // Recargar notas
       loadNotes();
     } catch (error) {
-      console.error('Error al publicar:', error);
+      console.error('Error al publicar con Firebase:', error);
       alert('Error al publicar la nota. Por favor intenta de nuevo.');
       publishButton.disabled = false;
       publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
@@ -11010,15 +11336,12 @@ function openCreatorHub() {
     feedContainer.innerHTML = '<div class="text-center py-8 flex justify-center"><div class="epic-loader" aria-label="Cargando"></div></div>';
 
     try {
-      const response = await fetch('/api/notes?limit=50');
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Error al cargar notas');
-      }
+      const snap = await firebase.database().ref('communityNotes').orderByChild('timestamp').limitToLast(50).once('value');
+      const notes = [];
+      snap.forEach(child => notes.push({ noteId: child.key, ...child.val() }));
+      notes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
       feedContainer.innerHTML = '';
-      const notes = result.notes || [];
 
       if (notes.length === 0) {
         feedContainer.innerHTML = '<div class="text-center py-8 text-gray-500">No hay notas aún. ¡Sé el primero en publicar!</div>';
@@ -11030,13 +11353,13 @@ function openCreatorHub() {
         noteElement.className = 'bg-white p-4 rounded-xl shadow';
         noteElement.innerHTML = `
           <div class="flex items-center mb-3">
-            <img src="${note.authorImage}" alt="${note.authorName}" class="w-10 h-10 rounded-full mr-3">
+            <img src="${note.authorImage || 'https://via.placeholder.com/150'}" alt="${note.authorName || 'Usuario'}" class="w-10 h-10 rounded-full mr-3">
             <div>
-              <h3 class="font-bold">${note.authorName}</h3>
-              <p class="text-sm text-gray-500">${new Date(note.timestamp).toLocaleString()}</p>
+              <h3 class="font-bold">${note.authorName || 'Usuario'}</h3>
+              <p class="text-sm text-gray-500">${note.timestamp ? new Date(note.timestamp).toLocaleString() : 'Ahora'}</p>
             </div>
           </div>
-          <p class="mb-3">${note.content}</p>
+          <p class="mb-3">${note.content || ''}</p>
           ${note.imageUrl ? `<img src="${note.imageUrl}" alt="Imagen de nota" class="w-full rounded-lg mb-3 max-h-96 object-cover">` : ''}
           <div class="flex items-center space-x-4">
             <button id="like-btn-${note.noteId}" onclick="likeNote('${note.noteId}')" class="flex items-center text-[#00A2FF] hover:text-red-600 transition-colors">
@@ -11046,12 +11369,8 @@ function openCreatorHub() {
               <span id="like-count-${note.noteId}">${note.likes || 0}</span>
             </button>
             ${note.authorId === firebase.auth().currentUser?.uid ?
-              `<button onclick="deleteNote('${note.noteId}')" class="text-red-500 hover:text-red-700">
-                <i class="fas fa-trash"></i> Eliminar
-              </button>` :
-              `<button onclick="reportNote('${note.noteId}')" class="text-gray-500 hover:text-gray-700 flex items-center">
-                <i class="fas fa-flag mr-1"></i> Reportar
-              </button>`
+              `<button onclick="deleteNote('${note.noteId}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i> Eliminar</button>` :
+              `<button onclick="reportNote('${note.noteId}')" class="text-gray-500 hover:text-gray-700 flex items-center"><i class="fas fa-flag mr-1"></i> Reportar</button>`
             }
           </div>
         `;
@@ -11059,7 +11378,7 @@ function openCreatorHub() {
         feedContainer.appendChild(noteElement);
       });
     } catch (error) {
-      console.error('Error al cargar notas:', error);
+      console.error('Error al cargar notas (Firebase):', error);
       feedContainer.innerHTML = '<div class="text-center py-8 text-red-500">Error al cargar notas. Por favor recarga la página.</div>';
     }
   }
@@ -11090,8 +11409,8 @@ function openCreatorHub() {
   // Busca palabras completas, no partes de palabras
   const palabras = textoNormalizado.split(/\s+/);
   return palabras.some(palabra =>
-    palabrasOfensivas.includes(palabra) ||
-    palabrasOfensivas.some(palabraOfensiva =>
+    palabrasProhibidasNotas.includes(palabra) ||
+    palabrasProhibidasNotas.some(palabraOfensiva =>
       palabra.includes(palabraOfensiva) && palabra.length < palabraOfensiva.length + 3
     )
   );
@@ -11159,26 +11478,26 @@ function moderarNota(noteId, content) {
 	      return;
 	    }
 
-	    const response = await fetch('/api/notes', {
-	      method: 'POST',
-	      headers: {
-	        'Content-Type': 'application/json',
-	      },
-	      body: JSON.stringify({ noteId, userId: user.uid })
-	    });
+	    const noteRef = firebase.database().ref('communityNotes/' + noteId);
+	    const noteSnap = await noteRef.once('value');
+	    if (!noteSnap.exists()) {
+	      alert('La nota no existe o ya fue eliminada');
+	      return;
+	    }
 
-    const result = await response.json();
+	    const noteData = noteSnap.val() || {};
+	    if (noteData.authorId !== user.uid) {
+	      alert('No tienes permisos para eliminar esta nota');
+	      return;
+	    }
 
-    if (!response.ok) {
-      throw new Error(result.error || 'Error al eliminar nota');
-    }
-
-    alert('Nota eliminada exitosamente');
-    loadNotes(); // Recargar notas
-  } catch (error) {
-    console.error('Error al eliminar nota:', error);
-    alert('Error al eliminar la nota');
-  }
+	    await noteRef.remove();
+	    alert('Nota eliminada exitosamente');
+	    loadNotes();
+	  } catch (error) {
+	    console.error('Error al eliminar nota:', error);
+	    alert('Error al eliminar la nota');
+	  }
 }
 
 function reportNote(noteId) {
@@ -11190,35 +11509,26 @@ async function likeNote(noteId) {
     if (!user) return;
 
     try {
-      const response = await fetch('/api/likes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          noteId: noteId,
-          userId: user.uid
-        })
+      const noteRef = firebase.database().ref('communityNotes/' + noteId);
+      const tx = await noteRef.transaction(note => {
+        if (!note) return note;
+        if (!note.likedBy) note.likedBy = {};
+        if (note.likedBy[user.uid]) return note;
+        note.likedBy[user.uid] = true;
+        note.likes = (note.likes || 0) + 1;
+        return note;
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (result.error === 'User already liked this note') {
-          console.log('Ya has dado like a esta nota');
-        } else {
-          throw new Error(result.error || 'Error al dar like');
-        }
+      if (!tx.committed || !tx.snapshot.exists()) {
         return;
       }
 
-      // Actualizar el contador en la UI
+      const updatedNote = tx.snapshot.val() || {};
       const likeCountElement = document.getElementById(`like-count-${noteId}`);
       if (likeCountElement) {
-        likeCountElement.textContent = result.likes;
+        likeCountElement.textContent = updatedNote.likes || 0;
       }
 
-      // Deshabilitar el botón de like
       const likeBtn = document.getElementById(`like-btn-${noteId}`);
       if (likeBtn) {
         likeBtn.style.opacity = '0.6';
@@ -11230,7 +11540,7 @@ async function likeNote(noteId) {
     }
 }
 
-  // VARIABLES GLOBALES
+  // VARIABLES GLOBALES  // VARIABLES GLOBALES
   let tapCount = 0,
     lastTap = 0,
     heartCount = 0;
