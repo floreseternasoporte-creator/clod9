@@ -3092,7 +3092,7 @@ firebase.auth().onAuthStateChanged(user => {
 
     .nav-button.active {
       color: #111111;
-      background-color: #f3f4f6;
+      background-color: transparent;
     }
 
     .nav-button:hover {
@@ -3105,6 +3105,27 @@ firebase.auth().onAuthStateChanged(user => {
 
     #bottom-nav.hide {
       transform: translateY(100%);
+    }
+
+    .search-filter-icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid #e6e6e6;
+      background: #ffffff;
+      color: #111111;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(17, 17, 17, 0.06);
+    }
+
+    #search-view,
+    #community-view,
+    #creator-hub-view,
+    #zenvio-chat-view {
+      background-color: #f6f6f6 !important;
+      opacity: 1;
     }
   </style>
 
@@ -3493,17 +3514,15 @@ function openZenvioChat() {
   initVoiceHoldRecorder();
   
   // Ocultar barra de navegación inferior
-  const bottomNav = document.getElementById('bottom-nav');
-  if (bottomNav) bottomNav.style.display = 'none';
+  setBottomNavVisibility(false, 'zenvio-chat');
 }
 
 function closeZenvioChat() {
   document.getElementById('zenvio-chat-view').classList.add('hidden');
   document.getElementById('creator-hub-view').classList.remove('hidden');
   
-  // Mostrar barra de navegación inferior
-  const bottomNav = document.getElementById('bottom-nav');
-  if (bottomNav) bottomNav.style.display = 'block';
+  // Mantener barra inferior oculta porque seguimos en Creator Hub
+  setBottomNavVisibility(false, 'creator-hub');
 }
 
 // Función para cambiar entre tabs de Atenis AI
@@ -4510,8 +4529,8 @@ function escapeHtml(text) {
       <button onclick="switchCommunityTab('feed')" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-uber-black text-uber-black" id="feed-tab">
         Para ti
       </button>
-      <button onclick="switchCommunityTab('photos'); loadPhotos();" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-uber-muted hover:bg-uber-field" id="photos-tab">
-        Fotos
+      <button onclick="switchCommunityTab('explore'); loadExploreTrends();" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-uber-muted hover:bg-uber-field" id="explore-tab">
+        Explorar
       </button>
     </div>
   </div>
@@ -4519,8 +4538,21 @@ function escapeHtml(text) {
   <!-- Content -->
   <div class="flex-1">
     <div id="notes-feed" class="divide-y divide-uber-line"></div>
-    <div id="photos-feed" class="hidden p-1">
-      <div class="grid grid-cols-3 gap-1" id="photos-grid"></div>
+    <div id="explore-feed" class="hidden p-4 space-y-6">
+      <section>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-uber-black">Historias en tendencia</h3>
+          <span class="text-xs text-uber-muted">Tiempo real</span>
+        </div>
+        <div id="explore-stories" class="grid grid-cols-2 gap-3"></div>
+      </section>
+      <section>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-uber-black">Autores populares</h3>
+          <span class="text-xs text-uber-muted">Actualizado ahora</span>
+        </div>
+        <div id="explore-authors" class="space-y-2"></div>
+      </section>
     </div>
 
     <!-- Modal de Creación Estilo Twitter -->
@@ -4572,7 +4604,7 @@ function escapeHtml(text) {
   color: #111111 !important;
 }
 
-#photos-tab.active {
+#explore-tab.active {
   border-color: #111111 !important;
   color: #111111 !important;
 }
@@ -4614,12 +4646,8 @@ function escapeHtml(text) {
       <a id="search-ai-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-uber-black hover:underline">Ver en Wikipedia</a>
     </div>
 
-    <div class="flex items-center justify-between mb-4">
+    <div class="mb-4">
       <div id="active-search-filters" class="flex flex-wrap gap-2"></div>
-      <button type="button" onclick="openCategoryFilterSheet()" class="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-uber-line bg-white text-sm font-semibold text-uber-black shadow-uber-chip">
-        <i class="fa-solid fa-sliders"></i>
-        Filtrar por categorías
-      </button>
     </div>
     <select id="category-filter" class="hidden" aria-hidden="true">
       <option value="">Todas</option>
@@ -4640,6 +4668,12 @@ function escapeHtml(text) {
     </div>
 
     <div id="search-stories-section">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-semibold text-uber-black">Historias</h3>
+        <button type="button" onclick="openCategoryFilterSheet()" class="search-filter-icon-btn" aria-label="Filtrar categorías">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+      </div>
       <div id="search-books-carousel" class="grid grid-cols-3 gap-1"></div>
     </div>
 
@@ -5094,31 +5128,29 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
 
   function switchCommunityTab(tab) {
     const feedTab = document.getElementById('feed-tab');
-    const photosTab = document.getElementById('photos-tab');
+    const exploreTab = document.getElementById('explore-tab');
     const aiTab = document.getElementById('ai-tab');
     const feedContent = document.getElementById('notes-feed');
-    const photosContent = document.getElementById('photos-feed');
-    
-    // Resetear estilos de todos los tabs
-    [feedTab, photosTab, aiTab].forEach(tabEl => {
+    const exploreContent = document.getElementById('explore-feed');
+
+    [feedTab, exploreTab, aiTab].forEach(tabEl => {
       if (tabEl) {
         tabEl.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-transparent text-gray-500';
       }
     });
-    
-    // Ocultar todo el contenido
-    feedContent.classList.add('hidden');
-    photosContent.classList.add('hidden');
-    
+
+    if (feedContent) feedContent.classList.add('hidden');
+    if (exploreContent) exploreContent.classList.add('hidden');
+
     if (tab === 'feed') {
-      feedTab.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-black text-black';
-      feedContent.classList.remove('hidden');
-    } else if (tab === 'photos') {
-      photosTab.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-black text-black';
-      photosContent.classList.remove('hidden');
+      if (feedTab) feedTab.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-black text-black';
+      if (feedContent) feedContent.classList.remove('hidden');
+    } else if (tab === 'explore') {
+      if (exploreTab) exploreTab.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-black text-black';
+      if (exploreContent) exploreContent.classList.remove('hidden');
+      loadExploreTrends();
     } else if (tab === 'ai') {
-      aiTab.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-black text-black';
-      // Cerrar comunidad y abrir generador de IA
+      if (aiTab) aiTab.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-black text-black';
       closeCommunity();
       openImageGenerator();
     }
@@ -9584,48 +9616,101 @@ function showLiveNotification(message, type = 'info') {
     <div class="gift-grid">
 
 	<script>
-	async function loadPhotos() {
-	  const photosGrid = document.getElementById('photos-grid');
-	  if (!photosGrid) return;
-	  
-	  photosGrid.innerHTML = '<div class="col-span-2 text-center py-8"><div class='flex justify-center'><div class='epic-loader' aria-label='Cargando fotos'></div></div></div>';
+	async function loadExploreTrends() {
+  const storiesContainer = document.getElementById('explore-stories');
+  const authorsContainer = document.getElementById('explore-authors');
+  if (!storiesContainer || !authorsContainer) return;
+
+  storiesContainer.innerHTML = '<div class="col-span-2 text-center py-8 text-uber-muted">Cargando tendencias...</div>';
+  authorsContainer.innerHTML = '<div class="text-center py-6 text-uber-muted">Cargando autores...</div>';
 
   try {
-    const response = await fetch('/api/notes?limit=50');
-    const result = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(result.error || 'Error al cargar fotos');
+    const stories = await loadStoriesFromFirebase();
+    const storiesWithScore = (stories || []).map((story) => {
+      const likes = Number(story.likes || story.likeCount || 0);
+      const views = Number(story.views || 0);
+      const comments = Number(story.commentsCount || story.comments || 0);
+      const score = likes * 3 + comments * 2 + views;
+      return { ...story, score };
+    });
+
+    const trendingStories = storiesWithScore
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
+
+    storiesContainer.innerHTML = '';
+    if (trendingStories.length === 0) {
+      storiesContainer.innerHTML = '<div class="col-span-2 text-center py-8 text-uber-muted">Aún no hay tendencias disponibles.</div>';
+    } else {
+      trendingStories.forEach((story) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'text-left bg-white border border-uber-line rounded-2xl overflow-hidden shadow-uber-chip';
+        card.onclick = () => openStoryDetail(story);
+        card.innerHTML = `
+          <img src="${story.coverImage || 'https://via.placeholder.com/300x400?text=Historia'}" alt="${story.title || 'Historia'}" class="w-full h-36 object-cover">
+          <div class="p-3">
+            <p class="text-sm font-semibold text-uber-black line-clamp-2">${story.title || 'Historia sin título'}</p>
+            <p class="text-xs text-uber-muted mt-1 truncate">${story.username || story.authorName || 'Autor desconocido'}</p>
+            <p class="text-[11px] text-uber-muted mt-2">🔥 ${story.score || 0} puntos</p>
+          </div>
+        `;
+        storiesContainer.appendChild(card);
+      });
     }
 
-    const photos = (result.notes || []).filter(note => note.imageUrl);
-    
-    photosGrid.innerHTML = '';
-    
-    if (photos.length === 0) {
-      photosGrid.innerHTML = '<div class="col-span-2 text-center py-8"><i class="fas fa-camera text-4xl text-gray-300 mb-4"></i><p class="text-gray-500">No hay fotos aún</p><p class="text-sm text-gray-400">Las fotos de la comunidad aparecerán aquí</p></div>';
-      return;
-    }
-    
-    photos.forEach(photo => {
-      const photoCard = document.createElement('div');
-      photoCard.className = 'relative aspect-square cursor-pointer rounded-lg overflow-hidden';
-      photoCard.innerHTML = `
-        <img src="${photo.imageUrl}" alt="" class="w-full h-full object-cover hover:scale-105 transition-transform">
-        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-          <div class="flex items-center">
-            <img src="${photo.authorImage || 'https://via.placeholder.com/150'}" alt="${photo.authorName || 'Usuario'}" class="w-5 h-5 rounded-full mr-2">
-            <span class="text-white text-xs truncate">${photo.authorName || 'Usuario'}</span>
-          </div>
-        </div>
-      `;
-      photoCard.onclick = () => openPhotoDetail(photo);
-      photosGrid.appendChild(photoCard);
+    const userStats = new Map();
+    storiesWithScore.forEach((story) => {
+      const key = story.userId || story.authorId || story.email || '';
+      if (!key) return;
+      const current = userStats.get(key) || {
+        userId: story.userId || story.authorId,
+        name: story.username || story.authorName || 'Autor',
+        image: story.authorImage || '',
+        score: 0,
+        stories: 0
+      };
+      current.score += Number(story.score || 0);
+      current.stories += 1;
+      if (!current.image && story.authorImage) current.image = story.authorImage;
+      userStats.set(key, current);
     });
+
+    const topAuthors = Array.from(userStats.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+
+    authorsContainer.innerHTML = '';
+    if (topAuthors.length === 0) {
+      authorsContainer.innerHTML = '<div class="text-center py-6 text-uber-muted">Aún no hay autores en tendencia.</div>';
+    } else {
+      topAuthors.forEach((author, index) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-white border border-uber-line rounded-2xl px-3 py-2 shadow-uber-chip';
+        row.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="text-xs font-bold text-uber-muted w-5">#${index + 1}</span>
+            <img src="${author.image || 'https://via.placeholder.com/80'}" class="w-10 h-10 rounded-full object-cover" alt="${author.name}">
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-uber-black truncate">${author.name}</p>
+              <p class="text-xs text-uber-muted">${author.stories} historias</p>
+            </div>
+          </div>
+          <span class="text-xs font-semibold text-uber-black">${author.score} pts</span>
+        `;
+        authorsContainer.appendChild(row);
+      });
+    }
   } catch (error) {
-    console.error('Error loading photos:', error);
-    photosGrid.innerHTML = '<div class="col-span-2 text-center py-8"><i class="fas fa-exclamation-triangle text-2xl text-red-500"></i><p class="mt-2 text-red-500">Error al cargar fotos</p></div>';
+    console.error('Error loading explore trends:', error);
+    storiesContainer.innerHTML = '<div class="col-span-2 text-center py-8 text-red-500">No se pudieron cargar tendencias.</div>';
+    authorsContainer.innerHTML = '<div class="text-center py-6 text-red-500">Error al cargar autores populares.</div>';
   }
+}
+
+async function loadPhotos() {
+  // Compatibilidad retroactiva: ahora Fotos fue reemplazado por Explorar
+  return loadExploreTrends();
 }
 
 	function openPhotoDetail(photo) {
@@ -10492,14 +10577,15 @@ function openCreatorHub() {
     // Mostrar creator hub
     document.getElementById('creator-hub-view').classList.remove('hidden');
     
-    // Ocultar top navbar
+    // Ocultar top navbar y barra inferior
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'none';
+    setBottomNavVisibility(false, 'creator-hub');
   }
 
   function closeCreatorHub() {
     document.getElementById('creator-hub-view').classList.add('hidden');
-    mainApp.classList.remove('hidden');
+    openHome();
   }
 
   function openNoteCreation() {
@@ -10594,31 +10680,30 @@ function openCreatorHub() {
 
   function switchCommunityTab(tab) {
     const feedTab = document.getElementById('feed-tab');
-    const photosTab = document.getElementById('photos-tab');
+    const exploreTab = document.getElementById('explore-tab');
     const notesFeed = document.getElementById('notes-feed');
-    const photosFeed = document.getElementById('photos-feed');
+    const exploreFeed = document.getElementById('explore-feed');
     const addNoteForm = document.getElementById('add-note-form');
 
     if (tab === 'feed') {
-      feedTab.classList.add('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      photosTab.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      notesFeed.classList.remove('hidden');
-      photosFeed.classList.add('hidden');
+      feedTab?.classList.add('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
+      exploreTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
+      notesFeed?.classList.remove('hidden');
+      exploreFeed?.classList.add('hidden');
       if (addNoteForm) addNoteForm.classList.add('hidden');
       loadNotes();
-    } else if (tab === 'photos') {
-      photosTab.classList.add('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      feedTab.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      photosFeed.classList.remove('hidden');
-      notesFeed.classList.add('hidden');
+    } else if (tab === 'explore') {
+      exploreTab?.classList.add('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
+      feedTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
+      exploreFeed?.classList.remove('hidden');
+      notesFeed?.classList.add('hidden');
       if (addNoteForm) addNoteForm.classList.add('hidden');
-      loadPhotos();
+      loadExploreTrends();
     } else if (tab === 'add') {
-      // 显示添加笔记表单（从创作者中心访问）
-      feedTab.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      photosTab.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      notesFeed.classList.add('hidden');
-      photosFeed.classList.add('hidden');
+      feedTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
+      exploreTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
+      notesFeed?.classList.add('hidden');
+      exploreFeed?.classList.add('hidden');
       if (addNoteForm) addNoteForm.classList.remove('hidden');
     }
   }
@@ -11244,6 +11329,7 @@ async function likeNote(noteId) {
     // Mostrar top navbar
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'flex';
+    setBottomNavVisibility(true);
   }
 
   function openSearch() {
@@ -11261,6 +11347,7 @@ async function likeNote(noteId) {
     // Mostrar top navbar
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'flex';
+    setBottomNavVisibility(true);
   }
 
   function openProfile() {
@@ -11281,6 +11368,7 @@ async function likeNote(noteId) {
     // Ocultar top navbar
     const topNav = document.getElementById('top-navbar');
     if (topNav) topNav.style.display = 'none';
+    setBottomNavVisibility(true);
     
     loadUserStats(user.uid);
   }
@@ -12981,17 +13069,35 @@ async function likeNote(noteId) {
     }).join('');
   }
 
+  function setBottomNavVisibility(isVisible, reason = '') {
+    const bottomNav = document.getElementById('bottom-nav');
+    if (!bottomNav) return;
+
+    if (isVisible) {
+      if (!reason || bottomNav.dataset.hiddenBy === reason) {
+        bottomNav.style.display = 'block';
+        if (reason) delete bottomNav.dataset.hiddenBy;
+      }
+      return;
+    }
+
+    bottomNav.style.display = 'none';
+    if (reason) bottomNav.dataset.hiddenBy = reason;
+  }
+
   function openCategoryFilterSheet() {
     renderCategoryFilterSheetOptions();
     document.getElementById('category-filter-sheet-backdrop')?.classList.remove('hidden');
     const sheet = document.getElementById('category-filter-sheet');
     if (sheet) sheet.classList.remove('translate-y-full');
+    setBottomNavVisibility(false, 'category-filter');
   }
 
   function closeCategoryFilterSheet() {
     document.getElementById('category-filter-sheet-backdrop')?.classList.add('hidden');
     const sheet = document.getElementById('category-filter-sheet');
     if (sheet) sheet.classList.add('translate-y-full');
+    setBottomNavVisibility(true, 'category-filter');
   }
 
   function selectCategoryFilter(value) {
@@ -13011,6 +13117,7 @@ async function likeNote(noteId) {
     renderActiveSearchFilters();
     renderCategoryFilterSheetOptions();
     performRealTimeSearch();
+    closeCategoryFilterSheet();
   }
 
   function performRealTimeSearch() {
