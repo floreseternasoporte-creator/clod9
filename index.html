@@ -2986,19 +2986,33 @@ function openLatestStory(authorId, storyId) {
 }
 
 // Llamar loadFollowingStories al cargar la página y cuando cambie el estado del usuario
-document.addEventListener('DOMContentLoaded', loadFollowingStories);
-firebase.auth().onAuthStateChanged(user => {
-  if (user) {
-    loadFollowingStories();
-    // Actualizar foto de perfil en barra inferior
-    firebase.database().ref('users/' + user.uid).once('value').then(snapshot => {
-      const userData = snapshot.val();
-      if (userData && userData.profileImage) {
-        const bottomNavPic = document.getElementById('bottom-nav-profile-pic');
-        if (bottomNavPic) bottomNavPic.src = userData.profileImage;
-      }
+document.addEventListener('DOMContentLoaded', () => {
+  loadFollowingStories();
+
+  const bindAuthListenerWhenReady = () => {
+    if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+      setTimeout(bindAuthListenerWhenReady, 50);
+      return;
+    }
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) return;
+      loadFollowingStories();
+
+      // Actualizar foto de perfil en barra inferior
+      firebase.database().ref('users/' + user.uid).once('value').then(snapshot => {
+        const userData = snapshot.val();
+        if (userData && userData.profileImage) {
+          const bottomNavPic = document.getElementById('bottom-nav-profile-pic');
+          if (bottomNavPic) bottomNavPic.src = userData.profileImage;
+        }
+      }).catch(error => {
+        console.warn('No se pudo cargar la foto en barra inferior:', error);
+      });
     });
-  }
+  };
+
+  bindAuthListenerWhenReady();
 });
 </script>
 
@@ -13271,11 +13285,19 @@ async function likeNote(noteId) {
     currentUserProfileRef.on('value', currentUserProfileListener);
   }
 
-  firebase.auth().onAuthStateChanged(user => {
+  firebase.auth().onAuthStateChanged(async user => {
     const mainAppContainer = document.getElementById('main-app');
 
     if (user) {
-      document.getElementById('live-transmit-btn').style.display = "block";
+      const liveTransmitBtn = document.getElementById('live-transmit-btn');
+      if (liveTransmitBtn) liveTransmitBtn.style.display = 'block';
+
+      // Cambiar de pantalla inmediatamente tras autenticación exitosa
+      setAuthScreensVisibility(true);
+      if (mainAppContainer) {
+        mainAppContainer.style.display = 'flex';
+        mainAppContainer.style.opacity = '1';
+      }
 
       // CARGAR ESTADÍSTICAS EN TIEMPO REAL
       loadUserStats(user.uid);
@@ -13290,17 +13312,16 @@ async function likeNote(noteId) {
 
       attachCurrentUserProfileListener(user);
 
-      firebase.database().ref('users/' + user.uid).once('value').then(snapshot => {
+      try {
+        const snapshot = await firebase.database().ref('users/' + user.uid).once('value');
         const data = snapshot.val();
         if (data && data.blocked && data.blockedUntil && Date.now() < data.blockedUntil) {
           alert("Tu cuenta ha sido bloqueada por infracciones. Por favor, contacta con el soporte para recuperar el acceso.");
           firebase.auth().signOut();
           return;
         }
+
         syncUserProfileToFirebase(user, data || {});
-        setAuthScreensVisibility(true);
-        mainAppContainer.style.display = 'flex';
-        mainAppContainer.style.opacity = '1';
         loadStories();
         loadUserStories(user.uid);
         initializeFeedSections();
@@ -13310,12 +13331,20 @@ async function likeNote(noteId) {
           loadUserFrame(user.uid, 'profile-frame');
           loadUserFrame(user.uid, 'profile-frame-desktop');
         }
-      });
+      } catch (error) {
+        console.error('Error cargando datos iniciales del usuario:', error);
+        // Fallback: mantener app utilizable aunque falle la lectura de perfil
+        loadStories();
+        loadUserStories(user.uid);
+        initializeFeedSections();
+      }
     } else {
       detachCurrentUserProfileListener();
       setAuthScreensVisibility(false);
-      mainAppContainer.style.display = 'none';
-      mainAppContainer.style.opacity = '0';
+      if (mainAppContainer) {
+        mainAppContainer.style.display = 'none';
+        mainAppContainer.style.opacity = '0';
+      }
     }
   });
   /*********************** AUTENTICACIÓN CON GOOGLE Y FACEBOOK **************************/
