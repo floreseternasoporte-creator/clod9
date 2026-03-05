@@ -43,14 +43,11 @@ FIREBASE_DATABASE_SECRET (opcional, para reglas restringidas)
 - `likes.js` - POST likes (Firebase Realtime)
 - `following.js` - POST follow/unfollow (Firebase Realtime)
 - `users.js` - GET/POST perfiles de usuario (Firebase Realtime)
-- `get-stories.js` - GET historias (Firebase Realtime)
-- `upload-story.js` - POST historias con portada base64 (Firebase Realtime)
-- `update-story.js` - POST actualización de historias (Firebase Realtime)
-- `delete-story.js` - POST borrado de historias (Firebase Realtime)
+- `discover-feed.js` - GET feed de descubrimiento con scoring híbrido (frescura + interacción + follows + intereses).
+- `trending-tags.js` - GET hashtags en tendencia con puntuación de uso e interacción.
 - `upload-image.js` - POST imágenes base64 (Firebase Realtime)
 - `user-stats.js` - GET estadísticas (Firebase Realtime)
 - `notifications.js` - GET/POST notificaciones
-- `scheduled-chapters.js` - GET/POST capítulos programados
 - `send-support-email.js` - POST emails
 
 ## Instalación
@@ -68,9 +65,13 @@ npm install
 
 - Ver auditoría técnica en `AUDITORIA_INFRAESTRUCTURA.md` para el detalle de dependencias activas.
 - Objetivo vigente: backend de datos consolidado en Firebase Realtime Database mediante APIs en Vercel.
+- Estrategia de crecimiento tipo TikTok documentada en `ROADMAP_EXPANSION_TIKTOK.md`.
 
 
 ## Diagnóstico
 
 - `GET /api/health` estado del runtime y variables Firebase.
 - `GET /api/health-firebase` (o `GET /api/health-firebase` por compatibilidad) prueba conectividad real contra Firebase Realtime Database.
+
+
+- Estado actual: la funcionalidad de historias y capítulos fue retirada de la plataforma.

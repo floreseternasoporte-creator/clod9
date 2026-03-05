@@ -299,7 +299,7 @@ async function searchContent(query) {
     });
     
     if (foundStories === 0) {
-      storiesContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">No se encontraron historias</div>';
+      storiesContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">Búsqueda de historias en pausa temporalmente.</div>';
     }
   } catch (error) {
     console.error('Error buscando historias:', error);
