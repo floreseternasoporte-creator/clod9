@@ -797,7 +797,6 @@ body {
       cursor: pointer;
     }
   </style>
-  <link rel="stylesheet" href="stories.css">
   <!-- Animación de Introducción Moderna Premium -->
   <script src="premium-intro.js"></script>
 
@@ -1006,61 +1005,9 @@ body {
 </head>
 
 <script>
-// Funciones para capítulos programados (Firebase)
-async function saveScheduledChapter(chapterId, publishDate) {
-  if (!currentEditingStory?.id) {
-    console.warn('No story selected for scheduling.');
-    return;
-  }
-  try {
-    await fetch('/api/scheduled-chapters', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'save',
-        chapterId,
-        storyId: currentEditingStory.id,
-        publishDate
-      })
-    });
-  } catch (error) {
-    console.error('Error scheduling chapter:', error);
-  }
-}
-
-async function checkScheduledChapters() {
-  try {
-    const response = await fetch('/api/scheduled-chapters');
-    if (!response.ok) return;
-    const data = await response.json();
-    const chapters = data.chapters || [];
-    const now = new Date().getTime();
-
-    await Promise.all(
-      chapters
-        .filter(
-          (scheduled) =>
-            scheduled.status === 'pending' &&
-            new Date(scheduled.publishDate).getTime() <= now
-        )
-        .map((scheduled) =>
-          fetch('/api/scheduled-chapters', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'publish',
-              chapterId: scheduled.chapterId
-            })
-          })
-        )
-    );
-  } catch (error) {
-    console.error('Error checking scheduled chapters:', error);
-  }
-}
-
-// Verificar capítulos programados cada minuto
-setInterval(checkScheduledChapters, 60000);
+// Funciones de capítulos programados eliminadas junto con la funcionalidad de historias.
+async function saveScheduledChapter() {}
+async function checkScheduledChapters() {}
 </script>
 
 <!-- MODAL DE NOTIFICACIONES -->
@@ -2732,34 +2679,6 @@ setInterval(checkScheduledChapters, 60000);
   </div>
 
   <div class="flex-1 overflow-y-auto pb-20" id="scrollable-content">
-    <!-- Carrusel de historias de autores seguidos -->
-<section id="stories-carousel" class="overflow-x-auto" style="margin-top: 0; padding-top: 8px;">
-  <div class="flex space-x-4 px-4">
-    <div id="following-stories" class="flex space-x-4"></div>
-  </div>
-</section>
-
-<!-- Relatos Diarios - Estilo Instagram -->
-    <section class="px-4 py-3 bg-white border-b border-gray-100">
-        <div class="flex space-x-4 overflow-x-auto scrollbar-hide">
-            <!-- Tu relato -->
-            <div class="flex flex-col items-center flex-shrink-0 cursor-pointer" id="add-story-btn">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-pink-500 p-0.5">
-                    <div class="w-full h-full rounded-full bg-white flex items-center justify-center">
-                        <svg class="w-8 h-8 text-[#00A2FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                    </div>
-                </div>
-                <span class="text-xs mt-1 text-gray-900 font-medium">Tu relato</span>
-            </div>
-
-            <!-- Relatos de otros usuarios -->
-            <div id="stories" class="flex space-x-4">
-                <!-- Las historias se cargarán aquí -->
-            </div>
-        </div>
-    </section>
 
     <style>
     .scrollbar-hide::-webkit-scrollbar {
@@ -2877,90 +2796,27 @@ setInterval(checkScheduledChapters, 60000);
 </section>
 
 <script>
-function renderStoriesPausedState(containerId, message = 'Esta sección estará disponible próximamente.') {
+function renderStoriesPausedState(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  container.innerHTML = `<div class="w-full text-center py-6 px-4 rounded-2xl border border-gray-200 bg-gray-50 text-gray-600 text-sm">${message}</div>`;
+  container.innerHTML = '';
+  container.classList.add('hidden');
 }
 
 function disableStoryCreationActions() {
-  document.querySelectorAll('[onclick*="openStoryCreation"]').forEach((btn) => {
-    btn.setAttribute('onclick', "alert('La creación y publicación de historias está pausada temporalmente.')");
-    btn.classList.remove('hover:bg-[#0066CC]', 'hover:text-red-600');
-    btn.classList.add('opacity-70');
-    if (!btn.disabled && btn.tagName === 'BUTTON') btn.disabled = true;
-
-    const textNode = btn.querySelector('span, p, h3') || btn;
-    const txt = String(textNode.textContent || '').trim();
-    if (txt && !txt.toLowerCase().includes('próximamente')) {
-      textNode.textContent = 'Próximamente';
-    }
+  document.querySelectorAll('[onclick*="openStory"]').forEach((btn) => {
+    btn.remove();
   });
 }
 
 function loadFollowingStories() {
-  renderStoriesPausedState('following-stories', 'Historias de inicio en pausa. Pronto activaremos esta sección.');
+  const carousel = document.getElementById('stories-carousel');
+  if (carousel) carousel.remove();
   return;
-  const user = firebase.auth().currentUser;
-  if (!user) return;
-
-  firebase.database().ref('following/' + user.uid).once('value').then(followingSnap => {
-    const followingStoriesDiv = document.getElementById('following-stories');
-    followingStoriesDiv.innerHTML = '';
-
-    followingSnap.forEach(following => {
-      const followedUserId = following.key;
-
-      firebase.database().ref('users/' + followedUserId).once('value').then(userSnap => {
-        const userData = userSnap.val();
-
-        // Verificar actualizaciones recientes (últimas 24 horas)
-        firebase.database().ref('stories').orderByChild('userId').equalTo(followedUserId).once('value').then(storiesSnap => {
-          let hasNewContent = false;
-          let latestStoryId = null;
-
-          storiesSnap.forEach(storySnap => {
-            const story = storySnap.val();
-            const lastUpdate = story.lastUpdate || story.createdAt;
-            if (Date.now() - lastUpdate < 24 * 60 * 60 * 1000) {
-              hasNewContent = true;
-              latestStoryId = storySnap.key;
-            }
-          });
-
-          const storyDiv = document.createElement('div');
-          storyDiv.className = 'flex flex-col items-center cursor-pointer';
-
-          const imageContainer = document.createElement('div');
-          imageContainer.className = `w-16 h-16 rounded-full overflow-hidden ${hasNewContent ? 'border-2 border-[#00A2FF]' : 'border border-gray-300'}`;
-
-          if (hasNewContent) {
-            imageContainer.classList.add('animate-pulse');
-          }
-
-          imageContainer.innerHTML = `
-            <img src="${userData.profileImage || 'https://via.placeholder.com/150'}"
-                 alt="${userData.username}"
-                 class="w-full h-full object-cover"
-                 onclick="openLatestStory('${followedUserId}', '${latestStoryId}')">
-          `;
-
-          storyDiv.appendChild(imageContainer);
-
-          const username = document.createElement('span');
-          username.className = 'text-xs mt-1 truncate w-16 text-center';
-          username.textContent = userData.username;
-          storyDiv.appendChild(username);
-
-          followingStoriesDiv.appendChild(storyDiv);
-        });
-      });
-    });
-  });
 }
 
 function openLatestStory(authorId, storyId) {
-  alert('La función de historias está pausada temporalmente.');
+  return;
 }
 
 // Llamar loadFollowingStories al cargar la página y cuando cambie el estado del usuario
@@ -4495,7 +4351,7 @@ function escapeHtml(text) {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-              <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Escritura pausada" class="w-8 h-8 rounded-full">
+              <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Función eliminada" class="w-8 h-8 rounded-full">
             </div>
             <div>
               <h3 class="text-base font-semibold">Creación de historias pausada</h3>
@@ -6672,11 +6528,11 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
               <!-- Header de historias con botón crear -->
               <div class="flex justify-between items-center mb-6">
                 <div>
-                  <h2 id="profile-stories-header" class="text-2xl font-bold text-gray-900">Escritura pausada</h2>
-                  <p class="text-gray-500 mt-1">La creación y publicación de historias no está disponible temporalmente.</p>
+                  <h2 id="profile-stories-header" class="text-2xl font-bold text-gray-900">Función eliminada</h2>
+                  <p class="text-gray-500 mt-1">La función de historias fue eliminada de la plataforma.</p>
                 </div>
                 <button class="bg-gray-300 text-gray-700 px-6 py-3 rounded-xl cursor-not-allowed flex items-center" disabled>
-                  Escritura pronto
+                  No disponible
                 </button>
               </div>
 
@@ -15100,7 +14956,7 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
   });
 
   function openStoryCreation() {
-    alert('La creación y publicación de historias está pausada temporalmente.');
+    return;
   }
 
   function closeStoryCreation() {
@@ -18458,53 +18314,6 @@ function closeZenvioStudio() {
 </script>
 
 
-<!-- Story Viewer Modal -->
-<div id="story-viewer">
-    <div class="story-content">
-        <!-- Story content will be loaded here -->
-    </div>
-    <button id="story-viewer-close" class="story-close">&times;</button>
-</div>
-
-<!-- Story Upload Modal -->
-<div id="story-upload-modal">
-    <div class="story-upload-content">
-        <div class="story-upload-header">
-            <button class="back-btn" id="story-upload-back" aria-label="Volver">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
-            <h2 style="margin: 0;">Relato Diario</h2>
-            <div style="width: 40px;"></div>
-        </div>
-
-        <div class="story-upload-preview">
-            <img src="" alt="Preview">
-        </div>
-
-        <form id="story-upload-form">
-            <div class="file-input-wrapper">
-                <label for="story-file" class="file-input-label">
-                    <i class="fas fa-camera"></i>
-                    <span>Seleccionar imagen</span>
-                    <span class="file-hint">Toca para elegir una imagen para tu relato</span>
-                </label>
-                <input type="file" id="story-file" accept="image/*" required>
-            </div>
-
-            <div class="upload-progress">
-                <div class="progress-bar-container">
-                    <div class="progress-bar"></div>
-                </div>
-                <div class="progress-text">Publicando...</div>
-            </div>
-
-            <button type="submit">Publicar Relato</button>
-        </form>
-    </div>
-</div>
-
 <!-- Global Loading Spinner -->
 <div id="global-loader" class="fixed inset-0 bg-black bg-opacity-40 z-[9999] hidden items-center justify-center">
   <div class="epic-loader" aria-label="Cargando"></div>
@@ -18542,7 +18351,6 @@ firebase.auth().onAuthStateChanged(user => {
 });
 </script>
 
-<script src="stories.js"></script>
 <script src="community-firebase.js"></script>
 <script src="search-firebase.js"></script>
 <script>
@@ -18552,5 +18360,61 @@ firebase.auth().onAuthStateChanged(user => {
     }
   });
 </script>
+<script>
+(function disableStoriesFeatureCompletely() {
+  const storySelectors = [
+    '#stories-carousel',
+    '#top-stories-section',
+    '#my-stories-modal',
+    '#story-upload-spinner',
+    '#story-creation-view',
+    '#story-details-view',
+    '#story-edit-view',
+    '#story-detail-modal',
+    '#story-blocked-modal',
+    '#chapter-read-modal',
+    '#stories-tab-content',
+    '#search-stories-section',
+    '#search-stories-tab'
+  ];
+
+  const removeStoryUi = () => {
+    storySelectors.forEach((selector) => {
+      const element = document.querySelector(selector);
+      if (element) element.remove();
+    });
+
+    document.querySelectorAll('[onclick*="openStory"],[onclick*="add-story-btn"]').forEach((el) => {
+      el.remove();
+    });
+
+    const searchStoriesSection = document.getElementById('search-stories-section');
+    if (searchStoriesSection) {
+      searchStoriesSection.innerHTML = '<div class="text-center text-gray-500 py-8">Esta funcionalidad fue eliminada.</div>';
+    }
+
+    const tab = document.getElementById('search-stories-tab');
+    if (tab) tab.remove();
+  };
+
+  window.openStoryCreation = function() {};
+  window.openStoryDetail = function() {};
+  window.openStoryEdit = function() {};
+  window.loadStories = function() {};
+  window.loadUserStories = function() {};
+  window.loadTopStories = async function() {};
+  window.loadFollowingStories = function() {};
+  window.loadStoriesFromFirebase = async function() { return []; };
+  window.saveScheduledChapter = async function() {};
+  window.checkScheduledChapters = async function() {};
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', removeStoryUi);
+  } else {
+    removeStoryUi();
+  }
+})();
+</script>
+
 </body>
 </html>
