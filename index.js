@@ -6,6 +6,7 @@ const allowedRoutes = new Set([
   'check-user-limits',
   'community-notes',
   'delete-story',
+  'discover-feed',
   'following',
   'get-chapters',
   'get-stories',
@@ -16,6 +17,7 @@ const allowedRoutes = new Set([
   'placeholder',
   'scheduled-chapters',
   'send-support-email',
+  'trending-tags',
   'update-story',
   'upload-image',
   'upload-story',
@@ -23,17 +25,23 @@ const allowedRoutes = new Set([
   'users'
 ]);
 
-const getRoute = (query) => {
+const normalizeCatchAllPath = (query) => {
   const rawPath = query?.path || query?.fn || [];
-  const route = Array.isArray(rawPath) ? rawPath[0] : rawPath;
+  if (Array.isArray(rawPath)) {
+    return rawPath.filter((part) => typeof part === 'string' && part.trim()).join('/');
+  }
+  return typeof rawPath === 'string' ? rawPath : '';
+};
+
+const getRoute = (query) => {
+  const normalizedPath = normalizeCatchAllPath(query);
+  const route = normalizedPath.split('/')[0];
   if (typeof route !== 'string') return route;
-  return route.split('/')[0];
+  return route;
 };
 
 const getSubPath = (query, route) => {
-  const rawPath = query?.path || query?.fn || '';
-  const source = Array.isArray(rawPath) ? rawPath[0] : rawPath;
-  if (typeof source !== 'string') return '';
+  const source = normalizeCatchAllPath(query);
   if (!route) return '';
   if (source === route) return '';
   const prefix = `${route}/`;
@@ -78,8 +86,8 @@ module.exports = async (req, res) => {
   if (!handler) return res.status(404).json({ error: 'Function not found.' });
 
   try {
-    if (handler === loadedModule) return await handler(req, res);
     const reqWithPath = { ...req, query: { ...req.query, path } };
+    if (handler === loadedModule) return await handler(reqWithPath, res);
     await runVercelHandler(handler, reqWithPath, res);
   } catch (error) {
     res.status(500).json({ error: `Failed to run handler "${route}".`, details: error.message });
