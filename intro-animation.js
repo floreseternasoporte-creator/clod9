@@ -40,7 +40,7 @@ class IntroAnimation {
       <!-- Contenido principal -->
       <div class="intro-logo">BeaBoo</div>
       <div class="intro-subtitle">
-        Descubre historias increíbles y conecta con una comunidad de escritores apasionados
+        Descubre contenido increíble y conecta con una comunidad apasionada
       </div>
 
       <!-- Barra de progreso -->
@@ -77,7 +77,7 @@ class IntroAnimation {
     
     // Simular carga de contenido
     setTimeout(() => {
-      this.updateLoadingText('Cargando historias...');
+      this.updateLoadingText('Cargando contenido...');
     }, 1000);
 
     setTimeout(() => {
