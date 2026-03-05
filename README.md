@@ -47,6 +47,8 @@ FIREBASE_DATABASE_SECRET (opcional, para reglas restringidas)
 - `upload-story.js` - POST historias con portada base64 (Firebase Realtime)
 - `update-story.js` - POST actualización de historias (Firebase Realtime)
 - `delete-story.js` - POST borrado de historias (Firebase Realtime)
+- `discover-feed.js` - GET feed de descubrimiento con scoring híbrido (frescura + interacción + follows + intereses).
+- `trending-tags.js` - GET hashtags en tendencia con puntuación de uso e interacción.
 - `upload-image.js` - POST imágenes base64 (Firebase Realtime)
 - `user-stats.js` - GET estadísticas (Firebase Realtime)
 - `notifications.js` - GET/POST notificaciones
@@ -68,6 +70,7 @@ npm install
 
 - Ver auditoría técnica en `AUDITORIA_INFRAESTRUCTURA.md` para el detalle de dependencias activas.
 - Objetivo vigente: backend de datos consolidado en Firebase Realtime Database mediante APIs en Vercel.
+- Estrategia de crecimiento tipo TikTok documentada en `ROADMAP_EXPANSION_TIKTOK.md`.
 
 
 ## Diagnóstico
