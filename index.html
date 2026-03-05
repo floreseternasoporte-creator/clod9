@@ -2864,20 +2864,43 @@ setInterval(checkScheduledChapters, 60000);
     <!-- SECCIONES DE CONTENIDO -->
 <section id="top-stories-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-      <h2 id="top-stories-title" class="text-base font-semibold text-gray-900">Mejores Historias</h2>
+      <h2 id="top-stories-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="top-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
 </section>
 
 <section id="new-releases-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-      <h2 id="new-releases-title" class="text-base font-semibold text-gray-900">Nuevos Lanzamientos</h2>
+      <h2 id="new-releases-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="new-releases" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
 </section>
 
 <script>
+function renderStoriesPausedState(containerId, message = 'Esta sección estará disponible próximamente.') {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = `<div class="w-full text-center py-6 px-4 rounded-2xl border border-gray-200 bg-gray-50 text-gray-600 text-sm">${message}</div>`;
+}
+
+function disableStoryCreationActions() {
+  document.querySelectorAll('[onclick*="openStoryCreation"]').forEach((btn) => {
+    btn.setAttribute('onclick', "alert('La creación y publicación de historias está pausada temporalmente.')");
+    btn.classList.remove('hover:bg-[#0066CC]', 'hover:text-red-600');
+    btn.classList.add('opacity-70');
+    if (!btn.disabled && btn.tagName === 'BUTTON') btn.disabled = true;
+
+    const textNode = btn.querySelector('span, p, h3') || btn;
+    const txt = String(textNode.textContent || '').trim();
+    if (txt && !txt.toLowerCase().includes('próximamente')) {
+      textNode.textContent = 'Próximamente';
+    }
+  });
+}
+
 function loadFollowingStories() {
+  renderStoriesPausedState('following-stories', 'Historias de inicio en pausa. Pronto activaremos esta sección.');
+  return;
   const user = firebase.auth().currentUser;
   if (!user) return;
 
@@ -2937,15 +2960,12 @@ function loadFollowingStories() {
 }
 
 function openLatestStory(authorId, storyId) {
-  if (storyId) {
-    openStoryDetail({id: storyId});
-  } else {
-    openAuthorProfile(authorId);
-  }
+  alert('La función de historias está pausada temporalmente.');
 }
 
 // Llamar loadFollowingStories al cargar la página y cuando cambie el estado del usuario
 document.addEventListener('DOMContentLoaded', () => {
+  disableStoryCreationActions();
   loadFollowingStories();
 
   const bindAuthListenerWhenReady = () => {
@@ -2998,49 +3018,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <section id="top10-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="top10-title" class="text-base font-semibold text-gray-900">Top 10</h2>
+        <h2 id="top10-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="top10" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="popular-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="popular-title" class="text-base font-semibold text-gray-900">Más Populares</h2>
+        <h2 id="popular-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="popular" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="terror-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="terror-title" class="text-base font-semibold text-gray-900">Terror Destacado</h2>
+        <h2 id="terror-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="terror-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="trending-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="trending-title" class="text-base font-semibold text-gray-900">Tendencias</h2>
+        <h2 id="trending-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="trending-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="mystery-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="mystery-title" class="text-base font-semibold text-gray-900">Popular en Misterio</h2>
+        <h2 id="mystery-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="mystery-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="adventure-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="adventure-title" class="text-base font-semibold text-gray-900">Lo Mejor en Aventura</h2>
+        <h2 id="adventure-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="adventure-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="suggested-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="suggested-title" class="text-base font-semibold text-gray-900">Recomendado para Ti</h2>
+        <h2 id="suggested-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="suggested-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
@@ -4471,22 +4491,19 @@ function escapeHtml(text) {
     </div>
 
     <div class="flex-1 overflow-y-auto p-4 space-y-4">
-      <button onclick="openStoryCreation()" class="w-full text-left bg-uber-black text-white rounded-3xl p-5 shadow-uber-header active:scale-[0.99] transition">
+      <div class="w-full text-left bg-uber-black text-white rounded-3xl p-5 shadow-uber-header">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-              <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Historia" class="w-8 h-8 rounded-full">
+              <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Escritura pausada" class="w-8 h-8 rounded-full">
             </div>
             <div>
-              <h3 class="text-base font-semibold">Crear historia</h3>
-              <p class="text-xs text-white/80 mt-0.5">Publicación larga y completa</p>
+              <h3 class="text-base font-semibold">Creación de historias pausada</h3>
+              <p class="text-xs text-white/80 mt-0.5">Pronto anunciaremos la nueva etapa de la plataforma</p>
             </div>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
         </div>
-      </button>
+      </div>
 
       <div class="grid grid-cols-2 gap-3">
         <button onclick="openLiveStreamModal()" class="text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip active:scale-[0.99] transition">
@@ -6519,7 +6536,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         <div class="grid grid-cols-3 gap-2 mb-4 text-center">
           <button onclick="openMyStoriesModal()" class="rounded-xl border border-gray-200 py-2">
             <div id="profile-stories-count" class="font-semibold">0</div>
-            <div class="text-xs text-gray-500">Historias</div>
+            <div class="text-xs text-gray-500">Historias (pausado)</div>
           </button>
           <div class="rounded-xl border border-gray-200 py-2">
             <div id="profile-notes-count" class="font-semibold">0</div>
@@ -6633,7 +6650,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         <div class="max-w-7xl mx-auto px-6">
           <nav class="flex space-x-8">
             <button class="tab-button active py-4 px-2 border-b-2 border-black text-black font-medium" data-tab="stories">
-              Historias
+              Escritura (próximamente)
             </button>
             <button class="tab-button py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="notes">
               Notas
@@ -6655,20 +6672,11 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
               <!-- Header de historias con botón crear -->
               <div class="flex justify-between items-center mb-6">
                 <div>
-                  <h2 id="profile-stories-header" class="text-2xl font-bold text-gray-900">0 Historias</h2>
-                  <button onclick="openStoryCreation()" class="text-[#00A2FF] hover:text-red-600 flex items-center mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    Gestionar mis historias
-                  </button>
+                  <h2 id="profile-stories-header" class="text-2xl font-bold text-gray-900">Escritura pausada</h2>
+                  <p class="text-gray-500 mt-1">La creación y publicación de historias no está disponible temporalmente.</p>
                 </div>
-                <button onclick="openStoryCreation()" class="bg-[#00A2FF] text-white px-6 py-3 rounded-xl hover:bg-[#0066CC] transition-all flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                  </svg>
-                  Nueva historia
+                <button class="bg-gray-300 text-gray-700 px-6 py-3 rounded-xl cursor-not-allowed flex items-center" disabled>
+                  Escritura pronto
                 </button>
               </div>
 
@@ -6692,7 +6700,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
               <h3 class="font-bold text-gray-900 mb-4">Estadísticas</h3>
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                  <span class="text-gray-600">Historias publicadas</span>
+                  <span class="text-gray-600">Historias (pausado)</span>
                   <span id="sidebar-stories-count" class="font-bold text-[#00A2FF]">0</span>
                 </div>
                 <div class="flex items-center justify-between">
@@ -7308,7 +7316,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="grid grid-cols-3 gap-2 mb-4 text-center">
       <div class="rounded-xl border border-gray-200 py-2">
         <div id="author-stories-count" class="font-semibold text-gray-900">0</div>
-        <div class="text-xs text-gray-500">Historias</div>
+        <div class="text-xs text-gray-500">Historias (pausado)</div>
       </div>
       <div class="rounded-xl border border-gray-200 py-2">
         <div id="author-notes-count" class="font-semibold text-gray-900">0</div>
@@ -7410,7 +7418,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Nueva historia</h1>
+        <h1 class="text-lg font-semibold">Próximamente</h1>
         <button onclick="selectStoryType('historia_completa')" class="text-[#00A2FF] font-semibold">Siguiente</button>
       </div>
     </div>
@@ -7454,7 +7462,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Nueva historia</h1>
+        <h1 class="text-lg font-semibold">Próximamente</h1>
         <button id="story-publish-btn" onclick="document.getElementById('story-form').requestSubmit()" class="px-4 py-2 rounded-xl bg-black text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">Publicar</button>
       </div>
     </div>
@@ -10948,56 +10956,17 @@ async function loadPhotos() {
 
   // Nueva función para cargar historias desde Firebase
   async function loadUserStoriesFromFirebase(userId) {
-    try {
-      const response = await fetch(`/api/get-stories?userId=${userId}`);
-      const result = await response.json();
+    const pausedMessage = `
+      <div class="col-span-full text-center py-12">
+        <h3 class="text-lg font-medium text-gray-600 mb-2">Creación de historias pausada</h3>
+        <p class="text-gray-500 mb-4">Pronto anunciaremos la nueva etapa de esta función.</p>
+      </div>
+    `;
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Error al cargar historias');
-      }
-
-      const userStoriesDesktop = document.getElementById('user-stories-desktop');
-      const userStoriesMobile = document.getElementById('user-stories');
-
-      if (userStoriesDesktop) userStoriesDesktop.innerHTML = '';
-      if (userStoriesMobile) userStoriesMobile.innerHTML = '';
-
-      const stories = result.stories || [];
-
-      if (stories.length === 0) {
-        const noStoriesMessage = `
-          <div class="col-span-full text-center py-12">
-            <div class="text-gray-400 mb-4">
-              <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-              </svg>
-            </div>
-            <h3 class="text-lg font-medium text-gray-600 mb-2">No tienes historias aún</h3>
-            <p class="text-gray-500 mb-4">Crea tu primera historia para comenzar</p>
-            <button onclick="openStoryCreation()" class="bg-[#00A2FF] text-white px-6 py-2 rounded-lg hover:bg-[#0066CC] transition-colors">
-              Crear primera historia
-            </button>
-          </div>
-        `;
-
-        if (userStoriesDesktop) userStoriesDesktop.innerHTML = noStoriesMessage;
-        if (userStoriesMobile) userStoriesMobile.innerHTML = noStoriesMessage;
-        return;
-      }
-
-      stories.forEach(story => {
-        const storyCard = createStoryCard(story, userId);
-
-        if (userStoriesDesktop) {
-          userStoriesDesktop.appendChild(storyCard.cloneNode(true));
-        }
-        if (userStoriesMobile) {
-          userStoriesMobile.appendChild(storyCard);
-        }
-      });
-    } catch (error) {
-      console.error('Error al cargar historias del usuario:', error);
-    }
+    const userStoriesDesktop = document.getElementById('user-stories-desktop');
+    const userStoriesMobile = document.getElementById('user-stories');
+    if (userStoriesDesktop) userStoriesDesktop.innerHTML = pausedMessage;
+    if (userStoriesMobile) userStoriesMobile.innerHTML = pausedMessage;
   }
 
   // Función para cargar las historias del usuario en el grid
@@ -11021,11 +10990,8 @@ async function loadPhotos() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
           </div>
-          <h3 class="text-lg font-medium text-gray-600 mb-2">No tienes historias aún</h3>
-          <p class="text-gray-500 mb-4">Crea tu primera historia para comenzar</p>
-          <button onclick="openStoryCreation()" class="bg-[#00A2FF] text-white px-6 py-2 rounded-lg hover:bg-[#0066CC] transition-colors">
-            Crear primera historia
-          </button>
+          <h3 class="text-lg font-medium text-gray-600 mb-2">Creación de historias pausada</h3>
+          <p class="text-gray-500 mb-4">Pronto anunciaremos la nueva etapa de esta función.</p>
         </div>
       `;
 
@@ -15134,13 +15100,7 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
   });
 
   function openStoryCreation() {
-    document.getElementById('story-creation-view').classList.remove('hidden');
-    document.getElementById('story-details-view').classList.add('hidden');
-    document.getElementById('story-edit-view').classList.add('hidden');
-
-    // Ocultar barra inferior
-    const bottomNav = document.getElementById('bottom-nav');
-    if (bottomNav) bottomNav.style.display = 'none';
+    alert('La creación y publicación de historias está pausada temporalmente.');
   }
 
   function closeStoryCreation() {
@@ -15930,51 +15890,23 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
   }
 
   async function initializeFeedSections() {
-    try {
-      await Promise.all([
-        loadTopStories(),
-        loadSuggestedStories(),
-        loadFeaturedAuthors(),
-        loadTrendingStories(),
-        loadMysteryStories(),
-        loadAdventureStories()
-      ]);
-      console.log('Todas las secciones cargadas exitosamente');
-    } catch (error) {
-      console.error('Error cargando secciones:', error);
+    const pausedMessage = 'Sección de historias en pausa. Próximamente volverá con una nueva experiencia.';
+    ['top-stories','top10','popular','terror-stories','trending-stories','mystery-stories','adventure-stories','suggested-stories','new-releases']
+      .forEach((id) => renderStoriesPausedState(id, pausedMessage));
+    const featuredAuthors = document.getElementById('featured-authors');
+    if (featuredAuthors) {
+      featuredAuthors.innerHTML = '<div class="text-center text-gray-600 py-6 border border-gray-200 rounded-2xl bg-gray-50">Próximamente actualizaremos recomendaciones de inicio.</div>';
     }
   }
 
   /*********************** CARGA DE HISTORIAS DEL AUTOR **************************/
   function loadAuthorStories(authorId) {
-    const authorStoriesRef = firebase.database().ref('stories').orderByChild('userId').equalTo(authorId);
-    authorStoriesRef.on('value', snapshot => {
-      const container = document.getElementById('author-stories');
-      container.innerHTML = "";
-      snapshot.forEach(child => {
-        const story = child.val();
-        if (story.blocked) return;
-        const card = document.createElement('div');
-        card.className = "cursor-pointer";
-        card.onclick = () => openStoryDetail(story);
-        card.innerHTML = `
-            <div class="rounded-2xl overflow-hidden shadow-md transform transition-transform hover:scale-105">
-              <img src="${story.coverImage || '/api/placeholder/200/300'}" alt="${story.title}" class="w-full h-40 object-cover">
-            </div>
-            <div class="mt-2">
-              <h3 class="font-semibold text-sm">${story.title}</h3>
-            </div>
-          `;
-        const langDiv = document.createElement('div');
-        langDiv.className = "mt-1 flex items-center space-x-2";
-        langDiv.innerHTML = `<span class="text-xs text-gray-500">Idioma: ${story.language || "N/A"}</span>`;
-        if (story.rating === "18plus") {
-          langDiv.innerHTML += ' <span class="text-xs text-red-600 font-bold border border-red-600 rounded px-1">+18</span>';
-        }
-        card.appendChild(langDiv);
-        container.appendChild(card);
-      });
-    });
+    const container = document.getElementById('author-stories');
+    if (container) {
+      container.innerHTML = '<div class="col-span-3 text-center text-gray-600 py-4 border border-gray-200 rounded-xl bg-gray-50">Historias en pausa temporalmente.</div>';
+    }
+    const count = document.getElementById('author-stories-count');
+    if (count) count.textContent = '0';
   }
   /*********************** NUEVAS FUNCIONES: DESCARGAR HISTORIA COMPLETA PARA LECTURA OFFLINE **************************/
   function downloadStory() {
