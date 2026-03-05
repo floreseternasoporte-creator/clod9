@@ -248,7 +248,7 @@ async function searchContent(query) {
   const lowerQuery = normalizeSearchTerm(query);
   const storiesContainer = document.getElementById('search-books-carousel');
   if (storiesContainer) {
-    storiesContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">La sección de historias fue eliminada.</div>';
+    storiesContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">Esta sección ya no está disponible.</div>';
   }
   
   // Buscar autores
@@ -329,11 +329,11 @@ async function followUser(userId) {
   }
 }
 
-// Sección de historias eliminada
+// Sección removida
 async function loadPopularStories() {
   const storiesContainer = document.getElementById('search-books-carousel');
   if (storiesContainer) {
-    storiesContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">La sección de historias fue eliminada.</div>';
+    storiesContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">Esta sección ya no está disponible.</div>';
   }
 }
 
