@@ -1,5 +1,103 @@
 // community-firebase.js - Comunidad con Firebase Realtime Database
 
+const communityHashtagStats = new Map();
+let hashtagListenerInitialized = false;
+
+const extractHashtags = (text) => {
+  const tags = String(text || '').toLowerCase().match(/#[\p{L}0-9_]+/gu) || [];
+  return Array.from(new Set(tags)).slice(0, 12);
+};
+
+const formatCompactCount = (value) => {
+  const n = Number(value || 0);
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+  return String(n);
+};
+
+const escapeHtml = (value) => String(value || '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
+const getHashtagUsageLabel = (tag) => {
+  const stats = communityHashtagStats.get(String(tag || '').toLowerCase());
+  const total = Number(stats?.count || 0);
+  if (total <= 0) return '0 usos';
+  return `${formatCompactCount(total)} usos`;
+};
+
+function renderDetectedHashtags() {
+  const input = document.getElementById('note-content');
+  const preview = document.getElementById('note-hashtag-preview');
+  if (!preview || !input) return;
+
+  const tags = extractHashtags(input.value || '');
+  if (!tags.length) {
+    preview.classList.add('hidden');
+    preview.innerHTML = '';
+    return;
+  }
+
+  preview.classList.remove('hidden');
+  preview.innerHTML = tags.map((tag) => `
+    <div class="px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
+      <p class="text-sm font-semibold text-[#00A2FF]">${escapeHtml(tag)}</p>
+      <p class="text-xs text-gray-500">${getHashtagUsageLabel(tag)}</p>
+    </div>
+  `).join('');
+}
+
+function syncCommunityHashtagsRealtime() {
+  if (hashtagListenerInitialized) return;
+  hashtagListenerInitialized = true;
+
+  firebase.database().ref('community_hashtags').on('value', (snapshot) => {
+    communityHashtagStats.clear();
+    snapshot.forEach((child) => {
+      const row = child.val() || {};
+      const tag = String(row.tag || decodeURIComponent(child.key || '') || '').toLowerCase();
+      if (!tag) return;
+      communityHashtagStats.set(tag, {
+        count: Number(row.count || 0),
+        usersCount: Number(row.usersCount || 0),
+        lastUsedAt: Number(row.lastUsedAt || 0)
+      });
+    });
+
+    renderDetectedHashtags();
+    if (typeof loadNotes === 'function') loadNotes();
+  });
+}
+
+async function registerCommunityHashtagsUsage(userId, hashtags) {
+  if (!userId || !Array.isArray(hashtags) || hashtags.length === 0) return;
+
+  await Promise.all(hashtags.map((tagRaw) => {
+    const tag = String(tagRaw || '').toLowerCase();
+    if (!tag.startsWith('#')) return Promise.resolve();
+
+    const ref = firebase.database().ref(`community_hashtags/${encodeURIComponent(tag)}`);
+    return ref.transaction((current) => {
+      const next = current || { tag, count: 0, usersCount: 0, users: {}, lastUsedAt: 0 };
+      const users = { ...(next.users || {}) };
+      const isNewUser = !users[userId];
+      users[userId] = true;
+      return {
+        ...next,
+        tag,
+        count: Number(next.count || 0) + 1,
+        usersCount: Number(next.usersCount || 0) + (isNewUser ? 1 : 0),
+        users,
+        lastUsedAt: Date.now()
+      };
+    });
+  }));
+}
+
 async function fetchUserProfile(user) {
   try {
     const snap = await firebase.database().ref('users/' + user.uid).once('value');
@@ -71,7 +169,8 @@ function normalizeNoteShape(note) {
     id: note.id || note.noteId,
     noteId: note.id || note.noteId,
     userId: note.userId || note.authorId,
-    authorId: note.authorId || note.userId
+    authorId: note.authorId || note.userId,
+    hashtags: Array.isArray(note.hashtags) ? note.hashtags : extractHashtags(note.content || '')
   };
 }
 
@@ -116,6 +215,8 @@ async function publishNote() {
       imageUrl = await uploadCommunityImage(file, user.uid);
     }
 
+    const hashtags = extractHashtags(content);
+
     const noteData = {
       content,
       authorId: user.uid,
@@ -125,6 +226,7 @@ async function publishNote() {
       imageUrl,
       likes: 0,
       likedBy: {},
+      hashtags,
       timestamp: Date.now()
     };
 
@@ -155,6 +257,10 @@ async function publishNote() {
     if (noteId && typeof moderarContenidoAutomaticamente === 'function') {
       moderarContenidoAutomaticamente(noteId, content);
     }
+
+    await registerCommunityHashtagsUsage(user.uid, hashtags).catch((error) => {
+      console.warn('No se pudo registrar hashtags en tiempo real:', error);
+    });
 
     const noteContent = document.getElementById('note-content');
     const imagePreview = document.getElementById('image-preview');
@@ -233,7 +339,8 @@ async function loadNotes() {
               <span class="font-semibold text-sm">${note.authorName || 'Usuario'}</span>
               <span class="text-xs text-gray-500">${timeAgo(note.timestamp || Date.now())}</span>
             </div>
-            <p class="text-sm mt-1">${note.content || ''}</p>
+            <p class="text-sm mt-1">${escapeHtml(note.content || '')}</p>
+            ${(note.hashtags || []).length ? `<div class="mt-2 flex flex-wrap gap-2">${(note.hashtags || []).map((tag) => `<div class="px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200"><p class="text-xs font-semibold text-[#00A2FF]">${escapeHtml(tag)}</p><p class="text-[11px] text-gray-500">${getHashtagUsageLabel(tag)}</p></div>`).join('')}</div>` : ''}
             ${note.imageUrl ? `<img src="${note.imageUrl}" class="mt-2 rounded-2xl max-h-96 w-full object-cover" alt="Imagen">` : ''}
             <div class="flex items-center space-x-4 mt-3 text-gray-500">
               <button id="like-btn-${note.id}" onclick="likeNote('${note.id}')" class="flex items-center space-x-1 hover:text-red-500">
@@ -348,8 +455,12 @@ function removeImage() {
 
 // Cargar notas al abrir la app con sesión activa
 document.addEventListener('DOMContentLoaded', () => {
+  const noteInput = document.getElementById('note-content');
+  if (noteInput) noteInput.addEventListener('input', renderDetectedHashtags);
+
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
+      syncCommunityHashtagsRealtime();
       loadNotes();
     }
   });
