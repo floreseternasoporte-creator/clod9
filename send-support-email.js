@@ -1,15 +1,22 @@
 const { firebaseRequest } = require('./firebase-realtime-client');
 const { runVercelHandler } = require('./vercel-adapter');
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+};
+
+const response = (statusCode, body) => ({ statusCode, headers: corsHeaders, body: JSON.stringify(body) });
+
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+  if (event.httpMethod === 'OPTIONS') return response(200, { ok: true });
+  if (event.httpMethod !== 'POST') return response(405, { error: 'Method Not Allowed' });
 
   try {
     const { email, problemType, description } = JSON.parse(event.body || '{}');
     if (!email || !problemType || !description) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'email, problemType and description are required' }) };
+      return response(400, { error: 'email, problemType and description are required' });
     }
 
     const ticketId = `ticket_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
@@ -25,15 +32,9 @@ exports.handler = async (event) => {
       }
     });
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ success: true, ticketId })
-    };
+    return response(200, { success: true, ticketId });
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
+    return response(500, { error: error.message });
   }
 };
 
