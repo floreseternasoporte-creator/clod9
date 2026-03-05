@@ -1621,124 +1621,63 @@ setInterval(checkScheduledChapters, 60000);
 
 <!-- MODAL DE VERIFICACIÓN DE IDENTIDAD - PASO A PASO -->
 
-<!-- MODAL DE SOPORTE ESTILO TIKTOK -->
+<!-- MODAL DE AYUDA -->
 <div id="support-modal" class="fixed inset-0 z-50 hidden bg-white">
   <div class="h-full flex flex-col">
-    <!-- Header estilo TikTok -->
     <div class="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
       <div class="flex items-center justify-between">
-        <button onclick="closeSupportModal()" class="text-gray-700 hover:text-black transition-colors">
+        <button id="help-back-button" onclick="closeSupportModal()" class="text-gray-700 hover:text-black transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold text-gray-900">Centro de Soporte</h1>
+        <h1 id="help-modal-title" class="text-lg font-semibold text-gray-900">Ayuda y soporte técnico</h1>
         <div class="w-6"></div>
       </div>
     </div>
 
-    <!-- Contenido principal -->
     <div class="flex-1 overflow-y-auto p-4">
-      <div class="max-w-md mx-auto space-y-6">
+      <div class="max-w-md mx-auto space-y-4">
 
-        <!-- Sección de contacto -->
-        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-          <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Contáctanos</h3>
-
-          <form id="support-form" class="space-y-4">
-            <div>
-              <input
-                id="support-email"
-                type="email"
-                placeholder="Tu email"
-                class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] bg-white transition-all"
-                required
-              >
-            </div>
-
-            <div>
-              <select
-                id="support-problem-type"
-                class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] bg-white appearance-none transition-all"
-                required
-              >
-                <option value="">Tipo de problema</option>
-                <option value="technical">Problema Técnico</option>
-                <option value="account">Problema con la Cuenta</option>
-                <option value="content">Problema con Contenido</option>
-                <option value="report">Reportar Abuso</option>
-                <option value="other">Otro</option>
-              </select>
-            </div>
-
-            <div>
-              <textarea
-                id="support-description"
-                placeholder="Describe tu problema..."
-                class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] resize-none transition-all"
-                rows="4"
-                minlength="20"
-                required
-              ></textarea>
-              <div class="text-xs text-gray-500 mt-1" id="char-count">Mínimo 20 caracteres</div>
-            </div>
-
-            <button
-              type="submit"
-              class="w-full bg-[#00A2FF] text-white py-4 rounded-lg font-semibold hover:bg-[#0066CC] transition-all"
-            >
-              Enviar Reporte
-            </button>
-          </form>
-        </div>
-
-        <!-- Sección de ayuda rápida -->
-        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Ayuda Rápida</h3>
-
-          <div class="space-y-3">
-            <button onclick="fillQuickHelp('login')" class="w-full text-left p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
-              <div class="font-medium text-gray-900">No puedo iniciar sesión</div>
-              <div class="text-sm text-gray-500">Problemas con email o contraseña</div>
-            </button>
-
-            <button onclick="fillQuickHelp('story')" class="w-full text-left p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
-              <div class="font-medium text-gray-900">Problema con mi historia</div>
-              <div class="text-sm text-gray-500">No se publica o no aparece</div>
-            </button>
-
-            <button onclick="fillQuickHelp('report')" class="w-full text-left p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
-              <div class="font-medium text-gray-900">Reportar contenido</div>
-              <div class="text-sm text-gray-500">Contenido inapropiado o spam</div>
-            </button>
+        <section id="help-home-view" class="space-y-4">
+          <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Ayuda y soporte técnico</h3>
+            <p class="text-sm text-gray-600 mb-5">Encuentra guías paso a paso para resolver dudas frecuentes de tu cuenta.</p>
+            <button onclick="openHelpServices()" class="w-full bg-[#00A2FF] text-white py-4 rounded-xl font-semibold hover:bg-[#0066CC] transition-all">Servicios de ayuda</button>
           </div>
-        </div>
+        </section>
+
+        <section id="help-services-view" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-900">¿En qué podemos ayudar?</h3>
+            <p class="text-sm text-gray-600 mt-1">Busca por tema o selecciona un artículo.</p>
+            <div class="mt-4 relative">
+              <input id="help-search-input" type="search" placeholder="Buscar artículos de ayuda..." class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:border-[#00A2FF]" oninput="renderHelpArticles()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-4.65a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Temas</h4>
+            <div id="help-topics-chips" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <h4 class="text-base font-semibold text-gray-900 mb-3">Artículos de ayuda</h4>
+            <div id="help-article-list" class="space-y-2"></div>
+          </div>
+        </section>
+
+        <section id="help-article-view" class="hidden bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          <p id="help-article-topic" class="text-xs font-semibold text-[#00A2FF] uppercase tracking-wide"></p>
+          <h3 id="help-article-title" class="text-xl font-bold text-gray-900 mt-1"></h3>
+          <p id="help-article-summary" class="text-sm text-gray-600 mt-2"></p>
+          <div id="help-article-steps" class="mt-4 space-y-3"></div>
+        </section>
 
       </div>
-    </div>
-  </div>
-
-  <!-- Modal de éxito -->
-  <div id="support-success-message" class="fixed inset-0 bg-white hidden z-60">
-    <div class="h-full flex flex-col items-center justify-center p-8">
-      <div class="w-20 h-20 bg-[#00A2FF] rounded-full flex items-center justify-center mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-
-      <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">¡Mensaje enviado!</h2>
-
-      <p class="text-gray-600 mb-8 text-center max-w-sm">
-        Hemos recibido tu solicitud. Te responderemos pronto en tus notificaciones.
-      </p>
-
-      <button
-        onclick="closeSupportModal()"
-        class="bg-[#00A2FF] text-white px-8 py-4 rounded-lg font-semibold hover:bg-[#0066CC] transition-colors"
-      >
-        Cerrar
-      </button>
     </div>
   </div>
 </div>
@@ -1780,8 +1719,8 @@ setInterval(checkScheduledChapters, 60000);
           </svg>
         </div>
         <div class="text-left">
-          <p class="font-semibold text-gray-900">Centro de soporte</p>
-          <p class="text-sm text-gray-500">Ayuda, reportes y estado</p>
+          <p class="font-semibold text-gray-900">Ayuda</p>
+          <p class="text-sm text-gray-500">Guías, temas y artículos</p>
         </div>
       </button>
 
@@ -2925,20 +2864,43 @@ setInterval(checkScheduledChapters, 60000);
     <!-- SECCIONES DE CONTENIDO -->
 <section id="top-stories-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-      <h2 id="top-stories-title" class="text-base font-semibold text-gray-900">Mejores Historias</h2>
+      <h2 id="top-stories-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="top-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
 </section>
 
 <section id="new-releases-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-      <h2 id="new-releases-title" class="text-base font-semibold text-gray-900">Nuevos Lanzamientos</h2>
+      <h2 id="new-releases-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="new-releases" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
 </section>
 
 <script>
+function renderStoriesPausedState(containerId, message = 'Esta sección estará disponible próximamente.') {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = `<div class="w-full text-center py-6 px-4 rounded-2xl border border-gray-200 bg-gray-50 text-gray-600 text-sm">${message}</div>`;
+}
+
+function disableStoryCreationActions() {
+  document.querySelectorAll('[onclick*="openStoryCreation"]').forEach((btn) => {
+    btn.setAttribute('onclick', "alert('La creación y publicación de historias está pausada temporalmente.')");
+    btn.classList.remove('hover:bg-[#0066CC]', 'hover:text-red-600');
+    btn.classList.add('opacity-70');
+    if (!btn.disabled && btn.tagName === 'BUTTON') btn.disabled = true;
+
+    const textNode = btn.querySelector('span, p, h3') || btn;
+    const txt = String(textNode.textContent || '').trim();
+    if (txt && !txt.toLowerCase().includes('próximamente')) {
+      textNode.textContent = 'Próximamente';
+    }
+  });
+}
+
 function loadFollowingStories() {
+  renderStoriesPausedState('following-stories', 'Historias de inicio en pausa. Pronto activaremos esta sección.');
+  return;
   const user = firebase.auth().currentUser;
   if (!user) return;
 
@@ -2998,15 +2960,12 @@ function loadFollowingStories() {
 }
 
 function openLatestStory(authorId, storyId) {
-  if (storyId) {
-    openStoryDetail({id: storyId});
-  } else {
-    openAuthorProfile(authorId);
-  }
+  alert('La función de historias está pausada temporalmente.');
 }
 
 // Llamar loadFollowingStories al cargar la página y cuando cambie el estado del usuario
 document.addEventListener('DOMContentLoaded', () => {
+  disableStoryCreationActions();
   loadFollowingStories();
 
   const bindAuthListenerWhenReady = () => {
@@ -3059,49 +3018,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <section id="top10-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="top10-title" class="text-base font-semibold text-gray-900">Top 10</h2>
+        <h2 id="top10-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="top10" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="popular-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="popular-title" class="text-base font-semibold text-gray-900">Más Populares</h2>
+        <h2 id="popular-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="popular" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="terror-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="terror-title" class="text-base font-semibold text-gray-900">Terror Destacado</h2>
+        <h2 id="terror-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="terror-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="trending-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="trending-title" class="text-base font-semibold text-gray-900">Tendencias</h2>
+        <h2 id="trending-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="trending-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="mystery-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="mystery-title" class="text-base font-semibold text-gray-900">Popular en Misterio</h2>
+        <h2 id="mystery-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="mystery-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="adventure-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="adventure-title" class="text-base font-semibold text-gray-900">Lo Mejor en Aventura</h2>
+        <h2 id="adventure-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="adventure-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="suggested-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="suggested-title" class="text-base font-semibold text-gray-900">Recomendado para Ti</h2>
+        <h2 id="suggested-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
       <div id="suggested-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
@@ -4532,22 +4491,19 @@ function escapeHtml(text) {
     </div>
 
     <div class="flex-1 overflow-y-auto p-4 space-y-4">
-      <button onclick="openStoryCreation()" class="w-full text-left bg-uber-black text-white rounded-3xl p-5 shadow-uber-header active:scale-[0.99] transition">
+      <div class="w-full text-left bg-uber-black text-white rounded-3xl p-5 shadow-uber-header">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-              <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Historia" class="w-8 h-8 rounded-full">
+              <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Escritura pausada" class="w-8 h-8 rounded-full">
             </div>
             <div>
-              <h3 class="text-base font-semibold">Crear historia</h3>
-              <p class="text-xs text-white/80 mt-0.5">Publicación larga y completa</p>
+              <h3 class="text-base font-semibold">Creación de historias pausada</h3>
+              <p class="text-xs text-white/80 mt-0.5">Pronto anunciaremos la nueva etapa de la plataforma</p>
             </div>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
         </div>
-      </button>
+      </div>
 
       <div class="grid grid-cols-2 gap-3">
         <button onclick="openLiveStreamModal()" class="text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip active:scale-[0.99] transition">
@@ -4644,7 +4600,9 @@ function escapeHtml(text) {
       </div>
 
       <div class="p-4">
-        <textarea id="note-content" placeholder="¿Qué está pasando?" maxlength="280" class="w-full border-0 resize-none focus:outline-none text-base bg-transparent" rows="4"></textarea>
+        <textarea id="note-content" placeholder="¿Qué está pasando? Usa hashtags como #anime #romance" maxlength="280" class="w-full border-0 resize-none focus:outline-none text-base bg-transparent" rows="4"></textarea>
+
+        <div id="note-hashtag-preview" class="hidden mt-3 space-y-2"></div>
 
         <div id="image-preview" class="hidden mt-3">
           <div class="relative inline-block">
@@ -6578,7 +6536,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         <div class="grid grid-cols-3 gap-2 mb-4 text-center">
           <button onclick="openMyStoriesModal()" class="rounded-xl border border-gray-200 py-2">
             <div id="profile-stories-count" class="font-semibold">0</div>
-            <div class="text-xs text-gray-500">Historias</div>
+            <div class="text-xs text-gray-500">Historias (pausado)</div>
           </button>
           <div class="rounded-xl border border-gray-200 py-2">
             <div id="profile-notes-count" class="font-semibold">0</div>
@@ -6692,7 +6650,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         <div class="max-w-7xl mx-auto px-6">
           <nav class="flex space-x-8">
             <button class="tab-button active py-4 px-2 border-b-2 border-black text-black font-medium" data-tab="stories">
-              Historias
+              Escritura (próximamente)
             </button>
             <button class="tab-button py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="notes">
               Notas
@@ -6714,20 +6672,11 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
               <!-- Header de historias con botón crear -->
               <div class="flex justify-between items-center mb-6">
                 <div>
-                  <h2 id="profile-stories-header" class="text-2xl font-bold text-gray-900">0 Historias</h2>
-                  <button onclick="openStoryCreation()" class="text-[#00A2FF] hover:text-red-600 flex items-center mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    Gestionar mis historias
-                  </button>
+                  <h2 id="profile-stories-header" class="text-2xl font-bold text-gray-900">Escritura pausada</h2>
+                  <p class="text-gray-500 mt-1">La creación y publicación de historias no está disponible temporalmente.</p>
                 </div>
-                <button onclick="openStoryCreation()" class="bg-[#00A2FF] text-white px-6 py-3 rounded-xl hover:bg-[#0066CC] transition-all flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                  </svg>
-                  Nueva historia
+                <button class="bg-gray-300 text-gray-700 px-6 py-3 rounded-xl cursor-not-allowed flex items-center" disabled>
+                  Escritura pronto
                 </button>
               </div>
 
@@ -6751,7 +6700,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
               <h3 class="font-bold text-gray-900 mb-4">Estadísticas</h3>
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                  <span class="text-gray-600">Historias publicadas</span>
+                  <span class="text-gray-600">Historias (pausado)</span>
                   <span id="sidebar-stories-count" class="font-bold text-[#00A2FF]">0</span>
                 </div>
                 <div class="flex items-center justify-between">
@@ -7367,7 +7316,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="grid grid-cols-3 gap-2 mb-4 text-center">
       <div class="rounded-xl border border-gray-200 py-2">
         <div id="author-stories-count" class="font-semibold text-gray-900">0</div>
-        <div class="text-xs text-gray-500">Historias</div>
+        <div class="text-xs text-gray-500">Historias (pausado)</div>
       </div>
       <div class="rounded-xl border border-gray-200 py-2">
         <div id="author-notes-count" class="font-semibold text-gray-900">0</div>
@@ -7469,7 +7418,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Nueva historia</h1>
+        <h1 class="text-lg font-semibold">Próximamente</h1>
         <button onclick="selectStoryType('historia_completa')" class="text-[#00A2FF] font-semibold">Siguiente</button>
       </div>
     </div>
@@ -7513,7 +7462,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Nueva historia</h1>
+        <h1 class="text-lg font-semibold">Próximamente</h1>
         <button id="story-publish-btn" onclick="document.getElementById('story-form').requestSubmit()" class="px-4 py-2 rounded-xl bg-black text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">Publicar</button>
       </div>
     </div>
@@ -11007,56 +10956,17 @@ async function loadPhotos() {
 
   // Nueva función para cargar historias desde Firebase
   async function loadUserStoriesFromFirebase(userId) {
-    try {
-      const response = await fetch(`/api/get-stories?userId=${userId}`);
-      const result = await response.json();
+    const pausedMessage = `
+      <div class="col-span-full text-center py-12">
+        <h3 class="text-lg font-medium text-gray-600 mb-2">Creación de historias pausada</h3>
+        <p class="text-gray-500 mb-4">Pronto anunciaremos la nueva etapa de esta función.</p>
+      </div>
+    `;
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Error al cargar historias');
-      }
-
-      const userStoriesDesktop = document.getElementById('user-stories-desktop');
-      const userStoriesMobile = document.getElementById('user-stories');
-
-      if (userStoriesDesktop) userStoriesDesktop.innerHTML = '';
-      if (userStoriesMobile) userStoriesMobile.innerHTML = '';
-
-      const stories = result.stories || [];
-
-      if (stories.length === 0) {
-        const noStoriesMessage = `
-          <div class="col-span-full text-center py-12">
-            <div class="text-gray-400 mb-4">
-              <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-              </svg>
-            </div>
-            <h3 class="text-lg font-medium text-gray-600 mb-2">No tienes historias aún</h3>
-            <p class="text-gray-500 mb-4">Crea tu primera historia para comenzar</p>
-            <button onclick="openStoryCreation()" class="bg-[#00A2FF] text-white px-6 py-2 rounded-lg hover:bg-[#0066CC] transition-colors">
-              Crear primera historia
-            </button>
-          </div>
-        `;
-
-        if (userStoriesDesktop) userStoriesDesktop.innerHTML = noStoriesMessage;
-        if (userStoriesMobile) userStoriesMobile.innerHTML = noStoriesMessage;
-        return;
-      }
-
-      stories.forEach(story => {
-        const storyCard = createStoryCard(story, userId);
-
-        if (userStoriesDesktop) {
-          userStoriesDesktop.appendChild(storyCard.cloneNode(true));
-        }
-        if (userStoriesMobile) {
-          userStoriesMobile.appendChild(storyCard);
-        }
-      });
-    } catch (error) {
-      console.error('Error al cargar historias del usuario:', error);
-    }
+    const userStoriesDesktop = document.getElementById('user-stories-desktop');
+    const userStoriesMobile = document.getElementById('user-stories');
+    if (userStoriesDesktop) userStoriesDesktop.innerHTML = pausedMessage;
+    if (userStoriesMobile) userStoriesMobile.innerHTML = pausedMessage;
   }
 
   // Función para cargar las historias del usuario en el grid
@@ -11080,11 +10990,8 @@ async function loadPhotos() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
           </div>
-          <h3 class="text-lg font-medium text-gray-600 mb-2">No tienes historias aún</h3>
-          <p class="text-gray-500 mb-4">Crea tu primera historia para comenzar</p>
-          <button onclick="openStoryCreation()" class="bg-[#00A2FF] text-white px-6 py-2 rounded-lg hover:bg-[#0066CC] transition-colors">
-            Crear primera historia
-          </button>
+          <h3 class="text-lg font-medium text-gray-600 mb-2">Creación de historias pausada</h3>
+          <p class="text-gray-500 mb-4">Pronto anunciaremos la nueva etapa de esta función.</p>
         </div>
       `;
 
@@ -13355,7 +13262,7 @@ async function likeNote(noteId) {
         const snapshot = await firebase.database().ref('users/' + user.uid).once('value');
         const data = snapshot.val();
         if (data && data.blocked && data.blockedUntil && Date.now() < data.blockedUntil) {
-          alert("Tu cuenta ha sido bloqueada por infracciones. Por favor, contacta con el soporte para recuperar el acceso.");
+          alert("Tu cuenta ha sido bloqueada por infracciones. Por favor, contacta con ayuda técnica para recuperar el acceso.");
           firebase.auth().signOut();
           return;
         }
@@ -13425,101 +13332,167 @@ async function likeNote(noteId) {
     }, 3000);
   }
 
-  /*********************** SOPORTE **************************/
+  /*********************** AYUDA **************************/
+  const helpArticles = [
+    {
+      id: 'edit-profile-name',
+      topic: 'Cuenta',
+      title: 'Cómo editar el nombre del perfil',
+      summary: 'Actualiza tu nombre visible desde la sección de configuración de perfil.',
+      steps: [
+        'Abre Configuración y entra en la sección Perfil.',
+        'Toca la opción Nombre para abrir el editor.',
+        'Escribe tu nuevo nombre (entre 3 y 30 caracteres recomendados).',
+        'Pulsa Guardar y verifica que el cambio se refleje en tu perfil.'
+      ]
+    },
+    {
+      id: 'change-profile-photo',
+      topic: 'Perfil',
+      title: 'Cómo cambiar tu foto de perfil',
+      summary: 'Sube una nueva imagen para personalizar tu cuenta.',
+      steps: [
+        'En Configuración entra en Perfil.',
+        'Selecciona Actualizar foto.',
+        'Elige una imagen clara desde tu dispositivo.',
+        'Confirma la carga y espera a que aparezca la vista previa.'
+      ]
+    },
+    {
+      id: 'publish-story',
+      topic: 'Historias',
+      title: 'Cómo publicar una historia',
+      summary: 'Guía rápida para crear y publicar una historia en la plataforma.',
+      steps: [
+        'Pulsa el botón de crear historia desde la pantalla principal.',
+        'Completa título, categoría, idioma y sinopsis.',
+        'Sube una portada y revisa que se vea correctamente.',
+        'Presiona Publicar y valida que aparezca en tu perfil.'
+      ]
+    },
+    {
+      id: 'recover-access',
+      topic: 'Acceso',
+      title: 'Qué hacer si no puedes iniciar sesión',
+      summary: 'Pasos para recuperar acceso cuando falla el inicio de sesión.',
+      steps: [
+        'Verifica correo y contraseña sin espacios extra.',
+        'Prueba el inicio con Google o Facebook si lo vinculaste.',
+        'Reinicia la app/navegador y vuelve a intentar.',
+        'Si sigue el problema, revisa notificaciones de bloqueo de cuenta.'
+      ]
+    }
+  ];
+
+  let selectedHelpTopic = 'Todos';
+  let helpView = 'home';
+
   function openSupportModal() {
     const supportModal = document.getElementById('support-modal');
     supportModal.style.zIndex = 9999;
     supportModal.classList.remove('hidden');
+    setHelpView('home');
   }
 
   function closeSupportModal() {
     document.getElementById('support-modal').classList.add('hidden');
-    // Resetear formulario
-    const form = document.getElementById('support-form');
-    if (form) form.reset();
-    // Ocultar mensaje de éxito y mostrar formulario
-    const mainContent = document.querySelector('#support-modal > div:first-child');
-    const successMessage = document.getElementById('support-success-message');
-    if (mainContent) mainContent.classList.remove('hidden');
-    if (successMessage) successMessage.classList.add('hidden');
+    const searchInput = document.getElementById('help-search-input');
+    if (searchInput) searchInput.value = '';
+    selectedHelpTopic = 'Todos';
+    setHelpView('home');
   }
 
-  function updateCharCount() {
-    const description = document.getElementById('support-description');
-    const charCount = document.getElementById('char-count');
-    const currentLength = description.value.length;
+  function setHelpView(view) {
+    helpView = view;
+    const title = document.getElementById('help-modal-title');
+    const backBtn = document.getElementById('help-back-button');
+    const home = document.getElementById('help-home-view');
+    const services = document.getElementById('help-services-view');
+    const article = document.getElementById('help-article-view');
 
-    charCount.textContent = `${currentLength} / 100 caracteres mínimo`;
+    home.classList.toggle('hidden', view !== 'home');
+    services.classList.toggle('hidden', view !== 'services');
+    article.classList.toggle('hidden', view !== 'article');
 
-    if (currentLength < 100) {
-      charCount.classList.add('text-red-500');
-      charCount.classList.remove('text-green-600');
+    if (view === 'home') {
+      title.textContent = 'Ayuda y soporte técnico';
+      backBtn.setAttribute('onclick', 'closeSupportModal()');
+    } else if (view === 'services') {
+      title.textContent = 'Servicios de ayuda';
+      backBtn.setAttribute('onclick', 'setHelpView("home")');
+      renderHelpTopics();
+      renderHelpArticles();
     } else {
-      charCount.classList.add('text-green-600');
-      charCount.classList.remove('text-red-500');
+      title.textContent = 'Artículo de ayuda';
+      backBtn.setAttribute('onclick', 'setHelpView("services")');
     }
   }
 
-  const supportDescription = document.getElementById('support-description');
-  if (supportDescription) supportDescription.addEventListener('input', updateCharCount);
+  function openHelpServices() {
+    setHelpView('services');
+  }
 
-  const supportForm = document.getElementById('support-form');
-  if (supportForm) supportForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  function renderHelpTopics() {
+    const container = document.getElementById('help-topics-chips');
+    const topics = ['Todos', ...new Set(helpArticles.map((article) => article.topic))];
+    container.innerHTML = topics.map((topic) => `
+      <button onclick="selectHelpTopic('${topic}')" class="px-3 py-1.5 rounded-full text-sm border transition-colors ${selectedHelpTopic === topic ? 'bg-[#00A2FF] text-white border-[#00A2FF]' : 'bg-white text-gray-700 border-gray-300 hover:border-[#00A2FF]'}">
+        ${topic}
+      </button>
+    `).join('');
+  }
 
-    const email = document.getElementById('support-email').value;
-    const problemType = document.getElementById('support-problem-type').value;
-    const description = document.getElementById('support-description').value;
+  function selectHelpTopic(topic) {
+    selectedHelpTopic = topic;
+    renderHelpTopics();
+    renderHelpArticles();
+  }
 
-    if (description.length < 100) {
-      alert("Por favor, proporciona una descripción de al menos 100 caracteres.");
+  function renderHelpArticles() {
+    const list = document.getElementById('help-article-list');
+    const query = String(document.getElementById('help-search-input')?.value || '').toLowerCase().trim();
+
+    const filtered = helpArticles.filter((article) => {
+      const matchTopic = selectedHelpTopic === 'Todos' || article.topic === selectedHelpTopic;
+      const haystack = `${article.title} ${article.summary} ${article.topic}`.toLowerCase();
+      const matchQuery = !query || haystack.includes(query);
+      return matchTopic && matchQuery;
+    });
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<p class="text-sm text-gray-500">No encontramos artículos con ese criterio.</p>';
       return;
     }
 
-    const user = firebase.auth().currentUser;
+    list.innerHTML = filtered.map((article) => `
+      <button onclick="openHelpArticle('${article.id}')" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
+        <p class="text-xs font-semibold text-[#00A2FF] uppercase">${article.topic}</p>
+        <p class="font-semibold text-gray-900 mt-1">${article.title}</p>
+        <p class="text-sm text-gray-500 mt-1">${article.summary}</p>
+      </button>
+    `).join('');
+  }
 
-    const btn = document.getElementById('btn-send-support');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="inline-flex items-center gap-2"><span class="epic-loader" style="width:20px;height:20px;border-radius:6px;"></span><span>Enviando</span></span>';
+  function openHelpArticle(articleId) {
+    const article = helpArticles.find((item) => item.id === articleId);
+    if (!article) return;
 
-    try {
-      const response = await fetch('/api/send-support-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          problemType,
-          description,
-          userId: user ? user.uid : null
-        })
-      });
+    document.getElementById('help-article-topic').textContent = article.topic;
+    document.getElementById('help-article-title').textContent = article.title;
+    document.getElementById('help-article-summary').textContent = article.summary;
 
-      const result = await response.json();
+    const stepsContainer = document.getElementById('help-article-steps');
+    stepsContainer.innerHTML = article.steps.map((step, index) => `
+      <div class="flex items-start gap-3 p-3 rounded-xl bg-gray-50">
+        <div class="h-7 w-7 rounded-full bg-[#00A2FF] text-white flex items-center justify-center text-sm font-bold">${index + 1}</div>
+        <p class="text-sm text-gray-700 leading-relaxed">${step}</p>
+      </div>
+    `).join('');
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Error al enviar solicitud');
-      }
+    setHelpView('article');
+  }
 
-      document.getElementById('support-form-container').classList.add('hidden');
-      document.getElementById('support-success-message').classList.remove('hidden');
-
-      setTimeout(() => {
-        closeSupportModal();
-      }, 3000);
-
-      document.getElementById('support-form').reset();
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Enviar Solicitud de Soporte';
-    } catch (error) {
-      console.error("Error al enviar solicitud de soporte:", error);
-      alert("❌ Hubo un error al enviar tu solicitud. Por favor, intenta nuevamente.");
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Enviar Solicitud de Soporte';
-    }
-  });
-  /*********************** NAVEGACIÓN Y MODALES **************************/
+/*********************** NAVEGACIÓN Y MODALES **************************/
   function openStoryDetail(story) {
     const user = firebase.auth().currentUser;
     if (!user) return;
@@ -13535,7 +13508,7 @@ async function likeNote(noteId) {
       fetch('/api/update-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storyId: story.id, updates: { views: nextViews } })
+        body: JSON.stringify({ storyId: story.id, userId: user.uid, updates: { views: nextViews } })
       }).catch(error => console.warn('No se pudo actualizar vistas:', error));
     }
 
@@ -15127,13 +15100,7 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
   });
 
   function openStoryCreation() {
-    document.getElementById('story-creation-view').classList.remove('hidden');
-    document.getElementById('story-details-view').classList.add('hidden');
-    document.getElementById('story-edit-view').classList.add('hidden');
-
-    // Ocultar barra inferior
-    const bottomNav = document.getElementById('bottom-nav');
-    if (bottomNav) bottomNav.style.display = 'none';
+    alert('La creación y publicación de historias está pausada temporalmente.');
   }
 
   function closeStoryCreation() {
@@ -15923,51 +15890,23 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
   }
 
   async function initializeFeedSections() {
-    try {
-      await Promise.all([
-        loadTopStories(),
-        loadSuggestedStories(),
-        loadFeaturedAuthors(),
-        loadTrendingStories(),
-        loadMysteryStories(),
-        loadAdventureStories()
-      ]);
-      console.log('Todas las secciones cargadas exitosamente');
-    } catch (error) {
-      console.error('Error cargando secciones:', error);
+    const pausedMessage = 'Sección de historias en pausa. Próximamente volverá con una nueva experiencia.';
+    ['top-stories','top10','popular','terror-stories','trending-stories','mystery-stories','adventure-stories','suggested-stories','new-releases']
+      .forEach((id) => renderStoriesPausedState(id, pausedMessage));
+    const featuredAuthors = document.getElementById('featured-authors');
+    if (featuredAuthors) {
+      featuredAuthors.innerHTML = '<div class="text-center text-gray-600 py-6 border border-gray-200 rounded-2xl bg-gray-50">Próximamente actualizaremos recomendaciones de inicio.</div>';
     }
   }
 
   /*********************** CARGA DE HISTORIAS DEL AUTOR **************************/
   function loadAuthorStories(authorId) {
-    const authorStoriesRef = firebase.database().ref('stories').orderByChild('userId').equalTo(authorId);
-    authorStoriesRef.on('value', snapshot => {
-      const container = document.getElementById('author-stories');
-      container.innerHTML = "";
-      snapshot.forEach(child => {
-        const story = child.val();
-        if (story.blocked) return;
-        const card = document.createElement('div');
-        card.className = "cursor-pointer";
-        card.onclick = () => openStoryDetail(story);
-        card.innerHTML = `
-            <div class="rounded-2xl overflow-hidden shadow-md transform transition-transform hover:scale-105">
-              <img src="${story.coverImage || '/api/placeholder/200/300'}" alt="${story.title}" class="w-full h-40 object-cover">
-            </div>
-            <div class="mt-2">
-              <h3 class="font-semibold text-sm">${story.title}</h3>
-            </div>
-          `;
-        const langDiv = document.createElement('div');
-        langDiv.className = "mt-1 flex items-center space-x-2";
-        langDiv.innerHTML = `<span class="text-xs text-gray-500">Idioma: ${story.language || "N/A"}</span>`;
-        if (story.rating === "18plus") {
-          langDiv.innerHTML += ' <span class="text-xs text-red-600 font-bold border border-red-600 rounded px-1">+18</span>';
-        }
-        card.appendChild(langDiv);
-        container.appendChild(card);
-      });
-    });
+    const container = document.getElementById('author-stories');
+    if (container) {
+      container.innerHTML = '<div class="col-span-3 text-center text-gray-600 py-4 border border-gray-200 rounded-xl bg-gray-50">Historias en pausa temporalmente.</div>';
+    }
+    const count = document.getElementById('author-stories-count');
+    if (count) count.textContent = '0';
   }
   /*********************** NUEVAS FUNCIONES: DESCARGAR HISTORIA COMPLETA PARA LECTURA OFFLINE **************************/
   function downloadStory() {
