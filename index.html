@@ -797,7 +797,6 @@ body {
       cursor: pointer;
     }
   </style>
-  <link rel="stylesheet" href="stories.css">
   <!-- Animación de Introducción Moderna Premium -->
   <script src="premium-intro.js"></script>
 
@@ -18458,53 +18457,6 @@ function closeZenvioStudio() {
 </script>
 
 
-<!-- Story Viewer Modal -->
-<div id="story-viewer">
-    <div class="story-content">
-        <!-- Story content will be loaded here -->
-    </div>
-    <button id="story-viewer-close" class="story-close">&times;</button>
-</div>
-
-<!-- Story Upload Modal -->
-<div id="story-upload-modal">
-    <div class="story-upload-content">
-        <div class="story-upload-header">
-            <button class="back-btn" id="story-upload-back" aria-label="Volver">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
-            <h2 style="margin: 0;">Relato Diario</h2>
-            <div style="width: 40px;"></div>
-        </div>
-
-        <div class="story-upload-preview">
-            <img src="" alt="Preview">
-        </div>
-
-        <form id="story-upload-form">
-            <div class="file-input-wrapper">
-                <label for="story-file" class="file-input-label">
-                    <i class="fas fa-camera"></i>
-                    <span>Seleccionar imagen</span>
-                    <span class="file-hint">Toca para elegir una imagen para tu relato</span>
-                </label>
-                <input type="file" id="story-file" accept="image/*" required>
-            </div>
-
-            <div class="upload-progress">
-                <div class="progress-bar-container">
-                    <div class="progress-bar"></div>
-                </div>
-                <div class="progress-text">Publicando...</div>
-            </div>
-
-            <button type="submit">Publicar Relato</button>
-        </form>
-    </div>
-</div>
-
 <!-- Global Loading Spinner -->
 <div id="global-loader" class="fixed inset-0 bg-black bg-opacity-40 z-[9999] hidden items-center justify-center">
   <div class="epic-loader" aria-label="Cargando"></div>
@@ -18542,7 +18494,6 @@ firebase.auth().onAuthStateChanged(user => {
 });
 </script>
 
-<script src="stories.js"></script>
 <script src="community-firebase.js"></script>
 <script src="search-firebase.js"></script>
 <script>
