@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
 };
 
+const response = (statusCode, body) => ({ statusCode, headers: corsHeaders, body: JSON.stringify(body) });
+
 const toClientStory = (id, row = {}) => ({
   id,
   title: row.title,
@@ -26,14 +28,18 @@ const toClientStory = (id, row = {}) => ({
 
 exports.handler = async (event) => {
   try {
-    if (event.httpMethod !== 'POST') return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
+    if (event.httpMethod === 'OPTIONS') return response(200, { ok: true });
+    if (event.httpMethod !== 'POST') return response(405, { error: 'Method not allowed' });
 
-    const { storyId, updates } = JSON.parse(event.body || '{}');
-    if (!storyId || !updates) return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'storyId and updates are required' }) };
+    const { storyId, userId, updates } = JSON.parse(event.body || '{}');
+    if (!storyId || !updates || !userId) return response(400, { error: 'storyId, userId and updates are required' });
 
     const path = `stories/${encodeURIComponent(storyId)}`;
     const current = await firebaseRequest(path);
-    if (!current) return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Story not found' }) };
+    if (!current) return response(404, { error: 'Story not found' });
+    if (String(current.userId || '') !== String(userId)) {
+      return response(403, { error: 'Forbidden: only the owner can update this story.' });
+    }
 
     const allowed = ['title', 'category', 'rating', 'language', 'synopsis', 'views', 'likes', 'coverImage', 'isPrivate', 'timestamp'];
     const payload = { updatedAt: Date.now() };
@@ -42,9 +48,9 @@ exports.handler = async (event) => {
     await firebaseRequest(path, { method: 'PATCH', body: payload });
     const updated = await firebaseRequest(path);
 
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, story: toClientStory(storyId, updated) }) };
+    return response(200, { success: true, story: toClientStory(storyId, updated) });
   } catch (error) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: error.message }) };
+    return response(500, { error: error.message });
   }
 };
 
