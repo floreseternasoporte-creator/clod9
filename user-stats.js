@@ -6,14 +6,11 @@ exports.handler = async (event) => {
     if (!userId || !type) return { statusCode: 400, body: JSON.stringify({ error: 'userId and type are required' }) };
 
     let count = 0;
-    if (type === 'stories') {
-      const stories = await getCollection('stories');
-      count = Object.values(stories).filter((story) => story && story.userId === userId).length;
-    } else if (type === 'notes') {
+    if (type === 'notes') {
       const notes = await getCollection('notes');
       count = Object.values(notes).filter((note) => note && note.userId === userId).length;
     } else {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid type. Use "stories" or "notes"' }) };
+      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid type. Use "notes"' }) };
     }
 
     return {
