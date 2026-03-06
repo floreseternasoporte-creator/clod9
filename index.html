@@ -15,7 +15,7 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha512-pap6t+K2bD6xIxQqkQ3sM8e+RXw7C3DyrgXV++o2aL/88+/9kS/l+SmpD8zZR1oN40Nq3QfT7HigDYfFW1zZAQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- MediaPipe para detección facial real -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
@@ -797,7 +797,6 @@ body {
       cursor: pointer;
     }
   </style>
-  <link rel="stylesheet" href="stories.css">
   <!-- Animación de Introducción Moderna Premium -->
   <script src="premium-intro.js"></script>
 
@@ -2626,11 +2625,8 @@ setInterval(checkScheduledChapters, 60000);
         <p class="text-sm text-gray-600">Detectamos un intento de envío de correo de recuperación después de un reinicio. Por favor, verifica que eres un humano.</p>
       </div>
 
-      <div id="captcha-container" class="mb-6">
-        <!-- reCAPTCHA se renderizará aquí -->
-        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="onCaptchaSuccess"></div>
-        <p class="text-xs text-gray-500 mt-3 text-center">Esta demostración usa una clave de reCAPTCHA pública para pruebas</p>
-      </div>
+      <div id="captcha-container" class="mb-6"><!-- reCAPTCHA se renderizará aquí dinámicamente --></div>
+      <p class="text-xs text-gray-500 mt-3 text-center">Esta demostración usa una clave de reCAPTCHA pública para pruebas</p>
 
       <div id="captcha-status" class="mb-4"></div>
 
@@ -2864,14 +2860,14 @@ setInterval(checkScheduledChapters, 60000);
     <!-- SECCIONES DE CONTENIDO -->
 <section id="top-stories-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-      <h2 id="top-stories-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
+      <h2 id="top-stories-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
       <div id="top-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
 </section>
 
 <section id="new-releases-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-      <h2 id="new-releases-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
+      <h2 id="new-releases-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
       <div id="new-releases" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
 </section>
@@ -2893,7 +2889,7 @@ function disableStoryCreationActions() {
     const textNode = btn.querySelector('span, p, h3') || btn;
     const txt = String(textNode.textContent || '').trim();
     if (txt && !txt.toLowerCase().includes('próximamente')) {
-      textNode.textContent = 'Próximamente';
+      textNode.textContent = 'Inicio';
     }
   });
 }
@@ -3018,49 +3014,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <section id="top10-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="top10-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
+        <h2 id="top10-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
       <div id="top10" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="popular-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="popular-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
+        <h2 id="popular-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
       <div id="popular" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="terror-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="terror-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
+        <h2 id="terror-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
       <div id="terror-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="trending-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="trending-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
+        <h2 id="trending-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
       <div id="trending-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="mystery-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="mystery-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
+        <h2 id="mystery-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
       <div id="mystery-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="adventure-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="adventure-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
+        <h2 id="adventure-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
       <div id="adventure-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
 
     <section id="suggested-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="suggested-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
+        <h2 id="suggested-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
       <div id="suggested-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
     </section>
@@ -4079,7 +4075,7 @@ function sendChatMessage() {
   userMsg.innerHTML = `
     <div class="flex-1 flex justify-end">
       <div class="bg-black rounded-2xl rounded-tr-none p-3 max-w-xs">
-        <p class="text-white text-sm">${escapeHtml(message)}</p>
+        <p class="text-white text-sm">${escapeHtmlLocal(message)}</p>
       </div>
     </div>
   `;
@@ -4193,7 +4189,7 @@ function sendChatMessage() {
         </div>
         <div class="flex-1">
           <div class="bg-gray-100 rounded-2xl rounded-tl-none p-3 max-w-xs">
-            <p class="text-gray-900 text-sm">${escapeHtml(aiResponse)}</p>
+            <p class="text-gray-900 text-sm">${escapeHtmlLocal(aiResponse)}</p>
           </div>
           <span class="text-xs text-gray-500 mt-1 block">Ahora</span>
         </div>
@@ -4466,7 +4462,7 @@ function shareChatImage(imageUrl) {
   }
 }
 
-function escapeHtml(text) {
+function escapeHtmlLocal(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
@@ -7418,7 +7414,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Próximamente</h1>
+        <h1 class="text-lg font-semibold">Inicio</h1>
         <button onclick="selectStoryType('historia_completa')" class="text-[#00A2FF] font-semibold">Siguiente</button>
       </div>
     </div>
@@ -7462,7 +7458,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Próximamente</h1>
+        <h1 class="text-lg font-semibold">Inicio</h1>
         <button id="story-publish-btn" onclick="document.getElementById('story-form').requestSubmit()" class="px-4 py-2 rounded-xl bg-black text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">Publicar</button>
       </div>
     </div>
@@ -11132,7 +11128,7 @@ async function loadPhotos() {
 
       <div class="mt-6 p-4 bg-gray-50 rounded-xl">
         <div class="text-center">
-          <div class="text-sm text-gray-600 mb-2">Próximamente</div>
+          <div class="text-sm text-gray-600 mb-2">Inicio</div>
           <div class="text-xs text-gray-500">Análisis detallados y métricas avanzadas</div>
         </div>
       </div>
@@ -15890,12 +15886,12 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
   }
 
   async function initializeFeedSections() {
-    const pausedMessage = 'Sección de historias en pausa. Próximamente volverá con una nueva experiencia.';
+    const pausedMessage = 'Sección no disponible.';
     ['top-stories','top10','popular','terror-stories','trending-stories','mystery-stories','adventure-stories','suggested-stories','new-releases']
       .forEach((id) => renderStoriesPausedState(id, pausedMessage));
     const featuredAuthors = document.getElementById('featured-authors');
     if (featuredAuthors) {
-      featuredAuthors.innerHTML = '<div class="text-center text-gray-600 py-6 border border-gray-200 rounded-2xl bg-gray-50">Próximamente actualizaremos recomendaciones de inicio.</div>';
+      featuredAuthors.innerHTML = '<div class="text-center text-gray-600 py-6 border border-gray-200 rounded-2xl bg-gray-50">Se actualizarán recomendaciones de inicio.</div>';
     }
   }
 
@@ -18542,7 +18538,6 @@ firebase.auth().onAuthStateChanged(user => {
 });
 </script>
 
-<script src="stories.js"></script>
 <script src="community-firebase.js"></script>
 <script src="search-firebase.js"></script>
 <script>
@@ -18552,5 +18547,64 @@ firebase.auth().onAuthStateChanged(user => {
     }
   });
 </script>
+<script>
+(function removeLegacyStoriesFeature() {
+  const selectors = [
+    '#stories-carousel', '#top-stories-section', '#story-creation-view', '#story-details-view',
+    '#story-edit-view', '#story-detail-modal', '#chapter-read-modal', '#story-viewer',
+    '#story-upload-modal', '#story-blocked-modal', '#my-stories-modal', '#story-upload-spinner'
+  ];
+
+  const removeStoryUi = () => {
+    selectors.forEach((sel) => {
+      const el = document.querySelector(sel);
+      if (el) el.remove();
+    });
+
+    document.querySelectorAll('[onclick*="openStory"], [id*="story-"]').forEach((el) => {
+      if (el.id === 'search-view' || el.id === 'search-info-list') return;
+      if (el.closest('#search-view')) return;
+      el.remove();
+    });
+  };
+
+  const isStoryEndpoint = (url) => {
+    const value = String(url || '');
+    return value.includes('/api/get-stories') || value.includes('/api/get-chapters') ||
+      value.includes('/api/update-story') || value.includes('/api/delete-story') ||
+      value.includes('/api/upload-story') || value.includes('/api/scheduled-chapters') ||
+      value.includes('/api/chapters');
+  };
+
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = (input, init = {}) => {
+    const url = typeof input === 'string' ? input : input?.url;
+    if (isStoryEndpoint(url)) {
+      const body = JSON.stringify({ ok: true, stories: [], chapters: [], chapter: null });
+      return Promise.resolve(new Response(body, { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    }
+    return originalFetch(input, init);
+  };
+
+  window.openStoryCreation = function () {};
+  window.openStoryDetail = function () {};
+  window.openStoryEdit = function () {};
+  window.loadStories = function () {};
+  window.loadUserStories = function () {};
+  window.loadTopStories = async function () {};
+  window.loadTrendingStories = async function () {};
+  window.loadMysteryStories = async function () {};
+  window.loadAdventureStories = async function () {};
+  window.initializeFeedSections = async function () {};
+  window.loadAuthorStories = function () {};
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', removeStoryUi);
+  } else {
+    removeStoryUi();
+  }
+})();
+</script>
+
 </body>
 </html>
