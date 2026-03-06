@@ -32,7 +32,7 @@ function handleSearchInput() {
       } else {
         renderSearchInfoList([]);
         clearSearchResults();
-        loadPopularStories();
+        loadPopularContent();
       }
       return;
     }
@@ -44,7 +44,7 @@ function handleSearchInput() {
       ]);
     } else {
       clearSearchResults();
-      loadPopularStories();
+      loadPopularContent();
     }
   }, 350);
 }
@@ -53,7 +53,7 @@ function clearSearchInput() {
   document.getElementById('search-input').value = '';
   document.getElementById('clear-search-btn').classList.add('hidden');
   clearSearchResults();
-  loadPopularStories();
+  loadPopularContent();
 }
 
 function clearSearchResults() {
@@ -246,9 +246,9 @@ async function searchInfoContent(query) {
 
 async function searchContent(query) {
   const lowerQuery = normalizeSearchTerm(query);
-  const storiesContainer = document.getElementById('search-books-carousel');
-  if (storiesContainer) {
-    storiesContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">Esta sección ya no está disponible.</div>';
+  const resultsContainer = document.getElementById('search-books-carousel');
+  if (resultsContainer) {
+    resultsContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">Esta sección ya no está disponible.</div>';
   }
   
   // Buscar autores
@@ -330,10 +330,10 @@ async function followUser(userId) {
 }
 
 // Sección removida
-async function loadPopularStories() {
-  const storiesContainer = document.getElementById('search-books-carousel');
-  if (storiesContainer) {
-    storiesContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">Esta sección ya no está disponible.</div>';
+async function loadPopularContent() {
+  const resultsContainer = document.getElementById('search-books-carousel');
+  if (resultsContainer) {
+    resultsContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">Esta sección ya no está disponible.</div>';
   }
 }
 
@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (!searchView.classList.contains('hidden')) {
-          loadPopularStories();
+          loadPopularContent();
         }
       });
     });
