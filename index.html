@@ -49,7 +49,6 @@ body {
   border-color: #111111 !important;
 }
 
-/* Ocultar título "Capítulos" y tagline en la pantalla de inicio */
 #tagline {
   display: none;
 }
@@ -68,7 +67,6 @@ body {
   text-shadow: none;
 }
 
-/* Margen para la lista de capítulos */
   margin-top: 10px;
 }
 
@@ -182,7 +180,6 @@ body {
   text-align: center;
 }
 
-/* MODAL DE CREACIÓN DE CAPÍTULO FULL SCREEN MODERNIZADO */
   position: fixed;
   inset: 0;
   display: none;
@@ -227,7 +224,6 @@ body {
   object-fit: cover;
 }
 
-.rating-badge {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -944,7 +940,6 @@ body {
     }
     window.addEventListener('load', organizeCarousels);
 
-          label.textContent = 'Capítulo';
         });
           label.textContent = 'Saga';
         });
@@ -1965,7 +1960,6 @@ body {
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
-              Publicar imagen
             </button>
           </div>
           <button onclick="generateImage()" id="generate-btn" class="w-full bg-[#00A2FF] text-white py-3 rounded-lg font-semibold hover:bg-[#0066CC] transition-all flex items-center justify-center">
@@ -3021,7 +3015,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="mt-3 flex flex-wrap gap-2">
             <button onclick="applyChatQuickPrompt('Genera una imagen cinematográfica de una ciudad futurista al atardecer')" class="atenis-quick-chip">Imagen pro</button>
-            <button onclick="applyChatQuickPrompt('Hazme un plan de 5 capítulos para una novela de misterio')" class="atenis-quick-chip">Plan capítulos</button>
           </div>
         </div>
       </div>
@@ -3764,10 +3757,6 @@ function sendChatMessage() {
       }
 
       // Mostrar mensaje de generación
-      const generatingMsg = document.createElement('div');
-      generatingMsg.className = 'flex items-start space-x-3';
-      generatingMsg.id = 'generating-image-msg';
-      generatingMsg.innerHTML = `
         <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center flex-shrink-0">
           <svg class="w-5 h-5 text-white animate-spin transform transition-transform duration-300 hover:rotate-12 hover:-translate-y-1" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2L9 12L12 15L15 12L12 2Z"/>
@@ -3790,7 +3779,6 @@ function sendChatMessage() {
           <span class="text-xs text-gray-500 mt-1 block">Ahora</span>
         </div>
       `;
-      messagesContainer.appendChild(generatingMsg);
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
       // Generar la imagen
@@ -4014,8 +4002,6 @@ async function generateImageInChat(prompt) {
     });
 
     // Remover mensaje de generación
-    const generatingMsg = document.getElementById('generating-image-msg');
-    if (generatingMsg) generatingMsg.remove();
 
     // Mostrar imagen generada
     const imageMsg = document.createElement('div');
@@ -4058,8 +4044,6 @@ async function generateImageInChat(prompt) {
     console.error('Error generando imagen:', error);
 
     // Remover mensaje de generación
-    const generatingMsg = document.getElementById('generating-image-msg');
-    if (generatingMsg) generatingMsg.remove();
 
     // Mostrar error
     const errorMsg = document.createElement('div');
@@ -4846,7 +4830,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
           </svg>
-          Publicar imagen
         </button>
       `;
     }
@@ -5076,7 +5059,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     const generatedImageSrc = document.getElementById('generated-image').src;
 
     if (!generatedImageSrc) {
-      alert('No hay imagen generada para publicar');
       return;
     }
 
@@ -6130,7 +6112,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
       <div class="bg-white border-b">
         <div class="max-w-7xl mx-auto px-6">
           <nav class="flex space-x-8">
-              Escritura (próximamente)
             </button>
             <button class="tab-button py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="notes">
               Notas
@@ -6881,14 +6862,12 @@ document.addEventListener('DOMContentLoaded', function() {
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Próximamente</h1>
       </div>
     </div>
 
     <!-- Contenido principal -->
     <div class="p-4">
       <div class="text-center mb-8">
-        <p class="text-gray-600">Comparte tu creatividad con la comunidad</p>
       </div>
 
       <!-- Opción única -->
@@ -6917,7 +6896,6 @@ document.addEventListener('DOMContentLoaded', function() {
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Próximamente</h1>
       </div>
     </div>
 
@@ -6987,7 +6965,6 @@ function previewCover(event) {
           </select>
         </div>
 
-        <!-- Sinopsis -->
         <div>
         </div>
       </form>
@@ -7054,13 +7031,10 @@ function previewCover(event) {
         </select>
       </div>
 
-      <!-- Sinopsis -->
       <div class="mb-6">
       </div>
 
-      <!-- Capítulos -->
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-lg font-semibold">Capítulos</h3>
         </div>
       </div>
 
@@ -7091,7 +7065,6 @@ function previewEditCover(event) {
 }
 </script>
 
-<!-- MODAL DE CREACIÓN/EDICIÓN DE CAPÍTULO -->
   <div class="h-full flex flex-col">
     <!-- Header -->
     <div class="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
@@ -7100,7 +7073,6 @@ function previewEditCover(event) {
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h2 class="text-lg font-semibold">Nuevo capítulo</h2>
       </div>
     </div>
 
@@ -7119,7 +7091,6 @@ function previewEditCover(event) {
   </div>
 </div>
 
-<!-- MODAL DE LECTURA DE CAPÍTULO -->
   <div class="bg-white w-full h-screen flex flex-col">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -7135,9 +7106,6 @@ function previewEditCover(event) {
         </svg>
         Anterior
       </button>
-      <div id="rating-container" class="flex items-center space-x-3">
-        <span class="text-gray-700 font-medium">Califica:</span>
-        <div id="star-rating" class="flex">
           <span class="star cursor-pointer text-2xl text-gray-400 hover:text-black transition-colors duration-150" data-value="1">★</span>
           <span class="star cursor-pointer text-2xl text-gray-400 hover:text-black transition-colors duration-150" data-value="2">★</span>
           <span class="star cursor-pointer text-2xl text-gray-400 hover:text-black transition-colors duration-150" data-value="3">★</span>
@@ -7179,21 +7147,15 @@ function previewEditCover(event) {
       </div>
     </div>
 
-    <!-- Lista de capítulos -->
     <div class="w-full mb-8">
-      <h3 class="text-lg font-bold mb-4 text-[#00A2FF]">Capítulos</h3>
-        <!-- Aquí insertar cada <li> de capítulo -->
       </ul>
     </div>
 
-    <!-- Sinopsis -->
     <div class="w-full mb-6">
-      <h3 class="text-lg font-semibold mb-3 text-[#00A2FF]">Sinopsis</h3>
       <p id="detail-synopsis" class="text-gray-600 leading-relaxed">
       </p>
     </div>
 
-    <!-- Métricas estilizadas debajo de sinopsis -->
     <div id="detail-metrics" class="flex justify-center gap-4">
       <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
         <span class="text-lg font-bold text-black">3</span>
@@ -7201,11 +7163,9 @@ function previewEditCover(event) {
       </div>
       <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
         <span class="text-lg font-bold text-black">4.5</span>
-        <p class="text-xs text-[#00A2FF] mt-1">Calificación</p>
       </div>
       <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
         <span class="text-lg font-bold text-black">12</span>
-        <p class="text-xs text-[#00A2FF] mt-1">Capítulos</p>
       </div>
     </div>
 
@@ -9996,7 +9956,6 @@ async function loadPhotos() {
     background-color: #e02849 !important;
   }
 
-  /* Forzar color de texto negro en capítulos */
     color: #000 !important;
     font-weight: 500 !important;
   }
@@ -10442,7 +10401,6 @@ async function loadPhotos() {
 
       <div class="mt-6 p-4 bg-gray-50 rounded-xl">
         <div class="text-center">
-          <div class="text-sm text-gray-600 mb-2">Próximamente</div>
           <div class="text-xs text-gray-500">Análisis detallados y métricas avanzadas</div>
         </div>
       </div>
@@ -11074,7 +11032,6 @@ async function likeNote(noteId) {
       noInfraccion: "No se detectaron infracciones en este perfil.",
       followers: "Seguidores",
       following: "Siguiendo",
-      ratings: "Calificaciones",
       languageModalTitle: "Selecciona tu idioma",
       editUsernamePrompt: "Introduce tu nuevo nombre de usuario:",
       usernameUpdated: "Nombre de usuario actualizado.",
@@ -12328,9 +12285,7 @@ async function likeNote(noteId) {
     },
     {
       steps: [
-        'Completa título, categoría, idioma y sinopsis.',
         'Sube una portada y revisa que se vea correctamente.',
-        'Presiona Publicar y valida que aparezca en tu perfil.'
       ]
     },
     {
@@ -12470,36 +12425,27 @@ async function likeNote(noteId) {
     // Actualizar contenido del modal
     document.getElementById('detail-author').innerHTML = "Por " + authorDisplay;
 
-    // Cargar capítulos (Firebase)
       .then(response => response.json())
       .then(data => {
-        let totalRating = 0, ratingCount = 0;
 
           const li = document.createElement('li');
           li.className = "p-4 border border-gray-200 rounded-xl hover:bg-gray-50 flex justify-between items-center";
 
-              totalRating += r;
-              ratingCount++;
             });
           }
         });
 
         };
 
-        let overallRating = ratingCount ? (totalRating / ratingCount).toFixed(1) : 0;
         document.getElementById('detail-metrics').innerHTML =
           `<div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
             <p class="text-xs text-[#00A2FF] mt-1">Visitas</p>
           </div>
           <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
-            <span class="text-lg font-bold text-black">${overallRating}</span>
-            <p class="text-xs text-[#00A2FF] mt-1">Rating</p>
           </div>
           <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
-            <p class="text-xs text-[#00A2FF] mt-1">Capítulos</p>
           </div>`;
       })
-      .catch(error => console.error('Error cargando capítulos:', error));
 
     // Mostrar el modal
     const mainAppElement = document.getElementById('main-app');
@@ -12549,7 +12495,6 @@ async function likeNote(noteId) {
 
       const map = snapshot.val() || {};
     }, error => {
-      console.error('Error en listener de capítulos:', error);
     });
   }
 
@@ -13823,7 +13768,6 @@ async function likeNote(noteId) {
     }
 
     if (!title || !category || !language) {
-      alert('Completa título, categoría e idioma para publicar.');
       return;
     }
       userId: user.uid,
@@ -13836,7 +13780,6 @@ async function likeNote(noteId) {
       timestamp: Date.now(),
       isPrivate: false,
       views: 0,
-      rating: rating,
       email: user.email
     };
     }
@@ -13896,24 +13839,20 @@ async function likeNote(noteId) {
       img.src = url;
     });
   }
-  /*********************** CAPÍTULOS **************************/
     document.getElementById('word-count').innerText = "0 palabras";
     document.getElementById('letter-count').innerText = "0 letras";
     document.getElementById('font-size').value = 16;
     document.getElementById('font-size-value').innerText = "16px";
-    if (saveBtn) saveBtn.textContent = 'Publicar';
   }
 
     document.getElementById('word-count').innerText = "0 palabras";
     document.getElementById('letter-count').innerText = "0 letras";
     document.getElementById('font-size').value = 16;
     document.getElementById('font-size-value').innerText = "16px";
-    if (saveBtn) saveBtn.textContent = 'Publicar';
   }
     e.preventDefault();
 
     if (!content) {
-      alert('Escribe el contenido del capítulo antes de publicar.');
       return;
     }
 
@@ -13932,17 +13871,12 @@ async function likeNote(noteId) {
         })
       })
         .then(response => {
-          if (!response.ok) throw new Error('No se pudo actualizar capítulo');
-          alert("Capítulo actualizado correctamente.");
         })
         .catch(error => {
-          console.error("Error al actualizar capítulo:", error);
-          alert('Error al guardar los cambios del capítulo.');
         });
     } else {
         content,
         createdAt: Date.now(),
-        status: scheduledDate ? 'scheduled' : 'published'
       };
 
 
@@ -13952,19 +13886,13 @@ async function likeNote(noteId) {
         })
       })
         .then(response => {
-          if (!response.ok) throw new Error('No se pudo guardar capítulo');
-          if (scheduledDate) {
           }
         })
         .then(() => {
           alert(
-            scheduledDate
-              ? "Capítulo programado para publicación el " + new Date(scheduledDate).toLocaleDateString()
           );
         })
         .catch(error => {
-          console.error("Error al agregar capítulo:", error);
-          alert('Error al agregar capítulo. Intenta nuevamente.');
         });
     }
   });
@@ -13972,7 +13900,6 @@ async function likeNote(noteId) {
     if (saveBtn) saveBtn.textContent = 'Guardar cambios';
   }
 
-    if (confirm("¿Estás seguro de eliminar este capítulo?")) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -13980,11 +13907,8 @@ async function likeNote(noteId) {
         })
       })
         .then(response => {
-          if (!response.ok) throw new Error('No se pudo eliminar capítulo');
-          alert("Capítulo eliminado correctamente.");
         })
         .catch(error => {
-          console.error("Error al eliminar capítulo:", error);
         });
     }
   }
@@ -14022,14 +13946,10 @@ async function likeNote(noteId) {
           console.log('Modal mostrado correctamente'); // Debug
         } else {
           console.error('No se encontró el modal de lectura'); // Debug
-          alert('Error: No se pudo abrir el capítulo');
         }
       } else {
-        alert('Capítulo no encontrado');
       }
     }).catch(error => {
-      console.error('Error al cargar capítulo:', error);
-      alert('Error al cargar el capítulo');
     });
   }
 
@@ -14052,7 +13972,6 @@ async function likeNote(noteId) {
     }
   }
 
-    const stars = document.querySelectorAll("#star-rating .star");
     stars.forEach(star => {
       star.classList.remove("selected");
     });
@@ -14060,9 +13979,7 @@ async function likeNote(noteId) {
     if (!user) return;
       .then(response => response.json())
       .then(data => {
-        if (rating) {
           stars.forEach(star => {
-            if (parseInt(star.getAttribute('data-value')) <= rating) {
               star.classList.add("selected");
             }
           });
@@ -14076,11 +13993,9 @@ async function likeNote(noteId) {
           body: JSON.stringify({
             action: 'rate',
             userId: user.uid,
-            rating: value
           })
         })
           .then(response => {
-            if (!response.ok) throw new Error('No se pudo guardar calificación');
             stars.forEach(s => {
               if (parseInt(s.getAttribute('data-value')) <= value) {
                 s.classList.add("selected");
@@ -14090,7 +14005,6 @@ async function likeNote(noteId) {
             });
           })
           .catch(error => {
-            console.error("Error al guardar calificación:", error);
           });
       };
     });
@@ -14743,7 +14657,6 @@ async function likeNote(noteId) {
     }, 1000);
   }
   window.addEventListener('load', initShakeDetection);
-  /*********************** MODAL DE CREACIÓN DE CAPÍTULO **************************/
   const fontFamilyInput = document.getElementById('font-family');
   const fontSizeInput = document.getElementById('font-size');
 
@@ -14775,7 +14688,6 @@ async function likeNote(noteId) {
 
 
     if (user) {
-      const { userRatings, categoryScores } = await getUserRatingPreferences(user.uid);
 
 
         }
@@ -15106,7 +15018,6 @@ async function likeNote(noteId) {
 
   function makeVoiceCall(userId) {
     // Implementar llamadas de voz (placeholder)
-    alert('Función de llamadas próximamente disponible');
   }
 
   function toggleVoiceMessage() {
@@ -15674,7 +15585,6 @@ async function likeNote(noteId) {
     const icon = btn.querySelector('i');
     icon.classList.add('fa-spin');
         }
-              // Se crea un bloque para cada capítulo con título y contenido completo
                 </div>`;
             });
           });
@@ -15761,9 +15671,6 @@ async function likeNote(noteId) {
         <p id="followers-trend" class="text-sm text-green-500">+0%</p>
       </div>
       <div class="bg-gray-50 p-4 rounded-xl text-center">
-        <h3 class="text-[#00A2FF] text-sm mb-1">Calificación</h3>
-        <p id="average-rating" class="text-2xl font-bold">0.0</p>
-        <p id="rating-trend" class="text-sm text-green-500">+0%</p>
       </div>
     </div>
 
@@ -15799,9 +15706,7 @@ async function likeNote(noteId) {
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
-              <th class="p-4 text-left">Capítulos</th>
               <th class="p-4 text-left">Vistas</th>
-              <th class="p-4 text-left">Rating</th>
               <th class="p-4 text-left">Estado</th>
               <th class="p-4 text-left">Acciones</th>
             </tr>
@@ -15816,7 +15721,6 @@ async function likeNote(noteId) {
       <h3 class="text-lg font-bold mb-4">Insights</h3>
       <div id="insights" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-blue-50 p-4 rounded-lg">
-          <h4 class="font-bold text-blue-700">Mejor hora para publicar</h4>
           <p id="best-time" class="mt-2">Analizando datos...</p>
         </div>
         <div class="bg-green-50 p-4 rounded-lg">
@@ -15839,9 +15743,6 @@ async function likeNote(noteId) {
       <span>Volver</span>
     </button>
 
-    <h2 class="text-2xl font-bold mb-4">Próximas Publicaciones</h2>
-    <div id="scheduled-content" class="space-y-4">
-      <!-- Aquí se mostrarán los capítulos programados -->
     </div>
   </div>
 </div>
@@ -15863,13 +15764,9 @@ function openCalendar() {
   const modal = document.getElementById('calendar-modal');
   modal.classList.remove('hidden');
 
-  // Cargar capítulos programados
-    const container = document.getElementById('scheduled-content');
     container.innerHTML = '';
 
     snapshot.forEach(child => {
-      const scheduled = child.val();
-      const releaseDate = new Date(scheduled.publishDate);
       const now = new Date();
       const daysUntil = Math.ceil((releaseDate - now) / (1000 * 60 * 60 * 24));
       const isAvailable = now >= releaseDate;
@@ -15881,19 +15778,15 @@ function openCalendar() {
           <div class="flex items-center space-x-4">
             <div class="flex-1">
               <div class="flex items-center">
-                ${isNew ? '<span class="ml-2 bg-[#00A2FF] text-white px-2 py-1 rounded text-xs">ESTRENO</span>' : ''}
               </div>
               ${isAvailable ?
                   class="bg-[#58CC02] text-white px-3 py-1 rounded-full text-sm">
-                  Leer ahora
                 </button>` :
-                `<p class="text-gray-600">Se publicará en ${daysUntil} días</p>
                  <p class="text-gray-600">Fecha: ${releaseDate.toLocaleDateString()}</p>`
               }
             </div>
             ${isNew ? `
   <div class="flex flex-wrap items-center gap-2">
-    <span class="bg-[#00A2FF] text-white px-2 py-1 rounded text-xs">ESTRENO</span>
     <button
       class="notification-bell-btn inline-flex items-center px-2 py-1 text-gray-600 hover:text-black transition-colors"
     >
@@ -15930,7 +15823,6 @@ function openCalendar() {
         // Programar notificación
         const user = firebase.auth().currentUser;
         if (user) {
-          const notificationTime = new Date(scheduled.publishDate);
           const currentTime = new Date();
 
           if (notificationTime > currentTime) {
@@ -15944,7 +15836,6 @@ function openCalendar() {
                 });
               }
 
-              // Eliminar de capítulos programados
             }, timeUntilNotification);
           }
         }
@@ -15979,7 +15870,6 @@ function closeCalendar() {
         status: 'pending'
       });
       bell.style.color = '#00A2FF';
-      alert('¡Te avisaremos cuando se publique el capítulo!');
 
       // Schedule notification
       const notificationTime = new Date(publishDate);
@@ -16027,8 +15917,6 @@ function updateStudioStats() {
 
     .then(snapshot => {
       let totalViews = 0;
-      let totalRating = 0;
-      let ratingCount = 0;
       let viewsData = {};
       let hourlyData = new Array(24).fill(0);
 
@@ -16040,8 +15928,6 @@ function updateStudioStats() {
 
           // Datos para gráfico de tendencias
 
-              totalRating += rating;
-              ratingCount++;
             });
           }
         }
@@ -16064,7 +15950,6 @@ function updateStudioStats() {
   const statusColors = {
     'published': 'bg-green-100 text-green-800',
     'draft': 'bg-gray-100 text-gray-800',
-    'scheduled': 'bg-blue-100 text-blue-800'
   };
 
   row.innerHTML = `
@@ -16097,12 +15982,9 @@ function updateStudioStats() {
 }
 
   document.getElementById('total-views').textContent = totalViews;
-  document.getElementById('average-rating').textContent =
-    ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : "0.0";
 
   // Actualizar tendencias (ejemplo)
   document.getElementById('views-trend').textContent = '+12%';
-  document.getElementById('rating-trend').textContent = '+2%';
 }
 
 function updateCharts(viewsData, hourlyData) {
@@ -16145,10 +16027,8 @@ function updateCharts(viewsData, hourlyData) {
 }
 
 function calculateInsights(hourlyData, viewsData) {
-  // Calcular mejor hora para publicar
   const bestHour = hourlyData.indexOf(Math.max(...hourlyData));
   document.getElementById('best-time').textContent =
-    `La mejor hora para publicar es a las ${bestHour}:00, donde tienes mayor engagement.`;
 
   // Calcular contenido más exitoso
   const bestDate = Object.entries(viewsData)
@@ -16157,9 +16037,6 @@ function calculateInsights(hourlyData, viewsData) {
     `Tu contenido más exitoso fue publicado el ${bestDate}.`;
 }
 
-function calculateAverageRating(ratings) {
-  if (!ratings) return "0.0";
-  const values = Object.values(ratings);
   return (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
 }
 
