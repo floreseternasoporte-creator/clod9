@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Atenis - Historias y Relatos</title>
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4653147807800151" crossorigin="anonymous"></script>
   <!-- reCAPTCHA API (v2 + v3) -->
@@ -50,8 +49,6 @@ body {
   border-color: #111111 !important;
 }
 
-/* Ocultar título "Capítulos" y tagline en la pantalla de inicio */
-#detail-chapters-title,
 #tagline {
   display: none;
 }
@@ -70,8 +67,6 @@ body {
   text-shadow: none;
 }
 
-/* Margen para la lista de capítulos */
-#detail-chapters {
   margin-top: 10px;
 }
 
@@ -107,15 +102,12 @@ body {
   margin-top: 4px;
 }
 
-.top-story-card {
   width: 220px;
 }
 
-.top-story-poster {
   height: 300px;
 }
 
-.top-story-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -188,8 +180,6 @@ body {
   text-align: center;
 }
 
-/* MODAL DE CREACIÓN DE CAPÍTULO FULL SCREEN MODERNIZADO */
-#chapter-creation-modal {
   position: fixed;
   inset: 0;
   display: none;
@@ -199,7 +189,6 @@ body {
   z-index: 50;
 }
 
-#chapter-creation-modal .modal-content {
   background: white;
   width: 100%;
   height: 100%;
@@ -209,20 +198,16 @@ body {
   color: #000;
 }
 
-/* PORTADAS DE HISTORIAS ADAPTATIVAS */
-.story-card {
   flex-shrink: 0;
   width: 100%;
   max-width: 250px;
 }
 
 @media (max-width: 640px) {
-  .story-card {
     max-width: 160px;
   }
 }
 
-.story-cover-container {
   position: relative;
   width: 100%;
   padding-top: 133.33%;
@@ -231,7 +216,6 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.story-cover-image {
   position: absolute;
   top: 0;
   left: 0;
@@ -240,7 +224,6 @@ body {
   object-fit: cover;
 }
 
-.rating-badge {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -527,7 +510,6 @@ body {
     }
 
 
-    #story-blocked-modal {
       position: fixed;
       inset: 0;
       background-color: rgba(255, 255, 255, 0.95);
@@ -739,7 +721,6 @@ body {
       }
 
       /* Hacer las imágenes de autores destacados circulares en desktop */
-      #featured-authors .story-card img {
         border-radius: 50%;
         width: 160px;
         height: 160px;
@@ -792,12 +773,9 @@ body {
       }
     }
 
-    /* NUEVA FUNCIÓN: Botón de descarga de historia para lectura offline */
-    #download-story-btn {
       cursor: pointer;
     }
   </style>
-  <link rel="stylesheet" href="stories.css">
   <!-- Animación de Introducción Moderna Premium -->
   <script src="premium-intro.js"></script>
 
@@ -927,10 +905,6 @@ body {
       const sections = [
         "search-view",
         "profile-view",
-        "story-detail-modal",
-        "story-creation-view",
-        "story-details-view",
-        "story-edit-view",
         "profile-edit-modal",
         "author-profile-modal",
         "support-modal",
@@ -939,8 +913,6 @@ body {
         "notifications-modal",
         "blocked-error-modal",
         "gift-drawer",
-        "story-blocked-modal",
-        "chapter-read-modal"
       ];
       sections.forEach(function(id) {
         var el = document.getElementById(id);
@@ -964,103 +936,23 @@ body {
     });
 
     function organizeCarousels() {
-      const carouselIds = ['new-releases', 'top10', 'popular', 'terror-stories'];
-      carouselIds.forEach(id => {
-        const carousel = document.getElementById(id);
-        if (carousel) {
-          carousel.classList.remove('grid', 'grid-cols-2', 'md:grid-cols-4');
-          carousel.classList.add('flex', 'space-x-4', 'overflow-x-auto');
-        }
-      });
+      return;
     }
     window.addEventListener('load', organizeCarousels);
 
-    function updateChapterUI() {
-      const chapterSection = document.getElementById('chapter-section');
-      if (!chapterSection) return;
-      if (storyTypeSelected === 'cuento') {
-        chapterSection.style.display = 'none';
-      } else if (storyTypeSelected === 'historia_completa') {
-        chapterSection.style.display = 'block';
-        document.querySelectorAll('.chapter-label').forEach(label => {
-          label.textContent = 'Capítulo';
         });
-      } else if (storyTypeSelected === 'novela') {
-        chapterSection.style.display = 'block';
-        document.querySelectorAll('.chapter-label').forEach(label => {
           label.textContent = 'Saga';
         });
       }
     }
 
-    function selectStoryType(type) {
-      storyTypeSelected = type;
-      document.getElementById('story-creation-view').classList.add('hidden');
-      document.getElementById('story-details-view').classList.remove('hidden');
-      updateChapterUI();
     }
 
-    /*********************** LAS FUNCIONES DE HISTORIAS ESTÁN DEFINIDAS MÁS ADELANTE CON Firebase ***********************/
     /*************** FIN NUEVAS FUNCIONES ***********************/
   </script>
 </head>
 
 <script>
-// Funciones para capítulos programados (Firebase)
-async function saveScheduledChapter(chapterId, publishDate) {
-  if (!currentEditingStory?.id) {
-    console.warn('No story selected for scheduling.');
-    return;
-  }
-  try {
-    await fetch('/api/scheduled-chapters', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'save',
-        chapterId,
-        storyId: currentEditingStory.id,
-        publishDate
-      })
-    });
-  } catch (error) {
-    console.error('Error scheduling chapter:', error);
-  }
-}
-
-async function checkScheduledChapters() {
-  try {
-    const response = await fetch('/api/scheduled-chapters');
-    if (!response.ok) return;
-    const data = await response.json();
-    const chapters = data.chapters || [];
-    const now = new Date().getTime();
-
-    await Promise.all(
-      chapters
-        .filter(
-          (scheduled) =>
-            scheduled.status === 'pending' &&
-            new Date(scheduled.publishDate).getTime() <= now
-        )
-        .map((scheduled) =>
-          fetch('/api/scheduled-chapters', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'publish',
-              chapterId: scheduled.chapterId
-            })
-          })
-        )
-    );
-  } catch (error) {
-    console.error('Error checking scheduled chapters:', error);
-  }
-}
-
-// Verificar capítulos programados cada minuto
-setInterval(checkScheduledChapters, 60000);
 </script>
 
 <!-- MODAL DE NOTIFICACIONES -->
@@ -1134,22 +1026,8 @@ setInterval(checkScheduledChapters, 60000);
   </div>
 </div>
 
-<!-- MODAL DE MIS HISTORIAS -->
-<div id="my-stories-modal" class="fixed inset-0 overflow-y-auto z-50 hidden bg-white" style="z-index: 9999;">
-  <div class="h-full flex flex-col">
-    <div class="sticky top-0 bg-white border-b border-gray-200 p-3 z-10">
-      <div class="flex items-center justify-between">
-        <button onclick="closeMyStoriesModal()" class="p-2">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h2 class="text-base font-semibold">Mis Historias</h2>
-        <div class="w-10"></div>
-      </div>
     </div>
     <div class="flex-1 overflow-y-auto p-4">
-      <div id="my-stories-list" class="grid grid-cols-2 gap-3"></div>
     </div>
   </div>
 </div>
@@ -1968,9 +1846,6 @@ setInterval(checkScheduledChapters, 60000);
   <div class="epic-loader" aria-label="Procesando"></div>
 </div>
 
-<!-- SPINNER PARA PUBLICAR HISTORIA -->
-<div id="story-upload-spinner" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50 hidden">
-  <div class="epic-loader" aria-label="Subiendo"></div>
 </div>
 
 
@@ -2085,7 +1960,6 @@ setInterval(checkScheduledChapters, 60000);
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
-              Publicar imagen
             </button>
           </div>
           <button onclick="generateImage()" id="generate-btn" class="w-full bg-[#00A2FF] text-white py-3 rounded-lg font-semibold hover:bg-[#0066CC] transition-all flex items-center justify-center">
@@ -2732,34 +2606,6 @@ setInterval(checkScheduledChapters, 60000);
   </div>
 
   <div class="flex-1 overflow-y-auto pb-20" id="scrollable-content">
-    <!-- Carrusel de historias de autores seguidos -->
-<section id="stories-carousel" class="overflow-x-auto" style="margin-top: 0; padding-top: 8px;">
-  <div class="flex space-x-4 px-4">
-    <div id="following-stories" class="flex space-x-4"></div>
-  </div>
-</section>
-
-<!-- Relatos Diarios - Estilo Instagram -->
-    <section class="px-4 py-3 bg-white border-b border-gray-100">
-        <div class="flex space-x-4 overflow-x-auto scrollbar-hide">
-            <!-- Tu relato -->
-            <div class="flex flex-col items-center flex-shrink-0 cursor-pointer" id="add-story-btn">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-pink-500 p-0.5">
-                    <div class="w-full h-full rounded-full bg-white flex items-center justify-center">
-                        <svg class="w-8 h-8 text-[#00A2FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                    </div>
-                </div>
-                <span class="text-xs mt-1 text-gray-900 font-medium">Tu relato</span>
-            </div>
-
-            <!-- Relatos de otros usuarios -->
-            <div id="stories" class="flex space-x-4">
-                <!-- Las historias se cargarán aquí -->
-            </div>
-        </div>
-    </section>
 
     <style>
     .scrollbar-hide::-webkit-scrollbar {
@@ -2862,111 +2708,30 @@ setInterval(checkScheduledChapters, 60000);
     </style>
 
     <!-- SECCIONES DE CONTENIDO -->
-<section id="top-stories-section" class="mb-8">
-      <div class="flex justify-between items-center mb-4 px-4">
-      <h2 id="top-stories-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
-      </div>
-      <div id="top-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
-</section>
 
-<section id="new-releases-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
-      <h2 id="new-releases-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
       </div>
-      <div id="new-releases" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
 </section>
 
 <script>
-function renderStoriesPausedState(containerId, message = 'Esta sección estará disponible próximamente.') {
   const container = document.getElementById(containerId);
   if (!container) return;
-  container.innerHTML = `<div class="w-full text-center py-6 px-4 rounded-2xl border border-gray-200 bg-gray-50 text-gray-600 text-sm">${message}</div>`;
+  container.innerHTML = '';
+  container.classList.add('hidden');
 }
 
-function disableStoryCreationActions() {
-  document.querySelectorAll('[onclick*="openStoryCreation"]').forEach((btn) => {
-    btn.setAttribute('onclick', "alert('La creación y publicación de historias está pausada temporalmente.')");
-    btn.classList.remove('hover:bg-[#0066CC]', 'hover:text-red-600');
-    btn.classList.add('opacity-70');
-    if (!btn.disabled && btn.tagName === 'BUTTON') btn.disabled = true;
-
-    const textNode = btn.querySelector('span, p, h3') || btn;
-    const txt = String(textNode.textContent || '').trim();
-    if (txt && !txt.toLowerCase().includes('próximamente')) {
-      textNode.textContent = 'Próximamente';
-    }
+    btn.remove();
   });
 }
 
-function loadFollowingStories() {
-  renderStoriesPausedState('following-stories', 'Historias de inicio en pausa. Pronto activaremos esta sección.');
+  if (carousel) carousel.remove();
   return;
-  const user = firebase.auth().currentUser;
-  if (!user) return;
-
-  firebase.database().ref('following/' + user.uid).once('value').then(followingSnap => {
-    const followingStoriesDiv = document.getElementById('following-stories');
-    followingStoriesDiv.innerHTML = '';
-
-    followingSnap.forEach(following => {
-      const followedUserId = following.key;
-
-      firebase.database().ref('users/' + followedUserId).once('value').then(userSnap => {
-        const userData = userSnap.val();
-
-        // Verificar actualizaciones recientes (últimas 24 horas)
-        firebase.database().ref('stories').orderByChild('userId').equalTo(followedUserId).once('value').then(storiesSnap => {
-          let hasNewContent = false;
-          let latestStoryId = null;
-
-          storiesSnap.forEach(storySnap => {
-            const story = storySnap.val();
-            const lastUpdate = story.lastUpdate || story.createdAt;
-            if (Date.now() - lastUpdate < 24 * 60 * 60 * 1000) {
-              hasNewContent = true;
-              latestStoryId = storySnap.key;
-            }
-          });
-
-          const storyDiv = document.createElement('div');
-          storyDiv.className = 'flex flex-col items-center cursor-pointer';
-
-          const imageContainer = document.createElement('div');
-          imageContainer.className = `w-16 h-16 rounded-full overflow-hidden ${hasNewContent ? 'border-2 border-[#00A2FF]' : 'border border-gray-300'}`;
-
-          if (hasNewContent) {
-            imageContainer.classList.add('animate-pulse');
-          }
-
-          imageContainer.innerHTML = `
-            <img src="${userData.profileImage || 'https://via.placeholder.com/150'}"
-                 alt="${userData.username}"
-                 class="w-full h-full object-cover"
-                 onclick="openLatestStory('${followedUserId}', '${latestStoryId}')">
-          `;
-
-          storyDiv.appendChild(imageContainer);
-
-          const username = document.createElement('span');
-          username.className = 'text-xs mt-1 truncate w-16 text-center';
-          username.textContent = userData.username;
-          storyDiv.appendChild(username);
-
-          followingStoriesDiv.appendChild(storyDiv);
-        });
-      });
-    });
-  });
 }
 
-function openLatestStory(authorId, storyId) {
-  alert('La función de historias está pausada temporalmente.');
+  return;
 }
 
-// Llamar loadFollowingStories al cargar la página y cuando cambie el estado del usuario
 document.addEventListener('DOMContentLoaded', () => {
-  disableStoryCreationActions();
-  loadFollowingStories();
 
   const bindAuthListenerWhenReady = () => {
     if (!window.firebase || !firebase.apps || !firebase.apps.length) {
@@ -2976,7 +2741,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     firebase.auth().onAuthStateChanged(user => {
       if (!user) return;
-      loadFollowingStories();
 
       // Actualizar foto de perfil en barra inferior
       firebase.database().ref('users/' + user.uid).once('value').then(snapshot => {
@@ -3006,76 +2770,12 @@ document.addEventListener('DOMContentLoaded', () => {
   animation: pulse 2s infinite;
 }
 
-#stories-carousel {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-#stories-carousel::-webkit-scrollbar {
-  display: none;
-}
 </style>
-
-    <section id="top10-section" class="mb-8">
-      <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="top10-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
-      </div>
-      <div id="top10" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
-    </section>
-
-    <section id="popular-section" class="mb-8">
-      <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="popular-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
-      </div>
-      <div id="popular" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
-    </section>
-
-    <section id="terror-section" class="mb-8">
-      <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="terror-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
-      </div>
-      <div id="terror-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
-    </section>
-
-    <section id="trending-section" class="mb-8">
-      <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="trending-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
-      </div>
-      <div id="trending-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
-    </section>
-
-    <section id="mystery-section" class="mb-8">
-      <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="mystery-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
-      </div>
-      <div id="mystery-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
-    </section>
-
-    <section id="adventure-section" class="mb-8">
-      <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="adventure-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
-      </div>
-      <div id="adventure-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
-    </section>
-
-    <section id="suggested-section" class="mb-8">
-      <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="suggested-title" class="text-base font-semibold text-gray-900">Próximamente</h2>
-      </div>
-      <div id="suggested-stories" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
-    </section>
-
-    <section id="featured-authors-section" class="mb-8">
-      <div class="flex justify-between items-center mb-4 px-4">
-        <h2 id="featured-authors-title" class="text-base font-semibold text-gray-900">Autores Destacados</h2>
-      </div>
-      <div id="featured-authors" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
-    </section>
   </div>
 
   <!-- BOTTOM NAVIGATION ESTILO UBER -->
   <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-uber-line transition-all duration-300 z-[100] shadow-uber-header">
-    <div class="grid grid-cols-5 px-2 py-2 gap-1">
+    <div class="grid grid-cols-4 px-2 py-2 gap-1">
       <button id="nav-home" data-section="home" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200 active">
         <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
           <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
@@ -3096,13 +2796,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </svg>
         </div>
         <span class="text-xs font-medium">Crear</span>
-      </button>
-      <button id="nav-community" data-section="community" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
-        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-        </svg>
-        <span class="text-xs font-medium">Comunidad</span>
       </button>
       <button id="nav-alerts" data-section="alerts" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -3157,7 +2850,7 @@ document.addEventListener('DOMContentLoaded', () => {
       display: block;
     }
 #search-view,
-    #community-view,
+    
     #creator-hub-view,
     #zenvio-chat-view {
       background-color: #f6f6f6 !important;
@@ -3240,7 +2933,6 @@ document.addEventListener('DOMContentLoaded', () => {
         case 'home': openHome(); break;
         case 'search': openSearch(); break;
         case 'create': openCreatorHub(); break;
-        case 'community': openCommunity(); break;
         case 'alerts': openNotifications(); break;
       }
     }
@@ -3294,8 +2986,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <button onclick="switchZenvioTab('chat')" class="zenvio-tab active px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 border-black text-black">
           Chat
         </button>
-        <button onclick="switchZenvioTab('story-generator')" class="zenvio-tab px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-600 hover:text-black">
-          Generador de Historias
         </button>
         <button onclick="switchZenvioTab('character-creator')" class="zenvio-tab px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-600 hover:text-black">
           Creador de Personajes
@@ -3324,9 +3014,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </span>
           </div>
           <div class="mt-3 flex flex-wrap gap-2">
-            <button onclick="applyChatQuickPrompt('Crea una historia de ciencia ficción con final inesperado')" class="atenis-quick-chip">Historia pro</button>
             <button onclick="applyChatQuickPrompt('Genera una imagen cinematográfica de una ciudad futurista al atardecer')" class="atenis-quick-chip">Imagen pro</button>
-            <button onclick="applyChatQuickPrompt('Hazme un plan de 5 capítulos para una novela de misterio')" class="atenis-quick-chip">Plan capítulos</button>
           </div>
         </div>
       </div>
@@ -3339,7 +3027,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="flex-1">
             <div class="bg-gray-100 rounded-2xl rounded-tl-none p-3 max-w-xs">
-              <p class="text-gray-900 text-sm">¡Hola! Soy Atenis AI. Puedo ayudarte a crear historias, generar ideas, responder preguntas y <strong>generar imágenes</strong>. Solo pídeme "genera una imagen de..." ¿En qué puedo ayudarte hoy?</p>
             </div>
             <span class="text-xs text-gray-500 mt-1 block">Ahora</span>
           </div>
@@ -3368,18 +3055,13 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- Story Generator Tab -->
-    <div id="zenvio-tab-story-generator" class="zenvio-tab-content hidden flex-1 overflow-y-auto p-4">
       <div class="max-w-2xl mx-auto">
         <div class="text-center mb-6">
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">Generador de Historias</h2>
-          <p class="text-gray-500 text-sm">Crea historias completas con IA en segundos</p>
         </div>
 
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Género</label>
-            <select id="story-genre" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent">
               <option value="fantasia">Fantasía</option>
               <option value="ciencia-ficcion">Ciencia Ficción</option>
               <option value="romance">Romance</option>
@@ -3392,31 +3074,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Tema o Idea Principal</label>
-            <textarea id="story-theme" rows="3" placeholder="Ej: Un joven descubre que puede viajar en el tiempo..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"></textarea>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Longitud</label>
-            <select id="story-length" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent">
               <option value="corta">Corta (500 palabras)</option>
               <option value="media">Media (1000 palabras)</option>
               <option value="larga">Larga (2000 palabras)</option>
             </select>
           </div>
 
-          <button onclick="generateStory()" class="w-full bg-[#00A2FF] text-white py-3 rounded-full font-semibold hover:bg-[#0066CC] transition-colors">
-            Generar Historia
           </button>
         </div>
 
-        <div id="generated-story-result" class="hidden mt-6 bg-gray-50 rounded-xl p-4 border border-gray-200">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-gray-900">Tu Historia Generada</h3>
-            <button onclick="copyStory()" class="text-[#00A2FF] hover:text-red-600 text-sm font-medium">
               Copiar
             </button>
           </div>
-          <div id="story-output" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
         </div>
       </div>
     </div>
@@ -3472,8 +3146,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Contexto de tu Historia</label>
-            <textarea id="plot-context" rows="4" placeholder="Describe brevemente tu historia actual..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"></textarea>
           </div>
 
           <button onclick="generatePlotTwist()" class="w-full bg-[#00A2FF] text-white py-3 rounded-full font-semibold hover:bg-[#0066CC] transition-colors">
@@ -3585,14 +3257,8 @@ function switchZenvioTab(tabName) {
   event.target.classList.remove('border-transparent', 'text-gray-600');
 }
 
-// Generador de Historias
-async function generateStory() {
-  const genre = document.getElementById('story-genre').value;
-  const theme = document.getElementById('story-theme').value.trim();
-  const length = document.getElementById('story-length').value;
 
   if (!theme) {
-    alert('Por favor ingresa un tema o idea para tu historia');
     return;
   }
 
@@ -3602,7 +3268,6 @@ async function generateStory() {
   btn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
   try {
-    const prompt = `Escribe una historia ${length} de género ${genre} sobre: ${theme}. Hazla emocionante y bien estructurada con inicio, desarrollo y final.`;
 
     const response = await fetch('/api/groq-chat', {
       method: 'POST',
@@ -3616,24 +3281,16 @@ async function generateStory() {
     });
 
     const data = await response.json();
-    const story = data.content || data.raw?.choices?.[0]?.message?.content || generarHistoriaLocal(genre, theme, length);
 
-    document.getElementById('story-output').textContent = story;
-    document.getElementById('generated-story-result').classList.remove('hidden');
 
   } catch (error) {
     console.error('Error:', error);
-    const story = generarHistoriaLocal(genre, theme, length);
-    document.getElementById('story-output').textContent = story;
-    document.getElementById('generated-story-result').classList.remove('hidden');
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalText;
   }
 }
 
-function generarHistoriaLocal(genre, theme, length) {
-  const historias = {
     fantasia: `En un reino olvidado donde ${theme}, un joven héroe descubre un antiguo secreto que cambiará su destino para siempre. Con la ayuda de aliados inesperados y enfrentando peligros inimaginables, debe encontrar el coraje para salvar su mundo de la oscuridad que amenaza con consumirlo todo.`,
     'ciencia-ficcion': `En el año 2157, cuando ${theme}, la humanidad se encuentra al borde de un descubrimiento que redefinirá su existencia. Un científico brillante debe tomar decisiones imposibles mientras navega por las complejidades de la tecnología avanzada y los dilemas éticos que esta presenta.`,
     romance: `Cuando ${theme}, dos almas destinadas se encuentran en las circunstancias más inesperadas. A través de obstáculos, malentendidos y momentos de pura magia, descubren que el amor verdadero puede superar cualquier barrera.`,
@@ -3643,12 +3300,8 @@ function generarHistoriaLocal(genre, theme, length) {
     drama: `En medio de ${theme}, vidas entrelazadas enfrentan decisiones que cambiarán su futuro. Entre conflictos personales, secretos revelados y momentos de profunda humanidad, cada personaje debe encontrar su propio camino hacia la redención.`
   };
 
-  return historias[genre] || historias.fantasia;
 }
 
-function copyStory() {
-  const story = document.getElementById('story-output').textContent;
-  navigator.clipboard.writeText(story).then(() => {
     event.target.textContent = 'Copiado';
     setTimeout(() => {
       event.target.textContent = 'Copiar';
@@ -3667,7 +3320,6 @@ async function generateCharacter() {
   btn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
   try {
-    const prompt = `Crea un perfil detallado de personaje tipo ${type} con estas características: ${traits || 'sorpréndeme'}. Incluye: nombre, edad, apariencia, personalidad, habilidades, debilidades, historia de fondo y motivaciones.`;
 
     const response = await fetch('/api/groq-chat', {
       method: 'POST',
@@ -3700,7 +3352,6 @@ function generarPersonajeLocal(type, traits) {
   const nombre = nombres[Math.floor(Math.random() * nombres.length)];
   const edad = Math.floor(Math.random() * 30) + 18;
 
-  return `**Nombre:** ${nombre}\n**Edad:** ${edad} años\n**Tipo:** ${type}\n**Características:** ${traits || 'Misterioso y carismático'}\n**Apariencia:** Cabello oscuro, ojos penetrantes, porte distinguido\n**Personalidad:** Determinado, inteligente, con un pasado complejo\n**Habilidades:** Estrategia, liderazgo, combate\n**Debilidades:** Confianza excesiva, recuerdos dolorosos\n**Historia:** Criado en circunstancias difíciles, ha forjado su propio camino\n**Motivación:** Busca redención y un propósito mayor`;
 }
 
 function mostrarPersonaje(character) {
@@ -3736,8 +3387,6 @@ async function generatePlotTwist() {
 
   try {
     const prompt = context
-      ? `Basado en esta historia: "${context}", sugiere un giro de trama sorprendente e inesperado que cambie todo.`
-      : 'Sugiere un giro de trama original y sorprendente para una historia.';
 
     const response = await fetch('/api/groq-chat', {
       method: 'POST',
@@ -3774,7 +3423,6 @@ function generarGiroLocal() {
     'El antagonista y el protagonista son en realidad la misma persona de líneas temporales diferentes.',
     'La persona que parecía ser el villano estaba en realidad protegiendo al mundo de una amenaza aún mayor.',
     'El protagonista descubre que tiene un hermano gemelo que ha estado viviendo su vida en paralelo.',
-    'La historia entera ha sido narrada desde la perspectiva del villano, y el "héroe" es en realidad el antagonista.',
     'El mundo en el que viven los personajes está dentro de un libro que alguien está escribiendo en tiempo real.',
     'El mejor amigo del protagonista ha estado muerto todo el tiempo, y solo él puede verlo.'
   ];
@@ -3878,7 +3526,6 @@ function openZenvioMenu() {
           </p>
         </div>
         <div class="text-sm text-gray-600 space-y-2">
-          <p>• Genera historias completas</p>
           <p>• Crea personajes únicos</p>
           <p>• Inventa giros de trama</p>
           <p>• Construye mundos ficticios</p>
@@ -4110,10 +3757,6 @@ function sendChatMessage() {
       }
 
       // Mostrar mensaje de generación
-      const generatingMsg = document.createElement('div');
-      generatingMsg.className = 'flex items-start space-x-3';
-      generatingMsg.id = 'generating-image-msg';
-      generatingMsg.innerHTML = `
         <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center flex-shrink-0">
           <svg class="w-5 h-5 text-white animate-spin transform transition-transform duration-300 hover:rotate-12 hover:-translate-y-1" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2L9 12L12 15L15 12L12 2Z"/>
@@ -4136,7 +3779,6 @@ function sendChatMessage() {
           <span class="text-xs text-gray-500 mt-1 block">Ahora</span>
         </div>
       `;
-      messagesContainer.appendChild(generatingMsg);
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
       // Generar la imagen
@@ -4237,9 +3879,7 @@ function getSmartLocalResponse(message) {
   const msg = message.toLowerCase();
 
   // Respuestas sobre escritura
-  if (msg.includes('escribir') || msg.includes('historia') || msg.includes('cuento')) {
     const responses = [
-      '¡Excelente pregunta! Para escribir una buena historia, comienza con un personaje interesante y un conflicto que resolver. ¿Qué tipo de historia quieres crear?',
       'La clave está en crear personajes con los que los lectores puedan conectar. Piensa en sus motivaciones, miedos y deseos. ¿Necesitas ayuda con algún personaje?',
       'Un buen inicio es crucial. Intenta comenzar con una escena que enganche al lector desde la primera línea. ¿Quieres que te dé ejemplos?'
     ];
@@ -4261,7 +3901,6 @@ function getSmartLocalResponse(message) {
     const responses = [
       'Los mejores personajes tienen defectos que los hacen humanos. Piensa en qué los hace vulnerables y qué los hace fuertes.',
       'Dale a tu personaje un objetivo claro y obstáculos que superar. La tensión entre lo que quieren y lo que los detiene crea drama.',
-      'Un buen personaje cambia a lo largo de la historia. ¿Cómo será diferente tu protagonista al final?'
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   }
@@ -4281,7 +3920,6 @@ function getSmartLocalResponse(message) {
 
   // Saludos
   if (msg.includes('hola') || msg.includes('hey') || msg.includes('hi')) {
-    return '¡Hola! 🚀 Soy Atenis AI. Puedo ayudarte a crear historias, generar ideas o crear imágenes. ¿En qué te ayudo hoy?';
   }
 
   // Agradecimientos
@@ -4292,7 +3930,6 @@ function getSmartLocalResponse(message) {
   // Respuesta genérica inteligente
   const genericResponses = [
     'Interesante pregunta. ¿Podrías darme más detalles para ayudarte mejor?',
-    'Entiendo. ¿Esto es para una historia que estás escribiendo? Puedo darte ideas específicas.',
     '¡Me gusta por dónde vas! Cuéntame más sobre lo que tienes en mente.',
     'Esa es una buena dirección. ¿Quieres que exploremos esa idea juntos?',
     'Puedo ayudarte con eso. También puedo generar imágenes si me dices "genera una imagen de..." 🎨'
@@ -4365,8 +4002,6 @@ async function generateImageInChat(prompt) {
     });
 
     // Remover mensaje de generación
-    const generatingMsg = document.getElementById('generating-image-msg');
-    if (generatingMsg) generatingMsg.remove();
 
     // Mostrar imagen generada
     const imageMsg = document.createElement('div');
@@ -4409,8 +4044,6 @@ async function generateImageInChat(prompt) {
     console.error('Error generando imagen:', error);
 
     // Remover mensaje de generación
-    const generatingMsg = document.getElementById('generating-image-msg');
-    if (generatingMsg) generatingMsg.remove();
 
     // Mostrar error
     const errorMsg = document.createElement('div');
@@ -4495,10 +4128,9 @@ function escapeHtml(text) {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-              <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Escritura pausada" class="w-8 h-8 rounded-full">
+              <img src="https://i.ibb.co/BKGSw09g/IMG-7706.png" alt="Función eliminada" class="w-8 h-8 rounded-full">
             </div>
             <div>
-              <h3 class="text-base font-semibold">Creación de historias pausada</h3>
               <p class="text-xs text-white/80 mt-0.5">Pronto anunciaremos la nueva etapa de la plataforma</p>
             </div>
           </div>
@@ -4514,12 +4146,8 @@ function escapeHtml(text) {
           <p class="text-xs text-uber-muted mt-1">Inicia transmisión ahora</p>
         </button>
 
-        <button onclick="document.getElementById('add-story-btn').click()" class="text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip active:scale-[0.99] transition">
           <div class="w-11 h-11 rounded-2xl bg-uber-field border border-uber-line flex items-center justify-center mb-3">
-            <img src="https://i.ibb.co/WpF2kzkt/IMG-7708.png" alt="Relato" class="w-7 h-7 rounded-full">
           </div>
-          <h3 class="text-sm font-semibold text-uber-black">Relato</h3>
-          <p class="text-xs text-uber-muted mt-1">Historia de 24 horas</p>
         </button>
 
         <button onclick="document.getElementById('image-generator-modal').style.display='block'" class="col-span-2 text-left bg-white border border-uber-line rounded-2xl p-4 shadow-uber-chip active:scale-[0.99] transition">
@@ -4540,118 +4168,7 @@ function escapeHtml(text) {
 </div>
 
 <!-- Community View - Estilo Twitter/X -->
-<div id="community-view" class="fixed inset-0 bg-uber-surface overflow-y-auto hidden z-50">
-  <!-- Header Simple -->
-  <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
-    <div class="flex items-center justify-between">
-      <h1 class="text-xl font-bold">Comunidad</h1>
-      <button id="community-compose-btn" onclick="openNoteCreation()" class="bg-white text-black border border-uber-line w-11 h-11 rounded-2xl flex items-center justify-center shadow-uber-chip hover:bg-gray-100 transition-colors" aria-label="Crear post" title="Crear post">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/>
-        </svg>
-      </button>
-    </div>
-  </div>
 
-  <!-- Tabs Simples -->
-  <div class="bg-white border-b border-uber-line">
-    <div class="flex">
-      <button onclick="switchCommunityTab('feed')" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-uber-black text-uber-black" id="feed-tab">
-        Para ti
-      </button>
-      <button onclick="switchCommunityTab('explore'); loadExploreTrends();" class="flex-1 py-4 text-center text-sm font-semibold border-b-2 border-transparent text-uber-muted hover:bg-uber-field" id="explore-tab">
-        Explorar
-      </button>
-    </div>
-  </div>
-
-  <!-- Content -->
-  <div class="flex-1">
-    <div id="notes-feed" class="divide-y divide-uber-line"></div>
-    <div id="explore-feed" class="hidden p-4 space-y-6">
-      <section>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-base font-bold text-uber-black">Historias en tendencia</h3>
-
-        </div>
-        <div id="explore-stories" class="grid grid-cols-2 gap-3"></div>
-      </section>
-      <section>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-base font-bold text-uber-black">Autores populares</h3>
-
-        </div>
-        <div id="explore-authors" class="space-y-2"></div>
-      </section>
-    </div>
-
-    <!-- Modal de Creación Estilo Twitter -->
-    <div id="add-note-form" class="hidden bg-white">
-      <div class="flex items-center justify-between p-3 border-b border-uber-line">
-        <button onclick="switchCommunityTab('feed')" class="text-sm font-medium text-uber-muted">Cancelar</button>
-        <h2 class="text-base font-semibold">Post</h2>
-        <button id="publish-note-btn" onclick="publishNote()" class="bg-uber-black text-white w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold hover:bg-[#222222]" aria-label="Publicar post" title="Publicar post">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/>
-            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="p-4">
-        <textarea id="note-content" placeholder="¿Qué está pasando? Usa hashtags como #anime #romance" maxlength="280" class="w-full border-0 resize-none focus:outline-none text-base bg-transparent" rows="4"></textarea>
-
-        <div id="note-hashtag-preview" class="hidden mt-3 space-y-2"></div>
-
-        <div id="image-preview" class="hidden mt-3">
-          <div class="relative inline-block">
-            <img id="preview-img" class="max-h-60 rounded-2xl">
-            <button onclick="removeImage()" class="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70">
-              ×
-            </button>
-          </div>
-        </div>
-
-        <div id="note-char-counter" class="text-xs text-uber-muted mt-2">0/280</div>
-      </div>
-
-      <div class="border-t border-uber-line p-3">
-        <div class="flex items-center space-x-4">
-          <label class="cursor-pointer text-uber-black hover:bg-uber-field p-2 rounded-full transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <input type="file" id="note-image" accept="image/*" class="hidden" onchange="handleNoteImagePreview(event)">
-          </label>
-          <button onclick="document.getElementById('image-generator-modal').style.display='block'" class="text-uber-black hover:bg-uber-field p-2 rounded-full transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<style>
-/* Tabs activos estilo Twitter */
-#feed-tab.active {
-  border-color: #111111 !important;
-  color: #111111 !important;
-}
-
-#explore-tab.active {
-  border-color: #111111 !important;
-  color: #111111 !important;
-}
-</style>
-
-
-
-
-<!-- Search View - Estilo Uber -->
 <div id="search-view" class="fixed inset-0 bg-uber-surface overflow-y-auto hidden z-50">
   <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
     <div class="relative">
@@ -4700,14 +4217,11 @@ function escapeHtml(text) {
       <option value="comedia">Comedia</option>
     </select>
     <div class="flex rounded-full bg-white border border-uber-line mb-5 p-1 shadow-uber-chip">
-      <button onclick="switchSearchTab('stories')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full bg-uber-black text-white transition-colors" id="search-stories-tab">Historias</button>
       <button onclick="switchSearchTab('authors')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors" id="search-authors-tab">Perfiles</button>
       <button onclick="switchSearchTab('info')" class="flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors" id="search-info-tab">Información</button>
     </div>
 
-    <div id="search-stories-section">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-sm font-semibold text-uber-black">Historias</h3>
         <button type="button" onclick="openCategoryFilterSheet()" class="search-filter-icon-btn" aria-label="Filtrar categorías">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M7 12h10M10 18h4"/>
@@ -4778,8 +4292,7 @@ function closeCreatorHub() {
 }
 
 function openCommunity() {
-  console.log('👥 Abriendo comunidad');
-  // Implementar lógica de comunidad
+  openHome();
 }
 
 function openProfileLegacy() {
@@ -4795,21 +4308,17 @@ function openProfileLegacy() {
 
 
 function switchSearchTab(tab) {
-  const storiesTab = document.getElementById('search-stories-tab');
   const authorsTab = document.getElementById('search-authors-tab');
   const infoTab = document.getElementById('search-info-tab');
-  const storiesSection = document.getElementById('search-stories-section');
   const authorsSection = document.getElementById('search-authors-section');
   const infoSection = document.getElementById('search-info-section');
 
   const inactiveClass = 'flex-1 py-2 text-center text-sm font-semibold rounded-full text-uber-muted transition-colors';
   const activeClass = 'flex-1 py-2 text-center text-sm font-semibold rounded-full bg-uber-black text-white transition-colors';
 
-  storiesTab.className = inactiveClass;
   authorsTab.className = inactiveClass;
   infoTab.className = inactiveClass;
 
-  storiesSection.classList.add('hidden');
   authorsSection.classList.add('hidden');
   infoSection.classList.add('hidden');
 
@@ -4820,8 +4329,6 @@ function switchSearchTab(tab) {
     infoTab.className = activeClass;
     infoSection.classList.remove('hidden');
   } else {
-    storiesTab.className = activeClass;
-    storiesSection.classList.remove('hidden');
   }
 }
 
@@ -5166,36 +4673,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     });
   });
 
-  function switchCommunityTab(tab) {
-    const feedTab = document.getElementById('feed-tab');
-    const exploreTab = document.getElementById('explore-tab');
-    const aiTab = document.getElementById('ai-tab');
-    const feedContent = document.getElementById('notes-feed');
-    const exploreContent = document.getElementById('explore-feed');
-
-    [feedTab, exploreTab, aiTab].forEach(tabEl => {
-      if (tabEl) {
-        tabEl.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-transparent text-gray-500';
-      }
-    });
-
-    if (feedContent) feedContent.classList.add('hidden');
-    if (exploreContent) exploreContent.classList.add('hidden');
-
-    if (tab === 'feed') {
-      if (feedTab) feedTab.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-black text-black';
-      if (feedContent) feedContent.classList.remove('hidden');
-    } else if (tab === 'explore') {
-      if (exploreTab) exploreTab.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-black text-black';
-      if (exploreContent) exploreContent.classList.remove('hidden');
-      loadExploreTrends();
-    } else if (tab === 'ai') {
-      if (aiTab) aiTab.className = 'community-tab flex-1 py-3 text-center font-medium border-b-2 border-black text-black';
-      closeCommunity();
-      openImageGenerator();
-    }
-  }
-
   async function getAISuggestions() {
     const btn = document.getElementById('ai-suggest-btn');
     const suggestionsDiv = document.getElementById('ai-suggestions');
@@ -5203,7 +4680,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
 
     btn.innerHTML = '<svg class="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Getting suggestions...';
 
-    let prompt = 'Generate creative writing prompts about books and storytelling:';
 
     if (currentText.length > 0) {
       prompt = `Continue this thought about writing or books: "${currentText}". Give me 4 different ways to expand on this idea:`;
@@ -5232,14 +4708,12 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         let prompts;
         if (currentText.length > 0) {
           prompts = [
-            currentText + ' and it made me realize how powerful stories can be',
             currentText + ' which is why I think every writer should explore this',
             currentText + ' and this experience changed my perspective on reading',
             currentText + ' so I want to share this insight with other book lovers'
           ];
         } else {
           prompts = [
-            aiText.split(':')[1]?.trim() || 'What story changed your perspective?',
             'Share your favorite plot twist from any book',
             'Describe your ideal writing space in detail',
             'What character would you love to meet in real life?'
@@ -5258,7 +4732,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
 
       if (currentText.length > 0) {
         suggestions = [
-          currentText + ' and it completely changed how I see storytelling',
           currentText + ' which is why I recommend it to every book lover',
           currentText + ' and this experience opened my mind to new possibilities',
           currentText + ' so I had to share this amazing discovery'
@@ -5271,7 +4744,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
           'Describe your writing process in one word',
           'What fictional world feels most real to you?',
           'Share a quote that changed your life',
-          'What story are you dying to tell?',
           'Describe your perfect reading day',
           'What character deserved a better ending?',
           'Share your most unusual book recommendation',
@@ -5358,7 +4830,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
           </svg>
-          Publicar imagen
         </button>
       `;
     }
@@ -5588,7 +5059,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     const generatedImageSrc = document.getElementById('generated-image').src;
 
     if (!generatedImageSrc) {
-      alert('No hay imagen generada para publicar');
       return;
     }
 
@@ -6534,9 +6004,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         </div>
 
         <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-          <button onclick="openMyStoriesModal()" class="rounded-xl border border-gray-200 py-2">
-            <div id="profile-stories-count" class="font-semibold">0</div>
-            <div class="text-xs text-gray-500">Historias (pausado)</div>
           </button>
           <div class="rounded-xl border border-gray-200 py-2">
             <div id="profile-notes-count" class="font-semibold">0</div>
@@ -6561,9 +6028,7 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
 
 
 
-      <!-- Historias del usuario -->
       <div class="border-t border-gray-200 pt-4">
-        <div id="user-stories" class="grid grid-cols-2 gap-3"></div>
       </div>
     </div>
   </div>
@@ -6634,8 +6099,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
                 <div class="text-white text-opacity-80 text-sm">código</div>
               </button>
               <div class="text-center">
-                <div id="profile-stories-count-desktop" class="text-2xl font-bold text-white">0</div>
-                <div class="text-white text-opacity-80 text-sm">historias publicadas</div>
               </div>
             </div>
           </div>
@@ -6649,8 +6112,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
       <div class="bg-white border-b">
         <div class="max-w-7xl mx-auto px-6">
           <nav class="flex space-x-8">
-            <button class="tab-button active py-4 px-2 border-b-2 border-black text-black font-medium" data-tab="stories">
-              Escritura (próximamente)
             </button>
             <button class="tab-button py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="notes">
               Notas
@@ -6665,23 +6126,16 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
         <div class="flex gap-8">
           <!-- Contenido principal -->
           <div class="flex-1">
-            <!-- Tab de Historias -->
-            <div id="stories-tab-content" class="tab-content">
 
 
-              <!-- Header de historias con botón crear -->
               <div class="flex justify-between items-center mb-6">
                 <div>
-                  <h2 id="profile-stories-header" class="text-2xl font-bold text-gray-900">Escritura pausada</h2>
-                  <p class="text-gray-500 mt-1">La creación y publicación de historias no está disponible temporalmente.</p>
                 </div>
                 <button class="bg-gray-300 text-gray-700 px-6 py-3 rounded-xl cursor-not-allowed flex items-center" disabled>
-                  Escritura pronto
+                  No disponible
                 </button>
               </div>
 
-              <!-- Grid de historias -->
-              <div id="user-stories-desktop" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
 
             <!-- Otros tabs (ocultos por defecto) -->
@@ -6700,8 +6154,6 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
               <h3 class="font-bold text-gray-900 mb-4">Estadísticas</h3>
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                  <span class="text-gray-600">Historias (pausado)</span>
-                  <span id="sidebar-stories-count" class="font-bold text-[#00A2FF]">0</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-gray-600">Total de lecturas</span>
@@ -7160,8 +6612,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="text-sm text-gray-600">Siguiendo</p>
               </div>
               <div>
-                <p class="text-2xl font-bold text-[#00A2FF]" id="edit-stories-count-desktop">0</p>
-                <p class="text-sm text-gray-600">Historias</p>
               </div>
             </div>
           </div>
@@ -7315,8 +6765,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="grid grid-cols-3 gap-2 mb-4 text-center">
       <div class="rounded-xl border border-gray-200 py-2">
-        <div id="author-stories-count" class="font-semibold text-gray-900">0</div>
-        <div class="text-xs text-gray-500">Historias (pausado)</div>
       </div>
       <div class="rounded-xl border border-gray-200 py-2">
         <div id="author-notes-count" class="font-semibold text-gray-900">0</div>
@@ -7338,7 +6786,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </button>
 
     <div class="border-t border-gray-200 mt-6 pt-4">
-      <div id="author-stories" class="grid grid-cols-3 gap-1"></div>
     </div>
   </div>
 </div>
@@ -7407,31 +6854,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-<!-- VISTA DE CREACIÓN DE HISTORIAS (Paso 1) - PANTALLA COMPLETA -->
-<div id="story-creation-view" class="fixed inset-0 overflow-y-auto z-[200] hidden bg-white text-black">
   <div class="min-h-screen w-full">
     <!-- Header fijo -->
     <div class="sticky top-0 z-10 bg-white border-b border-gray-200 p-4">
       <div class="flex items-center justify-between">
-        <button onclick="closeStoryCreation()" class="text-gray-700 hidden">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Próximamente</h1>
-        <button onclick="selectStoryType('historia_completa')" class="text-[#00A2FF] font-semibold">Siguiente</button>
       </div>
     </div>
 
     <!-- Contenido principal -->
     <div class="p-4">
       <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold mb-2 text-black">Crear historia</h2>
-        <p class="text-gray-600">Comparte tu creatividad con la comunidad</p>
       </div>
 
       <!-- Opción única -->
-      <div onclick="selectStoryType('historia_completa')" class="bg-white border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-[#00A2FF] transition">
         <div class="flex items-center">
           <div class="w-12 h-12 bg-gradient-to-br from-[#00A2FF] to-[#ff6b7a] rounded-full flex items-center justify-center mr-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -7439,8 +6878,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </svg>
           </div>
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-black">Historia con capítulos</h3>
-            <p class="text-sm text-gray-600">Crea una historia dividida en capítulos</p>
           </div>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -7451,28 +6888,21 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
-<!-- VISTA DE DETALLES DE HISTORIA (Paso 2) - PANTALLA COMPLETA -->
-<div id="story-details-view" class="fixed inset-0 overflow-y-auto z-50 hidden bg-white text-black">
   <div class="min-h-screen w-full">
     <!-- Header fijo -->
     <div class="sticky top-0 z-10 bg-white border-b border-gray-200 p-4">
       <div class="flex items-center justify-between">
-        <button onclick="backToStoryType()" class="text-gray-700">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 class="text-lg font-semibold">Próximamente</h1>
-        <button id="story-publish-btn" onclick="document.getElementById('story-form').requestSubmit()" class="px-4 py-2 rounded-xl bg-black text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">Publicar</button>
       </div>
     </div>
 
     <!-- Contenido principal -->
     <div class="p-4">
-      <form id="story-form" class="space-y-4">
         <!-- Portada -->
         <div class="mb-6">
-          <label for="story-cover" class="block cursor-pointer">
             <div id="cover-preview" class="w-full h-48 bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-[#00A2FF] transition overflow-hidden">
               <svg id="cover-icon" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -7480,7 +6910,6 @@ document.addEventListener('DOMContentLoaded', function() {
               <span id="cover-text" class="text-sm text-gray-600">Agregar portada</span>
               <img id="cover-image" class="hidden w-full h-full object-cover" alt="Portada">
             </div>
-            <input id="story-cover" type="file" accept="image/*" class="hidden" onchange="previewCover(event)">
           </label>
         </div>
 
@@ -7502,14 +6931,10 @@ function previewCover(event) {
 
         <!-- Título -->
         <div>
-          <label for="story-title" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
-          <input id="story-title" type="text" placeholder="Título de la historia" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition" required>
         </div>
 
         <!-- Categoría -->
         <div>
-          <label for="story-category" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-          <select id="story-category" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition appearance-none" required>
             <option value="" disabled selected>Selecciona una categoría</option>
             <option value="aventura">Aventura</option>
             <option value="romance">Romance</option>
@@ -7524,8 +6949,6 @@ function previewCover(event) {
 
         <!-- Clasificación -->
         <div>
-          <label for="story-rating" class="block text-sm font-medium text-gray-700 mb-2">Clasificación</label>
-          <select id="story-rating" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition appearance-none" required>
             <option value="all">Todo público</option>
             <option value="13plus">Mayores de 13</option>
             <option value="18plus">Mayores de 18</option>
@@ -7534,8 +6957,6 @@ function previewCover(event) {
 
         <!-- Idioma -->
         <div>
-          <label for="story-language" class="block text-sm font-medium text-gray-700 mb-2">Idioma</label>
-          <select id="story-language" class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition appearance-none" required>
             <option value="" disabled selected>Selecciona idioma</option>
             <option value="Spanish">Español</option>
             <option value="English">English</option>
@@ -7544,10 +6965,7 @@ function previewCover(event) {
           </select>
         </div>
 
-        <!-- Sinopsis -->
         <div>
-          <label for="story-synopsis" class="block text-sm font-medium text-gray-700 mb-2">Sinopsis</label>
-          <textarea id="story-synopsis" placeholder="Escribe una sinopsis..." class="w-full p-4 bg-uber-field border border-uber-line rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/10 transition resize-none" rows="4"></textarea>
         </div>
       </form>
     </div>
@@ -7559,25 +6977,17 @@ function previewCover(event) {
 
 <script>
   // Funciones para cambiar vistas
-  function selectStoryType(type) {
-    document.getElementById('story-creation-view').classList.add('hidden');
-    document.getElementById('story-details-view').classList.remove('hidden');
   }
 </script>
 
-<!-- MODAL DE EDICIÓN DE HISTORIAS (Paso 3) -->
-<div id="story-edit-view" class="fixed inset-0 overflow-y-auto z-[200] hidden bg-white text-black">
   <div class="h-full flex flex-col">
     <!-- Header -->
     <div class="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
       <div class="flex items-center justify-between">
-        <button onclick="closeStoryEdit()" class="text-gray-700">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h2 class="text-lg font-semibold">Editar historia</h2>
-        <button onclick="saveStoryEdits()" class="text-[#00A2FF] font-semibold">Guardar</button>
       </div>
     </div>
 
@@ -7585,7 +6995,6 @@ function previewCover(event) {
     <div class="flex-1 overflow-y-auto p-4">
       <!-- Portada -->
       <div class="mb-4">
-        <label for="edit-story-cover" class="block cursor-pointer">
           <div class="relative w-32 h-48 mx-auto bg-gray-100 rounded-lg overflow-hidden border border-gray-300">
             <img id="edit-cover-image" class="w-full h-full object-cover" alt="Portada">
             <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition flex items-center justify-center">
@@ -7595,18 +7004,15 @@ function previewCover(event) {
               </svg>
             </div>
           </div>
-          <input id="edit-story-cover" type="file" accept="image/*" class="hidden" onchange="previewEditCover(event)">
         </label>
       </div>
 
       <!-- Título -->
       <div class="mb-4">
-        <input id="edit-story-title" type="text" placeholder="Título" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF]">
       </div>
 
       <!-- Categoría -->
       <div class="mb-4">
-        <select id="edit-story-category" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] appearance-none">
           <option value="aventura">Aventura</option>
           <option value="romance">Romance</option>
           <option value="misterio">Misterio</option>
@@ -7620,37 +7026,26 @@ function previewCover(event) {
 
       <!-- Idioma -->
       <div class="mb-4">
-        <select id="edit-story-language" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] appearance-none">
           <option value="Spanish">Español</option>
           <option value="English">English</option>
         </select>
       </div>
 
-      <!-- Sinopsis -->
       <div class="mb-6">
-        <textarea id="edit-story-synopsis" placeholder="Sinopsis" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-[#00A2FF] resize-none" rows="4"></textarea>
       </div>
 
-      <!-- Capítulos -->
-      <div id="chapter-section" class="mb-6">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-lg font-semibold">Capítulos</h3>
-          <button onclick="openChapterCreationModal()" class="text-[#00A2FF] font-semibold">+ Agregar</button>
         </div>
-        <div id="chapter-list" class="space-y-2"></div>
       </div>
 
       <!-- Opciones -->
       <div class="space-y-3">
-        <button onclick="toggleStoryPrivacy()" class="w-full bg-white border border-gray-300 p-3 rounded-lg text-left flex items-center justify-between hover:bg-gray-50 transition">
           <span>Hacer privada</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>
 
-        <button onclick="confirmDeleteStory()" class="w-full bg-white border border-red-500 text-red-500 p-3 rounded-lg font-medium hover:bg-red-50 transition">
-          Eliminar historia
         </button>
       </div>
     </div>
@@ -7670,26 +7065,19 @@ function previewEditCover(event) {
 }
 </script>
 
-<!-- MODAL DE CREACIÓN/EDICIÓN DE CAPÍTULO -->
-<div id="chapter-creation-modal" class="fixed inset-0 bg-white z-50 hidden">
   <div class="h-full flex flex-col">
     <!-- Header -->
     <div class="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
       <div class="flex items-center justify-between">
-        <button onclick="closeChapterCreationModal()" class="text-gray-700">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h2 class="text-lg font-semibold">Nuevo capítulo</h2>
-        <button id="btn-save-chapter" onclick="document.getElementById('chapter-form').requestSubmit()" class="text-[#00A2FF] font-semibold">Publicar</button>
       </div>
     </div>
 
     <!-- Contenido -->
     <div class="flex-1 overflow-y-auto p-4">
-      <form id="chapter-form" class="space-y-4">
-        <textarea id="chapter-content" placeholder="Escribe tu capítulo..." class="w-full p-3 bg-white border-0 focus:outline-none text-black resize-none" style="font-size:16px; font-family: Arial; min-height: 400px;" required></textarea>
       </form>
     </div>
 
@@ -7703,10 +7091,7 @@ function previewEditCover(event) {
   </div>
 </div>
 
-<!-- MODAL DE LECTURA DE CAPÍTULO -->
-<div id="chapter-read-modal" class="fixed inset-0 bg-white bg-opacity-95 flex flex-col z-50 hidden">
   <div class="bg-white w-full h-screen flex flex-col">
-    <button onclick="closeChapterReadModal()" class="absolute top-6 left-6 text-gray-600 hover:text-black text-3xl z-10 transition-colors duration-200">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
       </svg>
@@ -7714,19 +7099,13 @@ function previewEditCover(event) {
     <div class="flex-1 overflow-y-auto p-8 md:p-12 max-w-3xl mx-auto w-full">
 
 
-      <h2 id="read-chapter-number" class="text-2xl md:text-3xl font-bold mb-8 mt-16 text-gray-900"></h2>
-      <div id="read-chapter-text" class="text-lg leading-relaxed text-gray-700 font-serif"></div>
     </div>
     <div class="bg-gray-50 border-t border-gray-200 p-4 flex justify-between items-center shadow-lg">
-      <button id="prev-chapter-btn" class="bg-gray-200 text-gray-700 px-5 py-3 rounded-lg shadow hover:shadow-md hover:bg-gray-300 transition-all duration-200 focus:outline-none flex items-center gap-2 font-medium" onclick="prevChapter()">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
         Anterior
       </button>
-      <div id="rating-container" class="flex items-center space-x-3">
-        <span class="text-gray-700 font-medium">Califica:</span>
-        <div id="star-rating" class="flex">
           <span class="star cursor-pointer text-2xl text-gray-400 hover:text-black transition-colors duration-150" data-value="1">★</span>
           <span class="star cursor-pointer text-2xl text-gray-400 hover:text-black transition-colors duration-150" data-value="2">★</span>
           <span class="star cursor-pointer text-2xl text-gray-400 hover:text-black transition-colors duration-150" data-value="3">★</span>
@@ -7734,7 +7113,6 @@ function previewEditCover(event) {
           <span class="star cursor-pointer text-2xl text-gray-400 hover:text-black transition-colors duration-150" data-value="5">★</span>
         </div>
       </div>
-      <button id="next-chapter-btn" class="bg-[#00A2FF] text-white px-5 py-3 rounded-lg shadow hover:shadow-md hover:bg-[#0066CC] transition-all duration-200 focus:outline-none flex items-center gap-2 font-medium" onclick="nextChapter()">
         Siguiente
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -7744,12 +7122,9 @@ function previewEditCover(event) {
   </div>
 </div>
 
-<!-- MODAL DE DETALLE DE HISTORIA -->
-<div id="story-detail-modal" class="fixed inset-0 overflow-y-auto z-[200] hidden bg-gradient-to-b from-white to-[#f9f9f9] text-black">
   <div class="p-6 relative max-w-4xl mx-auto bg-white min-h-screen">
 
     <!-- Botón de volver -->
-    <button onclick="closeStoryDetail()" class="text-[#00A2FF] mb-6 flex items-center">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <polyline points="15 18 9 12 15 6" />
       </svg>
@@ -7759,13 +7134,10 @@ function previewEditCover(event) {
     <!-- Sección principal: portada + título/autor -->
     <div class="flex items-start space-x-6 mb-8">
       <!-- Portada estilo Inkitt/Wattpad -->
-      <img id="detail-cover" src="/api/placeholder/400/600" alt="Portada de la historia"
            class="w-40 sm:w-48 md:w-56 aspect-[2/3] object-cover rounded-2xl border-2 border-[#00A2FF] shadow-lg">
 
-      <!-- Detalles de historia -->
       <div class="flex-1 flex flex-col">
         <h2 id="detail-title" class="text-2xl sm:text-3xl font-bold text-black mb-2">
-          Título de la historia
         </h2>
         <p id="detail-author"
            class="text-gray-600 mb-4 cursor-pointer hover:text-black transition-colors duration-200"
@@ -7775,23 +7147,15 @@ function previewEditCover(event) {
       </div>
     </div>
 
-    <!-- Lista de capítulos -->
     <div class="w-full mb-8">
-      <h3 class="text-lg font-bold mb-4 text-[#00A2FF]">Capítulos</h3>
-      <ul id="detail-chapters" class="space-y-3">
-        <!-- Aquí insertar cada <li> de capítulo -->
       </ul>
     </div>
 
-    <!-- Sinopsis -->
     <div class="w-full mb-6">
-      <h3 class="text-lg font-semibold mb-3 text-[#00A2FF]">Sinopsis</h3>
       <p id="detail-synopsis" class="text-gray-600 leading-relaxed">
-        Sinopsis de la historia...
       </p>
     </div>
 
-    <!-- Métricas estilizadas debajo de sinopsis -->
     <div id="detail-metrics" class="flex justify-center gap-4">
       <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
         <span class="text-lg font-bold text-black">3</span>
@@ -7799,11 +7163,9 @@ function previewEditCover(event) {
       </div>
       <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
         <span class="text-lg font-bold text-black">4.5</span>
-        <p class="text-xs text-[#00A2FF] mt-1">Calificación</p>
       </div>
       <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
         <span class="text-lg font-bold text-black">12</span>
-        <p class="text-xs text-[#00A2FF] mt-1">Capítulos</p>
       </div>
     </div>
 
@@ -10224,62 +9586,33 @@ function showLiveNotification(message, type = 'info') {
 
 	<script>
 	async function loadExploreTrends() {
-  const storiesContainer = document.getElementById('explore-stories');
   const authorsContainer = document.getElementById('explore-authors');
-  if (!storiesContainer || !authorsContainer) return;
 
-  storiesContainer.innerHTML = '<div class="col-span-2 text-center py-8 text-uber-muted">Cargando tendencias...</div>';
   authorsContainer.innerHTML = '<div class="text-center py-6 text-uber-muted">Cargando autores...</div>';
 
   try {
-    const stories = await loadStoriesFromFirebase();
-    const storiesWithScore = (stories || []).map((story) => {
-      const likes = Number(story.likes || story.likeCount || 0);
-      const views = Number(story.views || 0);
-      const comments = Number(story.commentsCount || story.comments || 0);
       const score = likes * 3 + comments * 2 + views;
-      return { ...story, score };
     });
 
-    const trendingStories = storiesWithScore
       .sort((a, b) => b.score - a.score)
       .slice(0, 6);
 
-    storiesContainer.innerHTML = '';
-    if (trendingStories.length === 0) {
-      storiesContainer.innerHTML = '<div class="col-span-2 text-center py-8 text-uber-muted">Aún no hay tendencias disponibles.</div>';
     } else {
-      trendingStories.forEach((story) => {
         const card = document.createElement('button');
         card.type = 'button';
         card.className = 'text-left bg-white border border-uber-line rounded-2xl overflow-hidden shadow-uber-chip';
-        card.onclick = () => openStoryDetail(story);
         card.innerHTML = `
-          <img src="${story.coverImage || 'https://via.placeholder.com/300x400?text=Historia'}" alt="${story.title || 'Historia'}" class="w-full h-36 object-cover">
           <div class="p-3">
-            <p class="text-sm font-semibold text-uber-black line-clamp-2">${story.title || 'Historia sin título'}</p>
-            <p class="text-xs text-uber-muted mt-1 truncate">${story.username || story.authorName || 'Autor desconocido'}</p>
-            <p class="text-[11px] text-uber-muted mt-2">🔥 ${story.score || 0} puntos</p>
           </div>
         `;
-        storiesContainer.appendChild(card);
       });
     }
 
     const userStats = new Map();
-    storiesWithScore.forEach((story) => {
-      const key = story.userId || story.authorId || story.email || '';
       if (!key) return;
       const current = userStats.get(key) || {
-        userId: story.userId || story.authorId,
-        name: story.username || story.authorName || 'Autor',
-        image: story.authorImage || '',
         score: 0,
-        stories: 0
       };
-      current.score += Number(story.score || 0);
-      current.stories += 1;
-      if (!current.image && story.authorImage) current.image = story.authorImage;
       userStats.set(key, current);
     });
 
@@ -10300,7 +9633,6 @@ function showLiveNotification(message, type = 'info') {
             <img src="${author.image || 'https://via.placeholder.com/80'}" class="w-10 h-10 rounded-full object-cover" alt="${author.name}">
             <div class="min-w-0">
               <p class="text-sm font-semibold text-uber-black truncate">${author.name}</p>
-              <p class="text-xs text-uber-muted">${author.stories} historias</p>
             </div>
           </div>
           <span class="text-xs font-semibold text-uber-black">${author.score} pts</span>
@@ -10310,7 +9642,6 @@ function showLiveNotification(message, type = 'info') {
     }
   } catch (error) {
     console.error('Error loading explore trends:', error);
-    storiesContainer.innerHTML = '<div class="col-span-2 text-center py-8 text-red-500">No se pudieron cargar tendencias.</div>';
     authorsContainer.innerHTML = '<div class="text-center py-6 text-red-500">Error al cargar autores populares.</div>';
   }
 }
@@ -10625,8 +9956,6 @@ async function loadPhotos() {
     background-color: #e02849 !important;
   }
 
-  /* Forzar color de texto negro en capítulos */
-  #detail-chapters li span {
     color: #000 !important;
     font-weight: 500 !important;
   }
@@ -10813,7 +10142,6 @@ async function loadPhotos() {
     applyFrame(frameType, 0);
   }
 
-  function showFrameHistory() {
     const user = firebase.auth().currentUser;
     if (!user) return;
 
@@ -10895,27 +10223,14 @@ async function loadPhotos() {
 
       const stats = result.stats;
 
-      // Actualizar contador de historias en móvil
-      const profileStoriesTitle = document.getElementById('profile-stories-title');
-      if (profileStoriesTitle) {
-        profileStoriesTitle.textContent = `${stats.storiesCount} Historias`;
       }
 
       // Actualizar en desktop
-      const profileStoriesHeader = document.getElementById('profile-stories-header');
-      const sidebarStoriesCount = document.getElementById('sidebar-stories-count');
-      const profileStoriesCountDesktop = document.getElementById('profile-stories-count-desktop');
       const sidebarTotalViews = document.getElementById('sidebar-total-views');
       const sidebarFollowersCount = document.getElementById('sidebar-followers-count');
 
-      if (profileStoriesHeader) {
-        profileStoriesHeader.textContent = `${stats.storiesCount} Historias`;
       }
-      if (sidebarStoriesCount) {
-        sidebarStoriesCount.textContent = stats.storiesCount;
       }
-      if (profileStoriesCountDesktop) {
-        profileStoriesCountDesktop.textContent = stats.storiesCount;
       }
       if (sidebarTotalViews) {
         sidebarTotalViews.textContent = stats.totalViews;
@@ -10947,81 +10262,45 @@ async function loadPhotos() {
         if (notesCountEl) notesCountEl.textContent = formatNumber(ids.size);
       });
 
-      // Cargar las historias del usuario
-      loadUserStoriesFromFirebase(userId);
     } catch (error) {
       console.error('Error al cargar estadísticas:', error);
     }
   }
 
-  // Nueva función para cargar historias desde Firebase
-  async function loadUserStoriesFromFirebase(userId) {
     const pausedMessage = `
       <div class="col-span-full text-center py-12">
-        <h3 class="text-lg font-medium text-gray-600 mb-2">Creación de historias pausada</h3>
         <p class="text-gray-500 mb-4">Pronto anunciaremos la nueva etapa de esta función.</p>
       </div>
     `;
 
-    const userStoriesDesktop = document.getElementById('user-stories-desktop');
-    const userStoriesMobile = document.getElementById('user-stories');
-    if (userStoriesDesktop) userStoriesDesktop.innerHTML = pausedMessage;
-    if (userStoriesMobile) userStoriesMobile.innerHTML = pausedMessage;
   }
 
-  // Función para cargar las historias del usuario en el grid
-  function loadUserStoriesGrid(userId, storiesSnapshot) {
-    const userStoriesDesktop = document.getElementById('user-stories-desktop');
-    const userStoriesMobile = document.getElementById('user-stories');
 
-    if (userStoriesDesktop) {
-      userStoriesDesktop.innerHTML = '';
     }
-    if (userStoriesMobile) {
-      userStoriesMobile.innerHTML = '';
     }
 
-    if (!storiesSnapshot.exists()) {
-      // Mostrar mensaje cuando no hay historias
-      const noStoriesMessage = `
         <div class="col-span-full text-center py-12">
           <div class="text-gray-400 mb-4">
             <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
           </div>
-          <h3 class="text-lg font-medium text-gray-600 mb-2">Creación de historias pausada</h3>
           <p class="text-gray-500 mb-4">Pronto anunciaremos la nueva etapa de esta función.</p>
         </div>
       `;
 
-      if (userStoriesDesktop) {
-        userStoriesDesktop.innerHTML = noStoriesMessage;
       }
-      if (userStoriesMobile) {
-        userStoriesMobile.innerHTML = noStoriesMessage;
       }
       return;
     }
 
-    // Cargar historias existentes
-    storiesSnapshot.forEach(child => {
-      const story = child.val();
-      story.id = child.key;
 
-      const storyCard = createStoryCard(story, userId);
 
-      if (userStoriesDesktop) {
-        userStoriesDesktop.appendChild(storyCard.cloneNode(true));
       }
-      if (userStoriesMobile) {
-        userStoriesMobile.appendChild(storyCard);
       }
     });
   }
 
-  // Función para crear una tarjeta de historia
-  function createStoryCard(story, userId) {
     const card = document.createElement('div');
     card.className = 'bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow cursor-pointer';
 
@@ -11030,17 +10309,12 @@ async function loadPhotos() {
 
     card.innerHTML = `
       <div class="aspect-[3/4] relative">
-        <img src="${story.coverImage || '/api/placeholder/300/400'}"
-             alt="${story.title}"
              class="w-full h-full object-cover rounded-t-xl">
         <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-xs">
-          ${story.views || 0} vistas
         </div>
         ${isOwner ? `
           <div class="absolute top-2 left-2 flex space-x-1">
-            <button onclick="openStoryEdit(${JSON.stringify(story).replace(/"/g, '&quot;')})"
                     class="bg-blue-500 text-white p-1 rounded-full hover:bg-blue-600 transition-colors"
-                    title="Editar historia">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
               </svg>
@@ -11049,13 +10323,9 @@ async function loadPhotos() {
         ` : ''}
       </div>
       <div class="p-4">
-        <h3 class="font-semibold text-gray-900 mb-1 line-clamp-1">${story.title}</h3>
-        <p class="text-sm text-gray-600 mb-2 line-clamp-2">${story.synopsis || 'Sin descripción'}</p>
         <div class="flex items-center justify-between">
           <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-            ${story.category || 'Sin categoría'}
           </span>
-          <button onclick="openStoryDetail(${JSON.stringify(story).replace(/"/g, '&quot;')})"
                   class="text-[#00A2FF] text-sm font-medium hover:text-red-600 transition-colors">
             Leer →
           </button>
@@ -11091,7 +10361,6 @@ async function loadPhotos() {
               </svg>
             </div>
             <div>
-              <div class="font-semibold text-gray-900">Historias publicadas</div>
               <div class="text-sm text-gray-500">Total de contenido</div>
             </div>
           </div>
@@ -11132,7 +10401,6 @@ async function loadPhotos() {
 
       <div class="mt-6 p-4 bg-gray-50 rounded-xl">
         <div class="text-center">
-          <div class="text-sm text-gray-600 mb-2">Próximamente</div>
           <div class="text-xs text-gray-500">Análisis detallados y métricas avanzadas</div>
         </div>
       </div>
@@ -11148,7 +10416,7 @@ function openCreatorHub() {
     if (mainApp) mainApp.classList.add('hidden');
     document.getElementById('search-view').classList.add('hidden');
     document.getElementById('profile-view').classList.add('hidden');
-    document.getElementById('community-view').classList.add('hidden');
+    const communityView = document.getElementById('community-view'); if (communityView) communityView.classList.add('hidden');
     document.getElementById('zenvio-chat-view').classList.add('hidden');
 
     // Mostrar creator hub
@@ -11202,28 +10470,13 @@ function openCreatorHub() {
     if (!user) return;
 
     // Mostrar indicadores de carga
-    const storiesCountEl = document.getElementById('creator-stories-count');
     const notesCountEl = document.getElementById('creator-notes-count');
 
-    if (storiesCountEl) storiesCountEl.innerHTML = '<span class="inline-flex justify-center"><span class="epic-loader" style="width:20px;height:20px;border-radius:6px;"></span></span>';
     if (notesCountEl) notesCountEl.innerHTML = '<span class="inline-flex justify-center"><span class="epic-loader" style="width:20px;height:20px;border-radius:6px;"></span></span>';
 
     try {
-      // Cargar estadísticas de historias desde Firebase
-      const storiesResponse = await fetch(`/api/user-stats?userId=${user.uid}&type=stories`);
-      if (storiesResponse.ok) {
-        const storiesData = await storiesResponse.json();
-        const storiesCount = storiesData.count || 0;
-        if (storiesCountEl) storiesCountEl.textContent = storiesCount;
       } else {
-        // Fallback: contar historias manualmente
-        const allStoriesResponse = await fetch('/api/get-stories');
-        if (allStoriesResponse.ok) {
-          const allStoriesData = await allStoriesResponse.json();
-          const userStories = allStoriesData.stories ? allStoriesData.stories.filter(story => story.userId === user.uid) : [];
-          if (storiesCountEl) storiesCountEl.textContent = userStories.length;
         } else {
-          if (storiesCountEl) storiesCountEl.textContent = '0';
         }
       }
 
@@ -11239,296 +10492,9 @@ function openCreatorHub() {
     } catch (error) {
       console.error('Error loading creator stats:', error);
       // Mostrar 0 en caso de error
-      if (storiesCountEl) storiesCountEl.textContent = '0';
       if (notesCountEl) notesCountEl.textContent = '0';
     }
   }
-
-  let currentCommunityTab = 'feed';
-
-  function updateCommunityComposerState() {
-    const composeBtn = document.getElementById('community-compose-btn');
-    if (!composeBtn) return;
-
-    const isExplore = currentCommunityTab === 'explore';
-    composeBtn.disabled = isExplore;
-    composeBtn.classList.toggle('hidden', isExplore);
-    composeBtn.classList.toggle('opacity-40', isExplore);
-    composeBtn.classList.toggle('cursor-not-allowed', isExplore);
-    composeBtn.title = isExplore ? 'Publicar solo disponible en Para ti' : 'Crear post';
-  }
-
-  function openCommunity() {
-    // Ocultar TODAS las vistas
-    const mainApp = document.getElementById('main-app');
-    if (mainApp) mainApp.classList.add('hidden');
-    document.getElementById('search-view').classList.add('hidden');
-    document.getElementById('profile-view').classList.add('hidden');
-    document.getElementById('creator-hub-view').classList.add('hidden');
-    document.getElementById('zenvio-chat-view').classList.add('hidden');
-
-    // Mostrar community
-    document.getElementById('community-view').classList.remove('hidden');
-
-    // Ocultar top navbar
-    const topNav = document.getElementById('top-navbar');
-    if (topNav) topNav.style.display = 'none';
-
-    currentCommunityTab = 'feed';
-    updateCommunityComposerState();
-    loadNotes();
-  }
-
-  function closeCommunity() {
-    document.getElementById('community-view').classList.add('hidden');
-    mainApp.classList.remove('hidden');
-  }
-
-  function switchCommunityTab(tab) {
-    currentCommunityTab = tab;
-    const feedTab = document.getElementById('feed-tab');
-    const exploreTab = document.getElementById('explore-tab');
-    const notesFeed = document.getElementById('notes-feed');
-    const exploreFeed = document.getElementById('explore-feed');
-    const addNoteForm = document.getElementById('add-note-form');
-
-    if (tab === 'feed') {
-      feedTab?.classList.add('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      exploreTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      notesFeed?.classList.remove('hidden');
-      exploreFeed?.classList.add('hidden');
-      if (addNoteForm) addNoteForm.classList.add('hidden');
-      loadNotes();
-      updateCommunityComposerState();
-    } else if (tab === 'explore') {
-      exploreTab?.classList.add('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      feedTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      exploreFeed?.classList.remove('hidden');
-      notesFeed?.classList.add('hidden');
-      if (addNoteForm) addNoteForm.classList.add('hidden');
-      updateCommunityComposerState();
-      loadExploreTrends();
-    } else if (tab === 'add') {
-      feedTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      exploreTab?.classList.remove('text-[#00A2FF]', 'border-b-2', 'border-[#00A2FF]');
-      notesFeed?.classList.add('hidden');
-      exploreFeed?.classList.add('hidden');
-      if (addNoteForm) addNoteForm.classList.remove('hidden');
-      updateCommunityComposerState();
-    }
-  }
-
-  function handleNoteImagePreview(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      document.getElementById('preview-img').src = e.target.result;
-      document.getElementById('image-preview').classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function removeImage() {
-    document.getElementById('note-image').value = '';
-    document.getElementById('image-preview').classList.add('hidden');
-    document.getElementById('preview-img').src = '';
-  }
-
-  // Actualizar contador de caracteres en tiempo real
-  document.addEventListener('DOMContentLoaded', function() {
-    const noteContent = document.getElementById('note-content');
-    if (noteContent) {
-      noteContent.addEventListener('input', updateNoteCharCounter);
-    }
-    updateNoteCharCounter();
-    updateCommunityComposerState();
-  });
-
-  async function publishNote() {
-    const content = document.getElementById('note-content').value.trim();
-    const imageInput = document.getElementById('note-image');
-
-    if (!content && !imageInput.files.length) {
-      alert('Por favor escribe algo o agrega una imagen');
-      return;
-    }
-
-    const user = firebase.auth().currentUser;
-    if (!user) {
-      alert('Debes iniciar sesión para publicar una nota');
-      return;
-    }
-
-    const publishButton = document.getElementById('publish-note-btn');
-    publishButton.disabled = true;
-    publishButton.innerHTML = '<span class="epic-loader" style="width:20px;height:20px;border-radius:7px;"></span>';
-
-    try {
-      // Verificar límites sin bloquear si el endpoint no está disponible
-      try {
-        const limitsCheck = await fetch('/api/check-user-limits', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.uid, action: 'note' })
-        });
-        if (limitsCheck.ok) {
-          const limitsResult = await limitsCheck.json();
-          if (limitsResult && limitsResult.canPerformAction === false) {
-            publishButton.disabled = false;
-            publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
-            alert(limitsResult.message || 'Has alcanzado el límite de publicaciones');
-            return;
-          }
-        }
-      } catch (limitError) {
-        console.warn('No se pudo verificar límites, se continúa con Firebase:', limitError);
-      }
-
-      const snapshot = await firebase.database().ref('users/' + user.uid).once('value');
-      const userData = snapshot.val() || {};
-
-      let imageUrl = '';
-      if (imageInput.files.length > 0) {
-        const file = imageInput.files[0];
-        const base64String = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (e) => resolve(e.target.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-
-        // Intentar subir por API; fallback a base64 si falla
-        try {
-          const uploadResponse = await fetch('/api/upload-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              imageData: base64String,
-              fileName: file.name,
-              userId: user.uid,
-              timestamp: Date.now(),
-              contentType: file.type,
-              imageType: 'community-note'
-            })
-          });
-          const uploadResult = await uploadResponse.json();
-          if (uploadResponse.ok && uploadResult.imageUrl) {
-            imageUrl = uploadResult.imageUrl;
-          } else {
-            imageUrl = base64String;
-          }
-        } catch (uploadError) {
-          console.warn('Falló subida de imagen por API, usando base64 en Firebase:', uploadError);
-          imageUrl = base64String;
-        }
-      }
-
-      const newNote = {
-        content,
-        authorId: user.uid,
-        authorName: userData.username || userData.name || 'Usuario',
-        authorImage: userData.profileImage || 'https://via.placeholder.com/150',
-        timestamp: Date.now(),
-        likes: 0,
-        likedBy: {},
-        imageUrl: imageUrl || ''
-      };
-
-      const newNoteRef = await firebase.database().ref('communityNotes').push(newNote);
-      moderarContenidoAutomaticamente(newNoteRef.key, content);
-
-      document.getElementById('note-content').value = '';
-      imageInput.value = '';
-      document.getElementById('image-preview').classList.add('hidden');
-      document.getElementById('preview-img').src = '';
-      updateNoteCharCounter();
-      switchCommunityTab('feed');
-
-      publishButton.disabled = false;
-      publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
-      alert('¡Nota publicada exitosamente!');
-
-      loadNotes();
-    } catch (error) {
-      console.error('Error al publicar con Firebase:', error);
-      alert('Error al publicar la nota. Por favor intenta de nuevo.');
-      publishButton.disabled = false;
-      publishButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
-    }
-  }
-
-  function publishNoteToDatabase(note) {
-    // Verifica el contenido de la nota específicamente
-    if (moderarContenidoNota(note.content)) {
-      alert('Tu nota no puede ser publicada porque contiene contenido inapropiado.');
-      return;
-    }
-
-    firebase.database().ref('communityNotes').push(note).then((ref) => {
-      // Verifica una vez más después de publicar (por si acaso)
-      moderarContenidoAutomaticamente(ref.key, note.content);
-
-      document.getElementById('note-content').value = '';
-      document.getElementById('note-image').value = '';
-      document.getElementById('image-preview').classList.add('hidden');
-      switchCommunityTab('feed');
-    });
-  }
-
-  async function loadNotes() {
-    const feedContainer = document.getElementById('notes-feed');
-    feedContainer.innerHTML = '<div class="text-center py-8 flex justify-center"><div class="epic-loader" aria-label="Cargando"></div></div>';
-
-    try {
-      const snap = await firebase.database().ref('communityNotes').orderByChild('timestamp').limitToLast(50).once('value');
-      const notes = [];
-      snap.forEach(child => notes.push({ noteId: child.key, ...child.val() }));
-      notes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-      feedContainer.innerHTML = '';
-
-      if (notes.length === 0) {
-        feedContainer.innerHTML = '<div class="text-center py-8 text-gray-500">No hay notas aún. ¡Sé el primero en publicar!</div>';
-        return;
-      }
-
-      notes.forEach(note => {
-        const noteElement = document.createElement('div');
-        noteElement.className = 'bg-white p-4 rounded-xl shadow';
-        noteElement.innerHTML = `
-          <div class="flex items-center mb-3">
-            <img src="${note.authorImage || 'https://via.placeholder.com/150'}" alt="${note.authorName || 'Usuario'}" class="w-10 h-10 rounded-full mr-3">
-            <div>
-              <h3 class="font-bold">${note.authorName || 'Usuario'}</h3>
-              <p class="text-sm text-gray-500">${note.timestamp ? new Date(note.timestamp).toLocaleString() : 'Ahora'}</p>
-            </div>
-          </div>
-          <p class="mb-3">${note.content || ''}</p>
-          ${note.imageUrl ? `<img src="${note.imageUrl}" alt="Imagen de nota" class="w-full rounded-lg mb-3 max-h-96 object-cover">` : ''}
-          <div class="flex items-center space-x-4">
-            <button id="like-btn-${note.noteId}" onclick="likeNote('${note.noteId}')" class="flex items-center text-[#00A2FF] hover:text-red-600 transition-colors">
-              <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-              <span id="like-count-${note.noteId}">${note.likes || 0}</span>
-            </button>
-            ${note.authorId === firebase.auth().currentUser?.uid ?
-              `<button onclick="deleteNote('${note.noteId}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i> Eliminar</button>` :
-              `<button onclick="reportNote('${note.noteId}')" class="text-gray-500 hover:text-gray-700 flex items-center"><i class="fas fa-flag mr-1"></i> Reportar</button>`
-            }
-          </div>
-        `;
-
-        feedContainer.appendChild(noteElement);
-      });
-    } catch (error) {
-      console.error('Error al cargar notas (Firebase):', error);
-      feedContainer.innerHTML = '<div class="text-center py-8 text-red-500">Error al cargar notas. Por favor recarga la página.</div>';
-    }
-  }
-
   function moderarContenidoNota(texto) {
   const palabrasProhibidasNotas = [
     // Insultos y lenguaje ofensivo
@@ -11906,7 +10872,7 @@ async function likeNote(noteId) {
   /*********************** FUNCIONES DE NAVEGACIÓN **************************/
   function openHome() {
     // Ocultar TODAS las vistas
-    document.getElementById('community-view').classList.add('hidden');
+    const communityView = document.getElementById('community-view'); if (communityView) communityView.classList.add('hidden');
     document.getElementById('search-view').classList.add('hidden');
     document.getElementById('profile-view').classList.add('hidden');
     document.getElementById('creator-hub-view').classList.add('hidden');
@@ -11929,7 +10895,7 @@ async function likeNote(noteId) {
     // Ocultar TODAS las vistas
     const mainApp = document.getElementById('main-app');
     if (mainApp) mainApp.classList.add('hidden');
-    document.getElementById('community-view').classList.add('hidden');
+    const communityView = document.getElementById('community-view'); if (communityView) communityView.classList.add('hidden');
     document.getElementById('profile-view').classList.add('hidden');
     document.getElementById('creator-hub-view').classList.add('hidden');
     document.getElementById('zenvio-chat-view').classList.add('hidden');
@@ -11951,7 +10917,7 @@ async function likeNote(noteId) {
     const mainApp = document.getElementById('main-app');
     if (mainApp) mainApp.classList.add('hidden');
     document.getElementById('search-view').classList.add('hidden');
-    document.getElementById('community-view').classList.add('hidden');
+    const communityView = document.getElementById('community-view'); if (communityView) communityView.classList.add('hidden');
     document.getElementById('creator-hub-view').classList.add('hidden');
     document.getElementById('zenvio-chat-view').classList.add('hidden');
 
@@ -12016,12 +10982,8 @@ async function likeNote(noteId) {
   const authFormContainer = document.getElementById('auth-form');
   const mainApp = document.getElementById('main-app');
   let isLogin = true;
-  let storyTypeSelected = "";
-  let currentEditingStory = null;
-  let currentChapters = [];
   let currentViewedAuthorId = null;
   let liveBroadcasterId = null;
-  let currentChapterEditId = null;
   let currentLanguage = 'es';
 
   function closeSearchLegacy() {
@@ -12046,40 +11008,22 @@ async function likeNote(noteId) {
   const translations = {
     es: {
       appName: "Zenvio",
-      tagline: "Tu portal de historias inolvidables",
       authTitle: "Zenvio",
       emailPlaceholder: "Correo electrónico",
       passwordPlaceholder: "Contraseña",
       btnIniciarSesion: "Iniciar Sesión",
       btnToggleAuth: "¿No tienes cuenta? Regístrate",
       btnVolver: "Volver",
-      topStories: "Mejores Historias",
       newReleases: "Nuevos Lanzamientos",
       top10: "Top 10",
       popular: "Más Populares",
-      terror: "Historias de Terror Destacadas",
-      searchPlaceholder: "Buscar historias o autores",
       searchResults: "Resultados de búsqueda",
       searchBooks: "Libros",
       searchAuthors: "Autores",
-      profileStories: "Mis Historias",
       editProfile: "Editar nombre",
       saveBio: "Guardar biografía",
-      createStory: "Crear Historia",
-      storyTitlePlaceholder: "Título de la historia",
       selectCategory: "Selecciona una categoría",
-      btnCreateStory: "Crear Historia",
-      editStory: "Editar Historia",
-      addChapter: "Agregar Capítulo",
-      deleteStory: "Eliminar Historia",
       makePrivate: "Hacer privada",
-      chapterCreationTitle: "Agregar Nuevo Capítulo",
-      chapterPlaceholder: "Escribe el contenido del capítulo aquí...",
-      btnSaveChapter: "Guardar Capítulo",
-      readChapter: "Capítulo",
-      btnPrevChapter: "Anterior",
-      btnNextChapter: "Siguiente",
-      rateChapter: "Califica:",
       authorProfile: "Por",
       reportProfile: "Reportar Perfil",
       reportInstructions: "Selecciona un motivo o describe el problema:",
@@ -12088,30 +11032,19 @@ async function likeNote(noteId) {
       noInfraccion: "No se detectaron infracciones en este perfil.",
       followers: "Seguidores",
       following: "Siguiendo",
-      ratings: "Calificaciones",
       languageModalTitle: "Selecciona tu idioma",
       editUsernamePrompt: "Introduce tu nuevo nombre de usuario:",
       usernameUpdated: "Nombre de usuario actualizado.",
       bioUpdated: "Biografía actualizada.",
-      chapterAdded: "Capítulo agregado.",
-      noEditingStory: "No hay historia en edición.",
       userNotAuthenticated: "Usuario no autenticado.",
-      chapterNotFound: "Capítulo no encontrado.",
-      firstChapter: "Este es el primer capítulo.",
-      lastChapter: "Este es el último capítulo.",
-      chapterRated: "Capítulo calificado con {value} estrella(s).",
       followSelfError: "No puedes seguirte a ti mismo.",
       nowFollowing: "Ahora sigues a este autor.",
       stoppedFollowing: "Has dejado de seguir a este autor.",
       alreadyFollowing: "Ya sigues a este usuario.",
-      storyDeleted: "Historia eliminada.",
-      editLater: "Puedes editar tu historia más tarde desde tu perfil."
     },
     en: {
-      topStories: "Top Stories",
       /* Traducciones en inglés */ },
     pt: {
-      topStories: "Melhores Histórias",
       /* Traducciones en portugués */ }
   };
 
@@ -13248,11 +12181,7 @@ async function likeNote(noteId) {
       // CARGAR ESTADÍSTICAS EN TIEMPO REAL
       loadUserStats(user.uid);
 
-      // Cargar historias de otros usuarios inmediatamente
       setTimeout(() => {
-        const storiesScript = document.querySelector('script[src="stories.js"]');
-        if (storiesScript && window.loadStories) {
-          window.loadStories();
         }
       }, 1000);
 
@@ -13268,8 +12197,6 @@ async function likeNote(noteId) {
         }
 
         syncUserProfileToFirebase(user, data || {});
-        loadStories();
-        loadUserStories(user.uid);
         initializeFeedSections();
 
         if (data) {
@@ -13280,8 +12207,6 @@ async function likeNote(noteId) {
       } catch (error) {
         console.error('Error cargando datos iniciales del usuario:', error);
         // Fallback: mantener app utilizable aunque falle la lectura de perfil
-        loadStories();
-        loadUserStories(user.uid);
         initializeFeedSections();
       }
     } else {
@@ -13359,15 +12284,8 @@ async function likeNote(noteId) {
       ]
     },
     {
-      id: 'publish-story',
-      topic: 'Historias',
-      title: 'Cómo publicar una historia',
-      summary: 'Guía rápida para crear y publicar una historia en la plataforma.',
       steps: [
-        'Pulsa el botón de crear historia desde la pantalla principal.',
-        'Completa título, categoría, idioma y sinopsis.',
         'Sube una portada y revisa que se vea correctamente.',
-        'Presiona Publicar y valida que aparezca en tu perfil.'
       ]
     },
     {
@@ -13493,86 +12411,43 @@ async function likeNote(noteId) {
   }
 
 /*********************** NAVEGACIÓN Y MODALES **************************/
-  function openStoryDetail(story) {
     const user = firebase.auth().currentUser;
     if (!user) return;
 
-    console.log('Abriendo historia:', story); // Debug
 
-    window.currentStoryId = story.id;
-    listenForStoryBlock(story.id);
 
     if (user) {
-      const nextViews = (story.views || 0) + 1;
-      story.views = nextViews;
-      fetch('/api/update-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storyId: story.id, userId: user.uid, updates: { views: nextViews } })
       }).catch(error => console.warn('No se pudo actualizar vistas:', error));
     }
 
     // Actualizar contenido del modal
-    document.getElementById('detail-cover').src = story.coverImage || '/api/placeholder/800/400';
-    document.getElementById('detail-title').textContent = story.title;
-    let authorDisplay = (story.username || "Autor Desconocido") + getVerificationIcon(story.email || "");
     document.getElementById('detail-author').innerHTML = "Por " + authorDisplay;
-    document.getElementById('detail-author').dataset.userid = story.userId;
-    document.getElementById('detail-author').onclick = () => openAuthorProfile(story.userId);
-    document.getElementById('detail-synopsis').textContent = story.synopsis || "Sinopsis no disponible.";
 
-    // Cargar capítulos (Firebase)
-    fetch(`/api/get-chapters?storyId=${story.id}`)
       .then(response => response.json())
       .then(data => {
-        const chaptersList = document.getElementById('detail-chapters');
-        chaptersList.innerHTML = "";
-        currentChapters = [];
-        const chapters = data.chapters || [];
-        let chapterCount = chapters.length;
-        let totalRating = 0, ratingCount = 0;
 
-        chapters.forEach(chapter => {
-          currentChapters.push(chapter);
           const li = document.createElement('li');
           li.className = "p-4 border border-gray-200 rounded-xl hover:bg-gray-50 flex justify-between items-center";
-          li.innerHTML = `<span class="text-black font-medium">Capítulo ${chapter.chapterNumber}</span>
-                            <button class="bg-[#00A2FF] text-white px-3 py-2 rounded-lg hover:bg-[#0066CC] transition-colors font-medium" onclick='openChapterReadModal("${story.id}", "${chapter.id}")'>Leer</button>`;
-          chaptersList.appendChild(li);
 
-          if (chapter.ratings) {
-            Object.values(chapter.ratings).forEach(r => {
-              totalRating += r;
-              ratingCount++;
             });
           }
         });
 
-        currentChapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
-        currentEditingStory = {
-          id: story.id,
-          currentChapterId: currentChapters.length ? currentChapters[0].id : null
         };
 
-        let overallRating = ratingCount ? (totalRating / ratingCount).toFixed(1) : 0;
         document.getElementById('detail-metrics').innerHTML =
           `<div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
-            <span class="text-lg font-bold text-black">${story.views || 0}</span>
             <p class="text-xs text-[#00A2FF] mt-1">Visitas</p>
           </div>
           <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
-            <span class="text-lg font-bold text-black">${overallRating}</span>
-            <p class="text-xs text-[#00A2FF] mt-1">Rating</p>
           </div>
           <div class="bg-white p-2 rounded-lg shadow-sm flex flex-col items-center w-20">
-            <span class="text-lg font-bold text-black">${chapterCount}</span>
-            <p class="text-xs text-[#00A2FF] mt-1">Capítulos</p>
           </div>`;
       })
-      .catch(error => console.error('Error cargando capítulos:', error));
 
     // Mostrar el modal
-    const modal = document.getElementById('story-detail-modal');
     const mainAppElement = document.getElementById('main-app');
 
     console.log('Modal element:', modal); // Debug
@@ -13587,8 +12462,6 @@ async function likeNote(noteId) {
     }
   }
 
-  function closeStoryDetail() {
-    const modal = document.getElementById('story-detail-modal');
     const mainAppElement = document.getElementById('main-app');
 
     if (modal) {
@@ -13599,100 +12472,52 @@ async function likeNote(noteId) {
     }
   }
 
-  let currentStoryChaptersListenerRef = null;
 
-  function renderStoryChaptersList(chapters = []) {
-    currentChapters = [];
-    const chapterListDiv = document.getElementById('chapter-list');
-    if (!chapterListDiv) return;
-    chapterListDiv.innerHTML = "";
 
-    chapters.forEach(chapter => currentChapters.push(chapter));
-    currentChapters.sort((a, b) => Number(a.chapterNumber || 0) - Number(b.chapterNumber || 0));
 
-    currentChapters.forEach(chapter => {
       const div = document.createElement('div');
       div.className = "flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border border-gray-200 rounded-xl mb-2";
-      const chapterInfo = document.createElement('div');
-      chapterInfo.innerHTML = `<span class="font-semibold">${translations[currentLanguage].readChapter} ${chapter.chapterNumber || '-'}</span>`;
       const btnContainer = document.createElement('div');
       btnContainer.className = "flex space-x-2 mt-2 sm:mt-0";
       const editButton = document.createElement('button');
       editButton.className = "bg-blue-500 text-white px-2 py-1 rounded";
       editButton.textContent = "Editar";
-      editButton.onclick = () => openChapterEditModal(chapter);
       const deleteButton = document.createElement('button');
       deleteButton.className = "bg-red-500 text-white px-2 py-1 rounded";
       deleteButton.textContent = "Eliminar";
-      deleteButton.onclick = () => deleteChapter(chapter.id);
       btnContainer.appendChild(editButton);
       btnContainer.appendChild(deleteButton);
-      div.appendChild(chapterInfo);
       div.appendChild(btnContainer);
-      chapterListDiv.appendChild(div);
     });
   }
 
-  function bindStoryChaptersRealtime(storyId) {
-    if (currentStoryChaptersListenerRef) {
-      currentStoryChaptersListenerRef.off();
-      currentStoryChaptersListenerRef = null;
     }
-    if (!storyId) return;
 
-    currentStoryChaptersListenerRef = firebase.database().ref('chapters/' + storyId);
-    currentStoryChaptersListenerRef.on('value', snapshot => {
       const map = snapshot.val() || {};
-      const chapters = Object.values(map).filter(Boolean);
-      renderStoryChaptersList(chapters);
     }, error => {
-      console.error('Error en listener de capítulos:', error);
     });
   }
 
-  function openStoryEdit(story) {
-    const storyId = story?.id || story?.storyId;
-    if (!storyId) {
-      alert('No se encontró el ID de la historia.');
       return;
     }
 
-    currentEditingStory = { ...story, id: storyId };
-    document.getElementById('edit-story-title').value = story.title || '';
-    document.getElementById('edit-story-category').value = story.category || '';
-    document.getElementById('edit-story-language').value = story.language || '';
-    document.getElementById('edit-story-synopsis').value = story.synopsis || '';
-    bindStoryChaptersRealtime(storyId);
-    document.getElementById('story-edit-view').classList.remove('hidden');
   }
 
-  function closeStoryEdit() {
-    if (currentStoryChaptersListenerRef) {
-      currentStoryChaptersListenerRef.off();
-      currentStoryChaptersListenerRef = null;
     }
-    document.getElementById('story-edit-view').classList.add('hidden');
     alert(translations[currentLanguage].editLater);
   }
 
-  function toggleStoryPrivacy() {
-    if (!currentEditingStory || !currentEditingStory.id) {
       alert('Error: No se puede cambiar la privacidad');
       return;
     }
 
-    const isPrivate = currentEditingStory.isPrivate || false;
     const newPrivacy = !isPrivate;
 
-    fetch('/api/update-story', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ storyId: currentEditingStory.id, updates: { isPrivate: newPrivacy } })
     })
       .then(response => {
         if (!response.ok) throw new Error('No se pudo actualizar privacidad');
-        currentEditingStory.isPrivate = newPrivacy;
-        alert(newPrivacy ? 'Historia marcada como privada' : 'Historia marcada como pública');
       })
       .catch(error => {
         console.error('Error al cambiar privacidad:', error);
@@ -13700,46 +12525,27 @@ async function likeNote(noteId) {
       });
   }
 
-  function confirmDeleteStory() {
-    if (!currentEditingStory || !currentEditingStory.id) {
-      alert('Error: No se puede eliminar la historia');
       return;
     }
 
-    if (confirm('¿Estás seguro de que quieres eliminar esta historia? Esta acción no se puede deshacer.')) {
-      fetch('/api/delete-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storyId: currentEditingStory.id })
       })
         .then(response => {
-          if (!response.ok) throw new Error('No se pudo eliminar la historia');
-          alert('Historia eliminada correctamente');
-          closeStoryEdit();
           openProfile();
         })
         .catch(error => {
-          console.error('Error al eliminar historia:', error);
-          alert('Error al eliminar la historia');
         });
     }
   }
 
-  function saveStoryEdits() {
-    if (!currentEditingStory || !currentEditingStory.id) {
-      alert(translations[currentLanguage].noEditingStory);
       return;
     }
 
     const updates = {
-      title: document.getElementById('edit-story-title').value,
-      category: document.getElementById('edit-story-category').value,
-      language: document.getElementById('edit-story-language').value,
-      synopsis: document.getElementById('edit-story-synopsis').value
     };
 
     // Si hay nueva portada, subirla
-    const coverInput = document.getElementById('edit-story-cover');
     if (coverInput.files && coverInput.files[0]) {
       const file = coverInput.files[0];
       const reader = new FileReader();
@@ -13754,7 +12560,6 @@ async function likeNote(noteId) {
               userId: firebase.auth().currentUser.uid,
               timestamp: Date.now(),
               contentType: file.type,
-              imageType: 'story-cover'
             })
           });
           const result = await response.json();
@@ -13766,14 +12571,10 @@ async function likeNote(noteId) {
         }
 
         // Guardar todos los cambios
-        fetch('/api/update-story', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ storyId: currentEditingStory.id, updates })
         })
           .then(response => {
-            if (!response.ok) throw new Error('No se pudo actualizar historia');
-            Object.assign(currentEditingStory, updates);
             alert('Cambios guardados correctamente');
           })
           .catch(error => {
@@ -13784,14 +12585,10 @@ async function likeNote(noteId) {
       reader.readAsDataURL(file);
     } else {
       // Guardar sin cambiar portada
-      fetch('/api/update-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storyId: currentEditingStory.id, updates })
       })
         .then(response => {
-          if (!response.ok) throw new Error('No se pudo actualizar historia');
-          Object.assign(currentEditingStory, updates);
           alert('Cambios guardados correctamente');
         })
         .catch(error => {
@@ -13917,28 +12714,15 @@ async function likeNote(noteId) {
     const recentRangeMs = 7 * 24 * 60 * 60 * 1000;
     const recentThreshold = Date.now() - recentRangeMs;
 
-    loadStoriesFromFirebase()
-      .then((stories) => {
         const books = [];
-        stories.forEach((story) => {
-          const storyTimestamp = getStoryTimestamp(story);
-          const isRecent = storyTimestamp >= recentThreshold;
-          const storyTitle = normalizeSearchQuery(story.title || '');
-          const storyAuthor = normalizeSearchQuery(story.username || story.authorName || story.author || '');
-          const storySynopsis = normalizeSearchQuery(story.synopsis || '');
-          const matchesQuery = !query || storyTitle.includes(query) || storyAuthor.includes(query) || storySynopsis.includes(query);
           const matchesCategory = !category
             || (category === 'recent' && isRecent)
-            || (category === 'system' && (story.category === 'sistema' || story.category === 'system' || story.type === 'sistema' || story.type === 'system'))
-            || story.category === category;
 
           if (matchesQuery && matchesCategory) {
-            books.push(story);
           }
         });
         renderBooksCarousel(books);
       })
-      .catch((error) => console.error('Error buscando historias:', error));
 
     if (query) {
       fetch(`/api/users?q=${encodeURIComponent(query)}&limit=100`)
@@ -13974,10 +12758,7 @@ async function likeNote(noteId) {
   }
   renderActiveSearchFilters();
   async function performSearch(query) {
-    const stories = await loadStoriesFromFirebase();
     let books = [];
-    stories.forEach(story => {
-      if (story.title && story.title.toLowerCase().includes(query)) books.push(story);
     });
     renderBooksCarousel(books);
     const normalizedQuery = normalizeSearchQuery(query);
@@ -13999,7 +12780,6 @@ async function likeNote(noteId) {
     carousel.innerHTML = '';
 
     if (!books || books.length === 0) {
-      carousel.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">No se encontraron historias</div>';
       return;
     }
 
@@ -14012,7 +12792,6 @@ async function likeNote(noteId) {
           </div>
           <p class="mt-2 text-sm font-semibold">${book.title}</p>
         `;
-      card.addEventListener('click', () => openStoryDetail(book));
       carousel.appendChild(card);
     });
   }
@@ -14164,7 +12943,6 @@ async function likeNote(noteId) {
       const profileImageDesktop = document.getElementById('edit-profile-image-desktop');
       const followersDesktop = document.getElementById('edit-followers-desktop');
       const followingDesktop = document.getElementById('edit-following-desktop');
-      const storiesDesktop = document.getElementById('edit-stories-count-desktop');
 
       if (usernameDesktop) usernameDesktop.value = data.username || "";
       if (emailDesktop) emailDesktop.value = user.email || "";
@@ -14186,8 +12964,6 @@ async function likeNote(noteId) {
       if (instagramDesktop) instagramDesktop.value = data.instagram || "";
       if (tiktokDesktop) tiktokDesktop.value = data.tiktokUsername || "";
 
-      firebase.database().ref('stories').orderByChild('userId').equalTo(user.uid).once('value').then(snapshot => {
-        if (storiesDesktop) storiesDesktop.textContent = snapshot.numChildren();
       });
 
       document.getElementById('profile-edit-modal').style.display = "block";
@@ -14462,7 +13238,6 @@ async function likeNote(noteId) {
   }
   /*********************** PERFIL DEL AUTOR **************************/
   function openAuthorProfile(authorId) {
-    document.getElementById('story-detail-modal').classList.add('hidden');
 
     // Check if current user is the profile owner
     const currentUser = firebase.auth().currentUser;
@@ -14607,7 +13382,6 @@ async function likeNote(noteId) {
     currentViewedAuthorId = authorId;
     document.getElementById('author-profile-modal').style.display = "block";
     updateFollowIcon();
-    loadAuthorStories(authorId);
     document.getElementById('author-profile-image').onclick = function() {
       firebase.database().ref(`liveStreams/${authorId}/isLive`).once('value').then(snapshot => {
         if (snapshot.exists() && snapshot.val()) {
@@ -14620,13 +13394,11 @@ async function likeNote(noteId) {
   function closeAuthorProfile() {
     document.getElementById('author-profile-modal').style.display = "none";
     if (document.getElementById('search-view').classList.contains('hidden')) {
-      document.getElementById('story-detail-modal').classList.remove('hidden');
     }
   }
 
   function closeBlockedErrorModal() {
     document.getElementById('blocked-error-modal').style.display = "none";
-    document.getElementById('story-detail-modal').classList.remove('hidden');
   }
   /*********************** FUNCIONES PARA SEGUIR **************************/
   function updateFollowIcon() {
@@ -14948,135 +13720,75 @@ async function likeNote(noteId) {
     openFollowingModal();
   }
 
-  function openMyStoriesModal() {
     const currentUser = firebase.auth().currentUser;
     if (!currentUser) {
       alert("Debes iniciar sesión.");
       return;
     }
 
-    document.getElementById('my-stories-modal').classList.remove('hidden');
     const bottomNav = document.getElementById('bottom-nav');
     if (bottomNav) bottomNav.style.display = 'none';
 
-    loadMyStoriesInModal(currentUser.uid);
   }
 
-  function closeMyStoriesModal() {
-    document.getElementById('my-stories-modal').classList.add('hidden');
     const bottomNav = document.getElementById('bottom-nav');
     if (bottomNav) bottomNav.style.display = 'block';
   }
 
-  function loadMyStoriesInModal(userId) {
-    const storiesList = document.getElementById('my-stories-list');
-    storiesList.innerHTML = '<div class="col-span-2 text-center py-8 text-gray-500">Cargando...</div>';
 
-    firebase.database().ref('stories').orderByChild('userId').equalTo(userId).once('value').then(snapshot => {
-      storiesList.innerHTML = '';
 
       if (!snapshot.exists()) {
-        storiesList.innerHTML = '<div class="col-span-2 text-center py-8 text-gray-500">No tienes historias aún</div>';
         return;
       }
 
       snapshot.forEach(childSnapshot => {
-        const story = childSnapshot.val();
-        const storyId = childSnapshot.key;
 
-        const storyCard = document.createElement('div');
-        storyCard.className = 'cursor-pointer';
-        storyCard.onclick = () => {
-          closeMyStoriesModal();
-          openStoryDetail({id: storyId, ...story});
         };
 
-        storyCard.innerHTML = `
           <div class="relative aspect-[3/4] rounded-lg overflow-hidden">
-            <img src="${story.coverImage || 'https://via.placeholder.com/300x400'}" class="w-full h-full object-cover" alt="${story.title}">
             <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-              <h3 class="text-white text-sm font-semibold line-clamp-2">${story.title}</h3>
             </div>
           </div>
         `;
 
-        storiesList.appendChild(storyCard);
       });
 
-      document.getElementById('profile-stories-count').textContent = snapshot.numChildren();
     });
   }
-  /*********************** CREACIÓN DE HISTORIAS **************************/
-function setStoryPublishingState(isPublishing, label = 'Publicar') {
-  const publishBtn = document.getElementById('story-publish-btn');
   if (!publishBtn) return;
   publishBtn.disabled = isPublishing;
   publishBtn.textContent = isPublishing ? 'Publicando...' : label;
 }
 
-  const storyForm = document.getElementById('story-form');
-  if (storyForm) storyForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    setStoryPublishingState(true);
-    document.getElementById('story-upload-spinner').style.display = "flex";
-    const title = (document.getElementById('story-title').value || '').trim();
-    const category = (document.getElementById('story-category').value || '').trim();
-    const synopsis = document.getElementById('story-synopsis').value || "";
-    const language = document.getElementById('story-language').value;
-    const rating = document.getElementById('story-rating').value;
-    const coverInput = document.getElementById('story-cover');
     const user = firebase.auth().currentUser;
     if (!user) {
       alert(translations[currentLanguage].userNotAuthenticated);
-      document.getElementById('story-upload-spinner').style.display = "none";
-      setStoryPublishingState(false);
       return;
     }
 
     if (!title || !category || !language) {
-      alert('Completa título, categoría e idioma para publicar.');
-      document.getElementById('story-upload-spinner').style.display = "none";
-      setStoryPublishingState(false);
       return;
     }
-    let newStory = {
       userId: user.uid,
       title,
       category,
       synopsis,
       language,
-      type: storyTypeSelected,
       coverImage: "",
       createdAt: Date.now(),
       timestamp: Date.now(),
       isPrivate: false,
       views: 0,
-      rating: rating,
       email: user.email
     };
-    if (storyTypeSelected === 'cuento') {
-      newStory.content = document.getElementById('cuento-content') ? document.getElementById('cuento-content').value : "";
     }
 
-    function saveStory(coverURL = "") {
-      newStory.coverImage = coverURL;
       firebase.database().ref('users/' + user.uid).once('value').then(snapshot => {
         const userData = snapshot.val();
-        newStory.username = userData && userData.username ? userData.username : "Autor Desconocido";
-        newStory.email = userData.email || user.email;
-        const storyRef = firebase.database().ref('stories').push();
-        newStory.id = storyRef.key;
-        storyRef.set(newStory)
           .then(() => {
-            document.getElementById('story-upload-spinner').style.display = "none";
-            setStoryPublishingState(false);
-            document.getElementById('story-details-view').classList.add('hidden');
-            openStoryEdit(newStory);
           })
           .catch(error => {
-            console.error("Error al guardar la historia:", error);
-            document.getElementById('story-upload-spinner').style.display = "none";
-            setStoryPublishingState(false);
           });
       });
     }
@@ -15087,33 +13799,23 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
           return convertFileToBase64(file);
         })
         .then((base64Image) => {
-          saveStory(base64Image);
         })
         .catch(errMsg => {
           alert(errMsg);
-          document.getElementById('story-upload-spinner').style.display = "none";
-          setStoryPublishingState(false);
         });
     } else {
-      saveStory();
     }
   });
 
-  function openStoryCreation() {
-    alert('La creación y publicación de historias está pausada temporalmente.');
+    return;
   }
 
-  function closeStoryCreation() {
-    document.getElementById('story-creation-view').classList.add('hidden');
 
     // Mostrar barra inferior
     const bottomNav = document.getElementById('bottom-nav');
     if (bottomNav) bottomNav.style.display = 'block';
   }
 
-  function backToStoryType() {
-    document.getElementById('story-details-view').classList.add('hidden');
-    document.getElementById('story-creation-view').classList.remove('hidden');
   }
 
   function validateCoverImage(file) {
@@ -15137,48 +13839,23 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
       img.src = url;
     });
   }
-  /*********************** CAPÍTULOS **************************/
-  function openChapterCreationModal() {
-    currentChapterEditId = null;
-    document.getElementById('chapter-form').reset();
     document.getElementById('word-count').innerText = "0 palabras";
     document.getElementById('letter-count').innerText = "0 letras";
     document.getElementById('font-size').value = 16;
     document.getElementById('font-size-value').innerText = "16px";
-    document.getElementById('chapter-content').style.fontSize = "16px";
-    document.getElementById('chapter-content').style.fontFamily = "Arial";
-    const saveBtn = document.getElementById('btn-save-chapter');
-    if (saveBtn) saveBtn.textContent = 'Publicar';
-    document.getElementById('chapter-creation-modal').style.display = "flex";
   }
 
-  function closeChapterCreationModal() {
-    document.getElementById('chapter-creation-modal').style.display = "none";
-    document.getElementById('chapter-form').reset();
     document.getElementById('word-count').innerText = "0 palabras";
     document.getElementById('letter-count').innerText = "0 letras";
     document.getElementById('font-size').value = 16;
     document.getElementById('font-size-value').innerText = "16px";
-    document.getElementById('chapter-content').style.fontSize = "16px";
-    document.getElementById('chapter-content').style.fontFamily = "Arial";
-    document.getElementById('chapter-schedule').value = "";
-    currentChapterEditId = null;
-    const saveBtn = document.getElementById('btn-save-chapter');
-    if (saveBtn) saveBtn.textContent = 'Publicar';
   }
-  const chapterForm = document.getElementById('chapter-form');
-  if (chapterForm) chapterForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    const content = (document.getElementById('chapter-content').value || '').trim();
-    const scheduledDate = document.getElementById('chapter-schedule').value;
 
     if (!content) {
-      alert('Escribe el contenido del capítulo antes de publicar.');
       return;
     }
 
-    if (!currentEditingStory) {
-      alert(translations[currentLanguage].noEditingStory);
       return;
     }
 
@@ -15188,103 +13865,55 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
       return;
     }
 
-    if (currentChapterEditId) {
-      fetch('/api/chapters', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          storyId: currentEditingStory.id,
-          chapterId: currentChapterEditId,
-          chapter: { content }
         })
       })
         .then(response => {
-          if (!response.ok) throw new Error('No se pudo actualizar capítulo');
-          closeChapterCreationModal();
-          alert("Capítulo actualizado correctamente.");
         })
         .catch(error => {
-          console.error("Error al actualizar capítulo:", error);
-          alert('Error al guardar los cambios del capítulo.');
         });
     } else {
-      const chapterNumber = currentChapters.length + 1;
-      const newChapter = {
-        chapterNumber,
         content,
         createdAt: Date.now(),
-        status: scheduledDate ? 'scheduled' : 'published'
       };
 
-      const chapterId = `chapter_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      newChapter.id = chapterId;
 
-      fetch('/api/chapters', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          storyId: currentEditingStory.id,
-          chapterId,
-          chapter: newChapter
         })
       })
         .then(response => {
-          if (!response.ok) throw new Error('No se pudo guardar capítulo');
-          if (scheduledDate) {
-            return saveScheduledChapter(chapterId, new Date(scheduledDate).getTime());
           }
         })
         .then(() => {
-          closeChapterCreationModal();
           alert(
-            scheduledDate
-              ? "Capítulo programado para publicación el " + new Date(scheduledDate).toLocaleDateString()
-              : translations[currentLanguage].chapterAdded
           );
         })
         .catch(error => {
-          console.error("Error al agregar capítulo:", error);
-          alert('Error al agregar capítulo. Intenta nuevamente.');
         });
     }
   });
 
-  function openChapterEditModal(chapter) {
-    currentChapterEditId = chapter.id;
-    document.getElementById('chapter-content').value = chapter.content;
-    const saveBtn = document.getElementById('btn-save-chapter');
     if (saveBtn) saveBtn.textContent = 'Guardar cambios';
-    document.getElementById('chapter-creation-modal').style.display = "flex";
   }
 
-  function deleteChapter(chapterId) {
-    if (confirm("¿Estás seguro de eliminar este capítulo?")) {
-      fetch('/api/chapters', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'delete',
-          storyId: currentEditingStory.id,
-          chapterId
         })
       })
         .then(response => {
-          if (!response.ok) throw new Error('No se pudo eliminar capítulo');
-          alert("Capítulo eliminado correctamente.");
         })
         .catch(error => {
-          console.error("Error al eliminar capítulo:", error);
         });
     }
   }
 
-  function openChapterReadModal(storyId, chapterId) {
-    console.log('Abriendo capítulo:', storyId, chapterId); // Debug
 
-    // Ocultar el modal de detalle de historia
-    const storyDetailModal = document.getElementById('story-detail-modal');
-    if (storyDetailModal && !storyDetailModal.classList.contains('hidden')) {
-      storyDetailModal.classList.add('hidden');
     }
 
     // Ocultar la app principal si está visible
@@ -15293,111 +13922,64 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
       mainApp.classList.add('hidden');
     }
 
-    fetch(`/api/chapters?storyId=${storyId}&chapterId=${chapterId}`)
       .then(response => response.json())
       .then(data => {
-      const chapter = data.chapter;
-      console.log('Datos del capítulo:', chapter); // Debug
 
-      if (chapter) {
-        document.getElementById('read-chapter-number').textContent = "Capítulo " + chapter.chapterNumber;
-        document.getElementById('read-chapter-text').innerHTML = chapter.content.replace(/\n/g, '<br>');
-        setupStarRating(storyId, chapterId);
 
-        if (!currentEditingStory) {
-          currentEditingStory = {
-            id: storyId,
-            currentChapterId: chapterId
           };
         } else {
-          currentEditingStory.currentChapterId = chapterId;
         }
 
         const user = firebase.auth().currentUser;
         if (user) {
-          fetch('/api/chapters', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               action: 'view',
-              storyId,
-              chapterId,
               userId: user.uid
             })
           }).catch(error => console.warn('No se pudo registrar vista:', error));
         }
 
         // Mostrar el modal de lectura
-        const chapterReadModal = document.getElementById('chapter-read-modal');
-        console.log('Modal de lectura:', chapterReadModal); // Debug
 
-        if (chapterReadModal) {
-          chapterReadModal.classList.remove('hidden');
           console.log('Modal mostrado correctamente'); // Debug
         } else {
           console.error('No se encontró el modal de lectura'); // Debug
-          alert('Error: No se pudo abrir el capítulo');
         }
       } else {
-        alert('Capítulo no encontrado');
       }
     }).catch(error => {
-      console.error('Error al cargar capítulo:', error);
-      alert('Error al cargar el capítulo');
     });
   }
 
-  function closeChapterReadModal() {
-    const chapterReadModal = document.getElementById('chapter-read-modal');
-    const storyDetailModal = document.getElementById('story-detail-modal');
     const mainApp = document.getElementById('main-app');
 
-    if (chapterReadModal) {
-      chapterReadModal.classList.add('hidden');
     }
 
     // Si hay un modal de detalle, mostrarlo, sino mostrar la app principal
-    if (storyDetailModal && window.currentStoryId) {
-      storyDetailModal.classList.remove('hidden');
     } else if (mainApp) {
       mainApp.classList.remove('hidden');
     }
   }
 
-  function prevChapter() {
-    if (!currentEditingStory || !currentEditingStory.currentChapterId) return;
-    const index = currentChapters.findIndex(ch => ch.id === currentEditingStory.currentChapterId);
     if (index > 0) {
-      openChapterReadModal(currentEditingStory.id, currentChapters[index - 1].id);
     } else {
-      alert(translations[currentLanguage].firstChapter);
     }
   }
 
-  function nextChapter() {
-    if (!currentEditingStory || !currentEditingStory.currentChapterId) return;
-    const index = currentChapters.findIndex(ch => ch.id === currentEditingStory.currentChapterId);
-    if (index < currentChapters.length - 1) {
-      openChapterReadModal(currentEditingStory.id, currentChapters[index + 1].id);
     } else {
-      alert(translations[currentLanguage].lastChapter);
     }
   }
 
-  function setupStarRating(storyId, chapterId) {
-    const stars = document.querySelectorAll("#star-rating .star");
     stars.forEach(star => {
       star.classList.remove("selected");
     });
     const user = firebase.auth().currentUser;
     if (!user) return;
-    fetch(`/api/chapters?storyId=${storyId}&chapterId=${chapterId}`)
       .then(response => response.json())
       .then(data => {
-        const rating = data.chapter?.ratings?.[user.uid];
-        if (rating) {
           stars.forEach(star => {
-            if (parseInt(star.getAttribute('data-value')) <= rating) {
               star.classList.add("selected");
             }
           });
@@ -15406,19 +13988,14 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
     stars.forEach(star => {
       star.onclick = function() {
         const value = parseInt(this.getAttribute('data-value'));
-        fetch('/api/chapters', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'rate',
-            storyId,
-            chapterId,
             userId: user.uid,
-            rating: value
           })
         })
           .then(response => {
-            if (!response.ok) throw new Error('No se pudo guardar calificación');
             stars.forEach(s => {
               if (parseInt(s.getAttribute('data-value')) <= value) {
                 s.classList.add("selected");
@@ -15426,10 +14003,8 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
                 s.classList.remove("selected");
               }
             });
-            alert(translations[currentLanguage].chapterRated.replace("{value}", value));
           })
           .catch(error => {
-            console.error("Error al guardar calificación:", error);
           });
       };
     });
@@ -15439,9 +14014,6 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
     document.getElementById('profile-image').classList.add('skeleton');
     document.getElementById('profile-username').classList.add('skeleton');
     document.getElementById('profile-bio').classList.add('skeleton');
-    const userStories = document.getElementById('user-stories');
-    if (userStories) {
-      userStories.classList.add('skeleton');
     }
   }
 
@@ -15449,9 +14021,6 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
     document.getElementById('profile-image').classList.remove('skeleton');
     document.getElementById('profile-username').classList.remove('skeleton');
     document.getElementById('profile-bio').classList.remove('skeleton');
-    const userStories = document.getElementById('user-stories');
-    if (userStories) {
-      userStories.classList.remove('skeleton');
     }
   }
   if (!navigator.onLine) {
@@ -15459,534 +14028,7 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
   }
   window.addEventListener('offline', applySkeletonEffect);
   window.addEventListener('online', removeSkeletonEffect);
-  /*********************** CARGA DE HISTORIAS **************************/
-  function loadStories() {
-    fetch('/api/get-stories')
-      .then(response => response.json())
-      .then(data => {
-        let stories = data.stories || [];
-        let newReleases = stories.sort((a, b) => getStoryTimestamp(b) - getStoryTimestamp(a));
-        renderStories(newReleases, 'new-releases', false);
-        let top10 = stories.sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 10);
-        renderStories(top10, 'top10', false);
-        let popular = stories.sort((a, b) => (b.views || 0) - (a.views || 0));
-        renderStories(popular, 'popular', false);
-        let terrorStories = stories.filter(story => story.category === 'terror');
-        renderStories(terrorStories, 'terror-stories', false);
-      })
-      .catch(error => console.error('Error loading stories from Firebase:', error));
-  }
 
-  function renderStories(stories, elementId, editMode) {
-    const container = document.getElementById(elementId);
-    container.innerHTML = '';
-    stories.forEach(story => {
-      if (story.blocked) return;
-      const storyCard = document.createElement('div');
-      storyCard.className = 'story-card cursor-pointer relative';
-      storyCard.onclick = editMode ? () => openStoryEdit(story) : () => openStoryDetail(story);
-      storyCard.innerHTML = `
-          <div class="rounded-2xl overflow-hidden shadow-md transform transition-transform hover:scale-105">
-            <div class="story-cover-container">
-              <img src="${story.coverImage || '/api/placeholder/200/300'}" alt="${story.title}" class="story-cover-image">
-            </div>
-          </div>
-          <div class="mt-2">
-            <h3 class="font-semibold text-sm">${story.title}</h3>
-          </div>
-        `;
-      const languageDiv = document.createElement('div');
-      languageDiv.className = "mt-1 flex items-center space-x-2";
-      languageDiv.innerHTML = `<span class="text-xs text-gray-500">Idioma: ${story.language || "N/A"}</span>`;
-      if (story.rating === "18plus") {
-        languageDiv.innerHTML += ' <span class="text-xs text-red-600 font-bold border border-red-600 rounded px-1">+18</span>';
-      }
-      storyCard.appendChild(languageDiv);
-      container.appendChild(storyCard);
-    });
-  }
-  /*********************** CARGA DE HISTORIAS DEL USUARIO **************************/
-  function loadUserStories(userId) {
-    fetch(`/api/get-stories?userId=${userId}`)
-      .then(response => response.json())
-      .then(data => {
-        const container = document.getElementById('user-stories');
-        container.innerHTML = "";
-        (data.stories || []).forEach(story => {
-          if (story.blocked) return;
-          const card = document.createElement('div');
-          card.className = "cursor-pointer";
-          card.onclick = () => openStoryEdit(story);
-          card.innerHTML = `
-              <div class="rounded-2xl overflow-hidden shadow-md transform transition-transform hover:scale-105">
-                <img src="${story.coverImage || '/api/placeholder/200/300'}" alt="${story.title}" class="w-full h-40 object-cover">
-              </div>
-              <div class="mt-2">
-                <h3 class="font-semibold text-sm">${story.title}</h3>
-              </div>
-            `;
-          const langDiv = document.createElement('div');
-          langDiv.className = "mt-1 flex items-center space-x-2";
-          langDiv.innerHTML = `<span class="text-xs text-gray-500">Idioma: ${story.language || "N/A"}</span>`;
-          if (story.rating === "18plus") {
-            langDiv.innerHTML += ' <span class="text-xs text-red-600 font-bold border border-red-600 rounded px-1">+18</span>';
-          }
-          card.appendChild(langDiv);
-          container.appendChild(card);
-        });
-      })
-      .catch(error => console.error('Error loading user stories from Firebase:', error));
-  }
-
-  /*********************** FUNCIONES AUXILIARES PARA CARGAR HISTORIAS DESDE Firebase **************************/
-  function getStoryTimestamp(story) {
-    const raw = story.createdAt || story.timestamp;
-    if (!raw) return 0;
-    const parsed = typeof raw === 'string' ? Date.parse(raw) : Number(raw);
-    return Number.isFinite(parsed) ? parsed : 0;
-  }
-
-  function getStoryKey(story, fallbackIndex) {
-    return (
-      story.id ||
-      story.storyId ||
-      story.key ||
-      `${story.userId || 'user'}-${story.title || 'story'}-${getStoryTimestamp(story)}-${fallbackIndex}`
-    );
-  }
-
-  async function loadStoriesFromFirebase() {
-    let firebaseStories = [];
-    try {
-      const response = await fetch('/api/get-stories');
-      if (!response.ok) {
-        throw new Error(`Firebase fetch failed with status ${response.status}`);
-      }
-      const data = await response.json();
-      firebaseStories = data.stories || [];
-    } catch (error) {
-      console.error('Error loading stories from Firebase:', error);
-      return [];
-    }
-
-    if (!firebaseStories.length) {
-      return firebaseStories;
-    }
-
-    const merged = new Map();
-    firebaseStories.forEach((story, index) => {
-      const key = getStoryKey(story, index);
-      if (!merged.has(key)) {
-        merged.set(key, story);
-      }
-    });
-
-    return Array.from(merged.values());
-  }
-
-  async function loadTopStories() {
-    const stories = await loadStoriesFromFirebase();
-    const container = document.getElementById('top-stories');
-    container.innerHTML = '';
-
-    if (!stories.length) {
-      container.innerHTML = '<p class="text-gray-500">No hay historias disponibles</p>';
-      return;
-    }
-
-    const rankedStories = stories
-      .map(story => {
-        const ratingScore = (story.ratingValue || 0) * 100;
-        const likesScore = (story.likes || 0) * 10;
-        const viewsScore = story.views || 0;
-        return {
-          ...story,
-          engagementScore: ratingScore + likesScore + viewsScore
-        };
-      })
-      .sort((a, b) => b.engagementScore - a.engagementScore)
-      .slice(0, 10);
-
-    rankedStories.forEach(story => {
-      const card = document.createElement('div');
-      card.className = 'top-story-card flex-shrink-0 cursor-pointer';
-      card.onclick = () => openStoryDetail(story);
-      card.innerHTML = `
-        <div class="top-story-poster rounded-2xl overflow-hidden shadow-md transform transition-transform hover:scale-105">
-          <img src="${story.coverImage || '/api/placeholder/240/360'}" alt="${story.title}" class="top-story-image">
-        </div>
-        <div class="mt-2">
-          <h3 class="font-semibold text-sm truncate">${story.title}</h3>
-          <p class="text-xs text-gray-500 truncate">${story.username || story.author || story.userName || 'Autor desconocido'}</p>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  }
-
-  async function getUserRatingPreferences(userId) {
-    const allStories = await loadStoriesFromFirebase();
-    const userRatings = {};
-    const categoryScores = {};
-
-    for (const story of allStories.slice(0, 30)) {
-      try {
-        const chaptersResponse = await fetch(`/api/get-chapters?storyId=${story.id}`);
-        const chaptersData = await chaptersResponse.json();
-
-        if (chaptersData.chapters) {
-          chaptersData.chapters.forEach(chapter => {
-            if (chapter.ratings && chapter.ratings[userId]) {
-              const rating = chapter.ratings[userId];
-              if (!categoryScores[story.category]) {
-                categoryScores[story.category] = { total: 0, count: 0 };
-              }
-              categoryScores[story.category].total += rating;
-              categoryScores[story.category].count += 1;
-
-              if (!userRatings[story.id]) {
-                userRatings[story.id] = { ratings: [], avgRating: 0, category: story.category };
-              }
-              userRatings[story.id].ratings.push(rating);
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Error loading chapters for story:', story.id, error);
-      }
-    }
-
-    Object.keys(userRatings).forEach(storyId => {
-      const ratings = userRatings[storyId].ratings;
-      userRatings[storyId].avgRating = ratings.reduce((a, b) => a + b, 0) / ratings.length;
-    });
-
-    Object.keys(categoryScores).forEach(category => {
-      categoryScores[category].avg = categoryScores[category].total / categoryScores[category].count;
-    });
-
-    return { userRatings, categoryScores };
-  }
-
-  function createRecommendedStoryCard(story) {
-    const card = document.createElement('div');
-    card.className = 'cursor-pointer transform transition-transform hover:scale-105';
-    card.onclick = () => openStoryDetail(story);
-    card.innerHTML = `
-      <div class="rounded-2xl overflow-hidden shadow-md">
-        <img src="${story.coverImage || '/api/placeholder/200/300'}" alt="${story.title}" class="w-full h-40 object-cover">
-      </div>
-      <div class="mt-2">
-        <h3 class="font-semibold text-sm truncate">${story.title}</h3>
-        ${story.ratingValue ? `<div class="flex items-center mt-1">
-          <i class="fas fa-star text-yellow-400 text-xs"></i>
-          <span class="text-xs text-gray-600 ml-1">${story.ratingValue.toFixed(1)}</span>
-        </div>` : ''}
-      </div>
-    `;
-    return card;
-  }
-
-  async function followAuthor(authorId, buttonElement) {
-    const user = firebase.auth().currentUser;
-    if (!user) {
-      alert('Debes iniciar sesión para seguir autores');
-      return;
-    }
-
-    try {
-      buttonElement.innerHTML = '<span class="inline-flex"><span class="epic-loader" style="width:16px;height:16px;border-radius:5px;"></span></span>';
-      buttonElement.disabled = true;
-
-      await firebase.database().ref('following/' + user.uid + '/' + authorId).set(true);
-      await firebase.database().ref('followers/' + authorId + '/' + user.uid).set(true);
-
-      buttonElement.classList.add('hidden');
-
-      await addNotification(authorId, `${user.displayName || user.email} te ha seguido`, 'follow');
-    } catch (error) {
-      console.error('Error following author:', error);
-      alert('Error al seguir al autor');
-      buttonElement.innerHTML = '<i class="fas fa-plus text-xs"></i>';
-      buttonElement.disabled = false;
-    }
-  }
-
-  /*********************** NUEVAS FUNCIONES: SUGERENCIAS Y AUTORES DESTACADOS **************************/
-  async function loadSuggestedStories() {
-    const user = firebase.auth().currentUser;
-    const stories = await loadStoriesFromFirebase();
-    const container = document.getElementById('suggested-stories');
-    container.innerHTML = '';
-
-    if (!stories.length) {
-      container.innerHTML = '<p class="text-gray-500">No hay historias disponibles</p>';
-      return;
-    }
-
-    let suggestedStories = [];
-
-    if (user) {
-      const { userRatings, categoryScores } = await getUserRatingPreferences(user.uid);
-
-      suggestedStories = stories.map(story => {
-        let score = story.views || 0;
-
-        if (userRatings[story.id]) {
-          score += userRatings[story.id].avgRating * 500;
-        }
-
-        if (categoryScores[story.category]) {
-          score += categoryScores[story.category].avg * 300;
-        }
-
-        if (story.ratingValue) {
-          score += story.ratingValue * 100;
-        }
-
-        return { ...story, score };
-      });
-
-      suggestedStories.sort((a, b) => b.score - a.score);
-    } else {
-      suggestedStories = stories.sort((a, b) => (b.ratingValue || 0) - (a.ratingValue || 0));
-    }
-
-    const suggested = suggestedStories.slice(0, 10);
-    suggested.forEach(story => {
-      const card = document.createElement('div');
-      card.className = 'story-card cursor-pointer';
-      card.onclick = () => openStoryDetail(story);
-      card.innerHTML = `
-        <div class="rounded-2xl overflow-hidden shadow-md">
-          <div class="story-cover-container">
-            <img src="${story.coverImage || '/api/placeholder/200/300'}" alt="${story.title}" class="story-cover-image">
-          </div>
-        </div>
-        <div class="mt-2">
-          <h3 class="font-semibold text-sm">${story.title}</h3>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  }
-
-  async function loadFeaturedAuthors() {
-    const stories = await loadStoriesFromFirebase();
-    const container = document.getElementById('featured-authors');
-    container.innerHTML = '';
-
-    const authorCounts = {};
-    stories.forEach(story => {
-      if (story && story.userId) {
-        if (!authorCounts[story.userId]) {
-          authorCounts[story.userId] = { count: 0, username: story.username, email: story.email };
-        }
-        authorCounts[story.userId].count++;
-      }
-    });
-
-    const authorsArray = Object.keys(authorCounts).map(uid => ({
-      uid,
-      ...authorCounts[uid]
-    }));
-
-    authorsArray.sort((a, b) => b.count - a.count);
-    const topAuthors = authorsArray.slice(0, 10);
-
-    const user = firebase.auth().currentUser;
-
-    for (const author of topAuthors) {
-      try {
-        const userData = await new Promise((resolve, reject) => {
-          firebase.database().ref('users/' + author.uid).once('value')
-            .then(snap => resolve(snap.val()))
-            .catch(reject);
-        });
-
-        const isFollowing = user ? await new Promise((resolve) => {
-          firebase.database().ref('following/' + user.uid + '/' + author.uid).once('value')
-            .then(snap => resolve(snap.exists()))
-            .catch(() => resolve(false));
-        }) : false;
-
-        const card = document.createElement('div');
-        card.className = 'flex-shrink-0 flex flex-col items-center relative';
-        card.innerHTML = `
-          <div class="relative">
-            <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-[#00A2FF] cursor-pointer hover:scale-105 transition-transform"
-                 onclick="openAuthorProfile('${author.uid}')">
-              <img src="${userData?.profileImage || 'https://via.placeholder.com/150'}"
-                   alt="${userData?.username || author.username}"
-                   class="w-full h-full object-cover">
-            </div>
-            <button class="absolute -bottom-1 -right-1 w-7 h-7 bg-[#00A2FF] text-white rounded-full flex items-center justify-center hover:bg-[#ef2950] transition shadow-lg ${isFollowing ? 'hidden' : ''}"
-                    onclick="followAuthor('${author.uid}', this)"
-                    title="Seguir">
-              <i class="fas fa-plus text-xs"></i>
-            </button>
-          </div>
-          <span class="text-xs mt-2 text-center font-medium truncate w-20">${userData?.username || author.username || 'Usuario'}</span>
-        `;
-        container.appendChild(card);
-      } catch (error) {
-        console.error('Error loading author:', author.uid, error);
-      }
-    }
-  }
-
-  async function loadTrendingStories() {
-    const stories = await loadStoriesFromFirebase();
-    const container = document.getElementById('trending-stories');
-    container.innerHTML = '';
-
-    if (!stories.length) return;
-
-    const now = Date.now();
-    const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
-
-    const trending = stories
-      .filter(story => getStoryTimestamp(story) > sevenDaysAgo)
-      .map(story => ({
-        ...story,
-        trendingScore: (story.views || 0) * 2 + (story.ratingValue || 0) * 100
-      }))
-      .sort((a, b) => b.trendingScore - a.trendingScore)
-      .slice(0, 8);
-
-    trending.forEach(story => {
-      container.appendChild(createRecommendedStoryCard(story));
-    });
-  }
-
-  async function loadMysteryStories() {
-    const stories = await loadStoriesFromFirebase();
-    const container = document.getElementById('mystery-stories');
-    container.innerHTML = '';
-
-    const mysteryStories = stories
-      .filter(story => story.category === 'misterio')
-      .sort((a, b) => (b.views || 0) - (a.views || 0))
-      .slice(0, 8);
-
-    mysteryStories.forEach(story => {
-      container.appendChild(createRecommendedStoryCard(story));
-    });
-  }
-
-  async function loadAdventureStories() {
-    const stories = await loadStoriesFromFirebase();
-    const container = document.getElementById('adventure-stories');
-    container.innerHTML = '';
-
-    const adventureStories = stories
-      .filter(story => story.category === 'aventura')
-      .sort((a, b) => (b.ratingValue || 0) - (a.ratingValue || 0))
-      .slice(0, 8);
-
-    adventureStories.forEach(story => {
-      container.appendChild(createRecommendedStoryCard(story));
-    });
-  }
-
-  async function initializeFeedSections() {
-    const pausedMessage = 'Sección de historias en pausa. Próximamente volverá con una nueva experiencia.';
-    ['top-stories','top10','popular','terror-stories','trending-stories','mystery-stories','adventure-stories','suggested-stories','new-releases']
-      .forEach((id) => renderStoriesPausedState(id, pausedMessage));
-    const featuredAuthors = document.getElementById('featured-authors');
-    if (featuredAuthors) {
-      featuredAuthors.innerHTML = '<div class="text-center text-gray-600 py-6 border border-gray-200 rounded-2xl bg-gray-50">Próximamente actualizaremos recomendaciones de inicio.</div>';
-    }
-  }
-
-  /*********************** CARGA DE HISTORIAS DEL AUTOR **************************/
-  function loadAuthorStories(authorId) {
-    const container = document.getElementById('author-stories');
-    if (container) {
-      container.innerHTML = '<div class="col-span-3 text-center text-gray-600 py-4 border border-gray-200 rounded-xl bg-gray-50">Historias en pausa temporalmente.</div>';
-    }
-    const count = document.getElementById('author-stories-count');
-    if (count) count.textContent = '0';
-  }
-  /*********************** NUEVAS FUNCIONES: DESCARGAR HISTORIA COMPLETA PARA LECTURA OFFLINE **************************/
-  function downloadStory() {
-    if (!window.currentStoryId) {
-      alert("No se ha seleccionado una historia.");
-      return;
-    }
-    const storyId = window.currentStoryId;
-    const btn = document.getElementById('download-story-btn');
-    const icon = btn.querySelector('i');
-    icon.classList.add('fa-spin');
-    firebase.database().ref('stories/' + storyId).once('value')
-      .then(storySnap => {
-        const storyData = storySnap.val();
-        if (!storyData) {
-          throw new Error("Historia no encontrada");
-        }
-        return firebase.database().ref('stories/' + storyId + '/chapters').once('value')
-          .then(chaptersSnap => {
-            let chaptersHTML = '';
-            chaptersSnap.forEach(child => {
-              const chapter = child.val();
-              chapter.id = child.key;
-              // Se crea un bloque para cada capítulo con título y contenido completo
-              chaptersHTML += `<div class="chapter" style="margin-bottom:20px;">
-                  <h3 style="margin-bottom:10px;">Capítulo ${chapter.chapterNumber}</h3>
-                  <p style="text-align:justify; white-space: pre-wrap;">${chapter.content}</p>
-                </div>`;
-            });
-            storyData.chaptersHTML = chaptersHTML;
-            return storyData;
-          });
-      })
-      .then(storyData => {
-        const htmlContent = `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>${storyData.title}</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .cover { max-width: 100%; height: auto; }
-    .chapter { margin-top: 20px; margin-bottom: 20px; }
-    .chapter h3 { margin-bottom: 10px; }
-    .chapter p { text-align: justify; white-space: pre-wrap; }
-  </style>
-</head>
-<body>
-  <h1>${storyData.title}</h1>
-  <img src="${storyData.coverImage}" alt="Portada" class="cover">
-  <div class="chapters">
-    ${storyData.chaptersHTML}
-  </div>
-</body>
-</html>`;
-        const blob = new Blob([htmlContent], {
-          type: 'text/html'
-        });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = storyData.title.replace(/\s+/g, '_') + '.html';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        icon.classList.remove('fa-spin');
-        icon.classList.remove('fa-download');
-        icon.classList.add('fa-check');
-        alert("Historia descargada para lectura offline.");
-        setTimeout(() => {
-          icon.classList.remove('fa-check');
-          icon.classList.add('fa-download');
-        }, 2000);
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Error al descargar la historia: " + err.message);
-        icon.classList.remove('fa-spin');
-      });
-  }
   /*********************** LIVE STREAMING **************************/
   let liveLocalStream = null;
   let livePeerConnection = null;
@@ -16525,7 +14567,6 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
       animContainer.classList.remove('show');
     }, 4000);
   }
-  /*********************** REPORTAR HISTORIA Y BLOQUEO **************************/
   let lastX = null,
     lastY = null,
     lastZ = null;
@@ -16570,27 +14611,18 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
   }
 
 
-  function listenForStoryBlock(storyId) {
-    firebase.database().ref('stories/' + storyId + '/blocked').on('value', snapshot => {
       if (snapshot.exists() && snapshot.val() === true) {
-        openStoryBlockedModal();
       }
     });
   }
 
-  function openStoryBlockedModal() {
-    const modal = document.getElementById('story-blocked-modal');
     if (modal) {
       modal.style.display = 'flex';
     }
   }
   let blockedStartX = null;
-  const storyBlockedModal = document.getElementById('story-blocked-modal');
-  if (storyBlockedModal) {
-    storyBlockedModal.addEventListener('touchstart', function(e) {
       blockedStartX = e.touches[0].clientX;
     });
-    storyBlockedModal.addEventListener('touchmove', function(e) {
       if (blockedStartX === null) return;
       const diffX = blockedStartX - e.touches[0].clientX;
       if (diffX > 100) {
@@ -16615,41 +14647,30 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
     dot1.style.left = '10%';
     dot2.style.top = '50%';
     dot2.style.left = '80%';
-    storyBlockedModal.appendChild(dot1);
-    storyBlockedModal.appendChild(dot2);
     setTimeout(() => {
       dot1.style.left = '45%';
       dot2.style.left = '55%';
     }, 100);
     setTimeout(() => {
-      storyBlockedModal.style.display = 'none';
       dot1.remove();
       dot2.remove();
     }, 1000);
   }
   window.addEventListener('load', initShakeDetection);
-  /*********************** MODAL DE CREACIÓN DE CAPÍTULO **************************/
   const fontFamilyInput = document.getElementById('font-family');
   const fontSizeInput = document.getElementById('font-size');
-  const chapterContentInput = document.getElementById('chapter-content');
 
-  if (fontFamilyInput && chapterContentInput) {
     fontFamilyInput.addEventListener('change', function() {
-      chapterContentInput.style.fontFamily = this.value;
     });
   }
 
-  if (fontSizeInput && chapterContentInput) {
     fontSizeInput.addEventListener('input', function() {
       var size = this.value;
-      chapterContentInput.style.fontSize = size + "px";
       const fontSizeValue = document.getElementById('font-size-value');
       if (fontSizeValue) fontSizeValue.innerText = size + "px";
     });
   }
 
-  if (chapterContentInput) {
-    chapterContentInput.addEventListener('input', function() {
       var text = this.value;
       var words = text.trim().split(/\s+/).filter(word => word.length > 0);
       const wordCount = document.getElementById('word-count');
@@ -16659,149 +14680,38 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
     });
   }
   /*********************** NUEVAS FUNCIONES: SUGERENCIAS Y AUTORES DESTACADOS **************************/
-  async function loadSuggestedStories() {
     const user = firebase.auth().currentUser;
-    const stories = await loadStoriesFromFirebase();
-    const container = document.getElementById('suggested-stories');
     container.innerHTML = '';
 
-    if (!stories.length) {
-      container.innerHTML = '<p class="text-gray-500">No hay historias disponibles</p>';
       return;
     }
 
-    let suggestedStories = [];
 
     if (user) {
-      const { userRatings, categoryScores } = await getUserRatingPreferences(user.uid);
 
-      suggestedStories = stories.map(story => {
-        let score = story.views || 0;
 
-        if (userRatings[story.id]) {
-          score += userRatings[story.id].avgRating * 500;
         }
 
-        if (categoryScores[story.category]) {
-          score += categoryScores[story.category].avg * 300;
         }
 
-        if (story.ratingValue) {
-          score += story.ratingValue * 100;
         }
 
-        return { ...story, score };
       });
 
-      suggestedStories.sort((a, b) => b.score - a.score);
     } else {
-      suggestedStories = stories.sort((a, b) => (b.ratingValue || 0) - (a.ratingValue || 0));
     }
 
-    const suggested = suggestedStories.slice(0, 10);
-    suggested.forEach(story => {
       const card = document.createElement('div');
-      card.className = 'story-card cursor-pointer';
-      card.onclick = () => openStoryDetail(story);
       card.innerHTML = `
         <div class="rounded-2xl overflow-hidden shadow-md">
-          <div class="story-cover-container">
-            <img src="${story.coverImage || '/api/placeholder/200/300'}" alt="${story.title}" class="story-cover-image">
           </div>
         </div>
         <div class="mt-2">
-          <h3 class="font-semibold text-sm">${story.title}</h3>
         </div>
       `;
       container.appendChild(card);
     });
   }
-
-  async function loadFeaturedAuthors() {
-    const stories = await loadStoriesFromFirebase();
-    const container = document.getElementById('featured-authors');
-    container.innerHTML = '';
-
-    const authorCounts = {};
-    stories.forEach(story => {
-      if (story && story.userId) {
-        if (!authorCounts[story.userId]) {
-          authorCounts[story.userId] = { count: 0, username: story.username, email: story.email };
-        }
-        authorCounts[story.userId].count++;
-      }
-    });
-
-    const authorsArray = Object.keys(authorCounts).map(uid => ({
-      uid,
-      ...authorCounts[uid]
-    }));
-
-    authorsArray.sort((a, b) => b.count - a.count);
-    const topAuthors = authorsArray.slice(0, 10);
-
-    const user = firebase.auth().currentUser;
-
-    for (const author of topAuthors) {
-      try {
-        const userData = await new Promise((resolve, reject) => {
-          firebase.database().ref('users/' + author.uid).once('value')
-            .then(snap => resolve(snap.val()))
-            .catch(reject);
-        });
-
-        const isFollowing = user ? await new Promise((resolve) => {
-          firebase.database().ref('following/' + user.uid + '/' + author.uid).once('value')
-            .then(snap => resolve(snap.exists()))
-            .catch(() => resolve(false));
-        }) : false;
-
-        const card = document.createElement('div');
-        card.className = 'flex-shrink-0 flex flex-col items-center relative';
-        card.innerHTML = `
-          <div class="relative">
-            <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-[#00A2FF] cursor-pointer hover:scale-105 transition-transform"
-                 onclick="openAuthorProfile('${author.uid}')">
-              <img src="${userData?.profileImage || 'https://via.placeholder.com/150'}"
-                   alt="${userData?.username || author.username}"
-                   class="w-full h-full object-cover">
-            </div>
-            <button class="absolute -bottom-1 -right-1 w-7 h-7 bg-[#00A2FF] text-white rounded-full flex items-center justify-center hover:bg-[#ef2950] transition shadow-lg ${isFollowing ? 'hidden' : ''}"
-                    onclick="followAuthor('${author.uid}', this)"
-                    title="Seguir">
-              <i class="fas fa-plus text-xs"></i>
-            </button>
-          </div>
-          <span class="text-xs mt-2 text-center font-medium truncate w-20">${userData?.username || author.username || 'Usuario'}</span>
-        `;
-        container.appendChild(card);
-      } catch (error) {
-        console.error('Error loading author:', author.uid, error);
-      }
-    }
-  }
-  /*************** FIN NUEVAS FUNCIONES **************************/
-
-  /*********************** SISTEMA DE MENSAJERÍA EN TIEMPO REAL **************************/
-  let currentChatUserId = null;
-  let selectedAuthorForMessage = null;
-  let typingTimeout = null;
-  let isTyping = false;
-  let voiceRecordingActive = false;
-
-  function openMessages() {
-    showLoader();
-    setTimeout(() => {
-      document.getElementById('main-app').classList.add('hidden');
-      document.getElementById('chat-view').classList.remove('hidden');
-      showConversationsView();
-      loadConversations();
-      listenForUnreadMessages();
-      loadCurrentUserInfo();
-      hideLoader();
-    }, 300);
-  }
-
   function closeChat() {
     document.getElementById('chat-view').classList.add('hidden');
     document.getElementById('main-app').classList.remove('hidden');
@@ -17108,7 +15018,6 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
 
   function makeVoiceCall(userId) {
     // Implementar llamadas de voz (placeholder)
-    alert('Función de llamadas próximamente disponible');
   }
 
   function toggleVoiceMessage() {
@@ -17670,59 +15579,27 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
 
   /*************** FIN SISTEMA DE MENSAJERÍA **************************/
 </script>
-<!-- NUEVO SCRIPT: Función para descargar la historia completa y almacenarla offline -->
 <script>
-  function downloadStory() {
-    if (!window.currentStoryId) {
-      alert("No se ha seleccionado una historia.");
       return;
     }
-    const storyId = window.currentStoryId;
-    const btn = document.getElementById('download-story-btn');
     const icon = btn.querySelector('i');
     icon.classList.add('fa-spin');
-    firebase.database().ref('stories/' + storyId).once('value')
-      .then(storySnap => {
-        const storyData = storySnap.val();
-        if (!storyData) {
-          throw new Error("Historia no encontrada");
         }
-        return firebase.database().ref('stories/' + storyId + '/chapters').once('value')
-          .then(chaptersSnap => {
-            let chaptersHTML = '';
-            chaptersSnap.forEach(child => {
-              const chapter = child.val();
-              chapter.id = child.key;
-              // Se crea un bloque para cada capítulo con título y contenido completo
-              chaptersHTML += `<div class="chapter" style="margin-bottom:20px;">
-                  <h3 style="margin-bottom:10px;">Capítulo ${chapter.chapterNumber}</h3>
-                  <p style="text-align:justify; white-space: pre-wrap;">${chapter.content}</p>
                 </div>`;
             });
-            storyData.chaptersHTML = chaptersHTML;
-            return storyData;
           });
       })
-      .then(storyData => {
         const htmlContent = `
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>${storyData.title}</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     .cover { max-width: 100%; height: auto; }
-    .chapter { margin-top: 20px; margin-bottom: 20px; }
-    .chapter h3 { margin-bottom: 10px; }
-    .chapter p { text-align: justify; white-space: pre-wrap; }
   </style>
 </head>
 <body>
-  <h1>${storyData.title}</h1>
-  <img src="${storyData.coverImage}" alt="Portada" class="cover">
-  <div class="chapters">
-    ${storyData.chaptersHTML}
   </div>
 </body>
 </html>`;
@@ -17731,14 +15608,12 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
         });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = storyData.title.replace(/\s+/g, '_') + '.html';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         icon.classList.remove('fa-spin');
         icon.classList.remove('fa-download');
         icon.classList.add('fa-check');
-        alert("Historia descargada para lectura offline.");
         setTimeout(() => {
           icon.classList.remove('fa-check');
           icon.classList.add('fa-download');
@@ -17746,7 +15621,6 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
       })
       .catch(err => {
         console.error(err);
-        alert("Error al descargar la historia: " + err.message);
         icon.classList.remove('fa-spin');
       });
   }
@@ -17785,9 +15659,6 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
     <!-- Panel de Estadísticas -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-gray-50 p-4 rounded-xl text-center">
-        <h3 class="text-[#00A2FF] text-sm mb-1">Total Historias</h3>
-        <p id="total-stories" class="text-2xl font-bold">0</p>
-        <p id="stories-trend" class="text-sm text-green-500">+0%</p>
       </div>
       <div class="bg-gray-50 p-4 rounded-xl text-center">
         <h3 class="text-[#00A2FF] text-sm mb-1">Total Vistas</h3>
@@ -17800,9 +15671,6 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
         <p id="followers-trend" class="text-sm text-green-500">+0%</p>
       </div>
       <div class="bg-gray-50 p-4 rounded-xl text-center">
-        <h3 class="text-[#00A2FF] text-sm mb-1">Calificación</h3>
-        <p id="average-rating" class="text-2xl font-bold">0.0</p>
-        <p id="rating-trend" class="text-sm text-green-500">+0%</p>
       </div>
     </div>
 
@@ -17818,16 +15686,12 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
       </div>
     </div>
 
-    <!-- Gestión de Historias -->
     <div class="bg-white rounded-xl shadow p-4 mb-8">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold">Mis Historias</h3>
         <div class="flex space-x-4">
-          <button onclick="openStoryCreation()" class="bg-[#00A2FF] text-white px-4 py-2 rounded-lg flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            Nueva Historia
           </button>
           <button onclick="analyzeAccount()" class="bg-[#00A2FF] text-white px-4 py-2 rounded-lg flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -17842,16 +15706,11 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
-              <th class="p-4 text-left">Historia</th>
-              <th class="p-4 text-left">Capítulos</th>
               <th class="p-4 text-left">Vistas</th>
-              <th class="p-4 text-left">Rating</th>
               <th class="p-4 text-left">Estado</th>
               <th class="p-4 text-left">Acciones</th>
             </tr>
           </thead>
-          <tbody id="stories-table" class="divide-y divide-gray-200">
-            <!-- Las historias se cargarán aquí dinámicamente -->
           </tbody>
         </table>
       </div>
@@ -17862,7 +15721,6 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
       <h3 class="text-lg font-bold mb-4">Insights</h3>
       <div id="insights" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-blue-50 p-4 rounded-lg">
-          <h4 class="font-bold text-blue-700">Mejor hora para publicar</h4>
           <p id="best-time" class="mt-2">Analizando datos...</p>
         </div>
         <div class="bg-green-50 p-4 rounded-lg">
@@ -17885,9 +15743,6 @@ function setStoryPublishingState(isPublishing, label = 'Publicar') {
       <span>Volver</span>
     </button>
 
-    <h2 class="text-2xl font-bold mb-4">Próximas Publicaciones</h2>
-    <div id="scheduled-content" class="space-y-4">
-      <!-- Aquí se mostrarán los capítulos programados -->
     </div>
   </div>
 </div>
@@ -17909,49 +15764,30 @@ function openCalendar() {
   const modal = document.getElementById('calendar-modal');
   modal.classList.remove('hidden');
 
-  // Cargar capítulos programados
-  firebase.database().ref('scheduledChapters').once('value').then(snapshot => {
-    const container = document.getElementById('scheduled-content');
     container.innerHTML = '';
 
     snapshot.forEach(child => {
-      const scheduled = child.val();
-      const storyId = scheduled.storyId;
-      const releaseDate = new Date(scheduled.publishDate);
       const now = new Date();
       const daysUntil = Math.ceil((releaseDate - now) / (1000 * 60 * 60 * 24));
       const isAvailable = now >= releaseDate;
 
-      // Obtener información de la historia
-      firebase.database().ref('stories/' + storyId).once('value').then(storySnap => {
-        const story = storySnap.val();
-        const isNew = (now - new Date(story.createdAt)) < 7 * 24 * 60 * 60 * 1000; // 7 días
 
         const div = document.createElement('div');
         div.className = 'bg-gray-100 p-4 rounded-lg';
         div.innerHTML = `
           <div class="flex items-center space-x-4">
-            <img src="${story.coverImage || '/api/placeholder/100/150'}" alt="${story.title}" class="w-20 h-30 object-cover rounded">
             <div class="flex-1">
               <div class="flex items-center">
-                <h3 class="font-bold">${story.title}</h3>
-                ${isNew ? '<span class="ml-2 bg-[#00A2FF] text-white px-2 py-1 rounded text-xs">ESTRENO</span>' : ''}
               </div>
-              <p class="text-gray-600">Capítulo ${scheduled.chapterNumber}</p>
               ${isAvailable ?
-                `<button onclick="openChapterReadModal('${storyId}', '${child.key}')"
                   class="bg-[#58CC02] text-white px-3 py-1 rounded-full text-sm">
-                  Leer ahora
                 </button>` :
-                `<p class="text-gray-600">Se publicará en ${daysUntil} días</p>
                  <p class="text-gray-600">Fecha: ${releaseDate.toLocaleDateString()}</p>`
               }
             </div>
             ${isNew ? `
   <div class="flex flex-wrap items-center gap-2">
-    <span class="bg-[#00A2FF] text-white px-2 py-1 rounded text-xs">ESTRENO</span>
     <button
-      onclick="toggleNotification(event, '${storyId}', '${child.key}', '${story.title}', ${scheduled.publishDate})"
       class="notification-bell-btn inline-flex items-center px-2 py-1 text-gray-600 hover:text-black transition-colors"
     >
       <i class="fas fa-bell notification-bell text-sm"></i>
@@ -17987,24 +15823,19 @@ function openCalendar() {
         // Programar notificación
         const user = firebase.auth().currentUser;
         if (user) {
-          const notificationTime = new Date(scheduled.publishDate);
           const currentTime = new Date();
 
           if (notificationTime > currentTime) {
             const timeUntilNotification = notificationTime.getTime() - currentTime.getTime();
 
             setTimeout(() => {
-              addNotification(user.uid, `¡Tu capítulo programado de "${story.title}" ha sido publicado!`, 'chapter_published');
 
               // Solo actualizar cuando llegue la fecha de publicación
               if (new Date() >= notificationTime) {
-                firebase.database().ref('stories/' + storyId + '/chapters/' + child.key).update({
                   status: 'published'
                 });
               }
 
-              // Eliminar de capítulos programados
-              firebase.database().ref('scheduledChapters/' + child.key).remove();
             }, timeUntilNotification);
           }
         }
@@ -18017,7 +15848,6 @@ function closeCalendar() {
   document.getElementById('calendar-modal').classList.add('hidden');
 }
 
-function toggleNotification(event, storyId, chapterId, storyTitle, publishDate) {
   event.stopPropagation();
   const user = firebase.auth().currentUser;
   if (!user) return;
@@ -18026,7 +15856,6 @@ function toggleNotification(event, storyId, chapterId, storyTitle, publishDate) 
   bell.classList.add('active');
 
   // Toggle notification in database
-  const notificationRef = firebase.database().ref(`userNotifications/${user.uid}/${chapterId}`);
 
   notificationRef.once('value').then(snapshot => {
     if (snapshot.exists()) {
@@ -18037,13 +15866,10 @@ function toggleNotification(event, storyId, chapterId, storyTitle, publishDate) 
     } else {
       // Add notification
       notificationRef.set({
-        storyId,
-        storyTitle,
         publishDate,
         status: 'pending'
       });
       bell.style.color = '#00A2FF';
-      alert('¡Te avisaremos cuando se publique el capítulo!');
 
       // Schedule notification
       const notificationTime = new Date(publishDate);
@@ -18055,8 +15881,6 @@ function toggleNotification(event, storyId, chapterId, storyTitle, publishDate) 
         setTimeout(() => {
           addNotification(
             user.uid,
-            `¡El nuevo capítulo de "${storyTitle}" ya está disponible!`,
-            'chapter_release'
           );
         }, timeUntilNotification);
       }
@@ -18091,46 +15915,26 @@ function updateStudioStats() {
   const startDate = new Date(document.getElementById('date-start').value);
   const endDate = new Date(document.getElementById('date-end').value);
 
-  firebase.database().ref('stories').orderByChild('userId').equalTo(user.uid).once('value')
     .then(snapshot => {
-      let totalStories = 0;
       let totalViews = 0;
-      let totalRating = 0;
-      let ratingCount = 0;
       let viewsData = {};
       let hourlyData = new Array(24).fill(0);
 
       // Procesar datos
       snapshot.forEach(child => {
-        const story = child.val();
-        const storyDate = new Date(story.createdAt);
 
-        if (storyDate >= startDate && storyDate <= endDate) {
-          totalStories++;
-          totalViews += story.views || 0;
 
           // Datos por hora
-          const hour = storyDate.getHours();
-          hourlyData[hour] += story.views || 0;
 
           // Datos para gráfico de tendencias
-          const dateStr = storyDate.toLocaleDateString();
-          viewsData[dateStr] = (viewsData[dateStr] || 0) + (story.views || 0);
 
-          if (story.ratings) {
-            Object.values(story.ratings).forEach(rating => {
-              totalRating += rating;
-              ratingCount++;
             });
           }
         }
 
-        // Actualizar tabla de historias
-        updateStoriesTable(story);
       });
 
       // Actualizar estadísticas
-      updateStatistics(totalStories, totalViews, totalRating, ratingCount);
 
       // Actualizar gráficos
       updateCharts(viewsData, hourlyData);
@@ -18140,31 +15944,21 @@ function updateStudioStats() {
     });
 }
 
-function updateStoriesTable(story) {
-  const tbody = document.getElementById('stories-table');
   const row = document.createElement('tr');
   row.className = 'hover:bg-gray-50';
 
-  const status = story.status || 'published';
   const statusColors = {
     'published': 'bg-green-100 text-green-800',
     'draft': 'bg-gray-100 text-gray-800',
-    'scheduled': 'bg-blue-100 text-blue-800'
   };
 
   row.innerHTML = `
     <td class="p-4">
       <div class="flex items-center space-x-3">
-        <img src="${story.coverImage || '/api/placeholder/50/75'}" class="w-12 h-16 object-cover rounded" alt="${story.title}">
         <div>
-          <h4 class="font-bold">${story.title}</h4>
-          <p class="text-sm text-gray-600">${new Date(story.createdAt).toLocaleDateString()}</p>
         </div>
       </div>
     </td>
-    <td class="p-4">${(story.chapters || []).length}</td>
-    <td class="p-4">${story.views || 0}</td>
-    <td class="p-4">${calculateAverageRating(story.ratings)}</td>
     <td class="p-4">
       <span class="px-2 py-1 rounded-full text-xs ${statusColors[status]}">
         ${status.charAt(0).toUpperCase() + status.slice(1)}
@@ -18172,12 +15966,10 @@ function updateStoriesTable(story) {
     </td>
     <td class="p-4">
       <div class="flex space-x-2">
-        <button onclick="openStoryEdit(${JSON.stringify(story)})" class="text-blue-600 hover:text-blue-800">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
         </button>
-        <button onclick="openChapterCreationModal()" class="text-green-600 hover:text-green-800">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
@@ -18189,16 +15981,10 @@ function updateStoriesTable(story) {
   tbody.appendChild(row);
 }
 
-function updateStatistics(totalStories, totalViews, totalRating, ratingCount) {
-  document.getElementById('total-stories').textContent = totalStories;
   document.getElementById('total-views').textContent = totalViews;
-  document.getElementById('average-rating').textContent =
-    ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : "0.0";
 
   // Actualizar tendencias (ejemplo)
-  document.getElementById('stories-trend').textContent = '+5%';
   document.getElementById('views-trend').textContent = '+12%';
-  document.getElementById('rating-trend').textContent = '+2%';
 }
 
 function updateCharts(viewsData, hourlyData) {
@@ -18241,10 +16027,8 @@ function updateCharts(viewsData, hourlyData) {
 }
 
 function calculateInsights(hourlyData, viewsData) {
-  // Calcular mejor hora para publicar
   const bestHour = hourlyData.indexOf(Math.max(...hourlyData));
   document.getElementById('best-time').textContent =
-    `La mejor hora para publicar es a las ${bestHour}:00, donde tienes mayor engagement.`;
 
   // Calcular contenido más exitoso
   const bestDate = Object.entries(viewsData)
@@ -18253,9 +16037,6 @@ function calculateInsights(hourlyData, viewsData) {
     `Tu contenido más exitoso fue publicado el ${bestDate}.`;
 }
 
-function calculateAverageRating(ratings) {
-  if (!ratings) return "0.0";
-  const values = Object.values(ratings);
   return (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
 }
 
@@ -18319,7 +16100,6 @@ function analyzeAccount() {
   }, 10000);
 
   setTimeout(() => {
-    statusText.textContent = "Verificando historial...";
     firebase.database().ref('userWarnings/' + user.uid).once('value', snapshot => {
       if (snapshot.exists()) {
         snapshot.forEach(child => {
@@ -18381,7 +16161,6 @@ function analyzeAccount() {
 
 function closeZenvioStudio() {
   document.getElementById('beaboo-studio-modal').classList.add('hidden');
-  document.getElementById('story-stats').innerHTML = '';
 }
 
 <!-- Script para la vista de Live (Duolingo Live Style) -->
@@ -18458,53 +16237,6 @@ function closeZenvioStudio() {
 </script>
 
 
-<!-- Story Viewer Modal -->
-<div id="story-viewer">
-    <div class="story-content">
-        <!-- Story content will be loaded here -->
-    </div>
-    <button id="story-viewer-close" class="story-close">&times;</button>
-</div>
-
-<!-- Story Upload Modal -->
-<div id="story-upload-modal">
-    <div class="story-upload-content">
-        <div class="story-upload-header">
-            <button class="back-btn" id="story-upload-back" aria-label="Volver">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
-            <h2 style="margin: 0;">Relato Diario</h2>
-            <div style="width: 40px;"></div>
-        </div>
-
-        <div class="story-upload-preview">
-            <img src="" alt="Preview">
-        </div>
-
-        <form id="story-upload-form">
-            <div class="file-input-wrapper">
-                <label for="story-file" class="file-input-label">
-                    <i class="fas fa-camera"></i>
-                    <span>Seleccionar imagen</span>
-                    <span class="file-hint">Toca para elegir una imagen para tu relato</span>
-                </label>
-                <input type="file" id="story-file" accept="image/*" required>
-            </div>
-
-            <div class="upload-progress">
-                <div class="progress-bar-container">
-                    <div class="progress-bar"></div>
-                </div>
-                <div class="progress-text">Publicando...</div>
-            </div>
-
-            <button type="submit">Publicar Relato</button>
-        </form>
-    </div>
-</div>
-
 <!-- Global Loading Spinner -->
 <div id="global-loader" class="fixed inset-0 bg-black bg-opacity-40 z-[9999] hidden items-center justify-center">
   <div class="epic-loader" aria-label="Cargando"></div>
@@ -18542,8 +16274,6 @@ firebase.auth().onAuthStateChanged(user => {
 });
 </script>
 
-<script src="stories.js"></script>
-<script src="community-firebase.js"></script>
 <script src="search-firebase.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -18552,5 +16282,27 @@ firebase.auth().onAuthStateChanged(user => {
     }
   });
 </script>
+<script>
+  ];
+
+      const element = document.querySelector(selector);
+      if (element) element.remove();
+    });
+
+      el.remove();
+    });
+
+    }
+
+    if (tab) tab.remove();
+  };
+
+
+  if (document.readyState === 'loading') {
+  } else {
+  }
+})();
+</script>
+
 </body>
 </html>
