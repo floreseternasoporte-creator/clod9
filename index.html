@@ -3394,10 +3394,28 @@ function openSearchLegacy() {
   }, 100);
 }
 
+function openSearch() {
+  openSearchLegacy();
+}
+
 function openHomeLegacy() {
   console.log('🏠 Abriendo inicio');
   document.getElementById('search-view').classList.add('hidden');
   document.getElementById('main-app').style.display = 'flex';
+}
+
+function openHome() {
+  openHomeLegacy();
+}
+
+function openNotifications() {
+  const modal = document.getElementById('notifications-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeNotifications() {
+  const modal = document.getElementById('notifications-modal');
+  if (modal) modal.classList.add('hidden');
 }
 
 function openCreatorHub() {

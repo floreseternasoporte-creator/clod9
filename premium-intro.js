@@ -1,7 +1,7 @@
 // Versión Premium de la Animación de Introducción
 class PremiumIntroAnimation {
   constructor() {
-    this.duration = 5000;
+    this.duration = 1200;
     this.init();
   }
 
@@ -34,6 +34,7 @@ class PremiumIntroAnimation {
           justify-content: center;
           z-index: 10000;
           overflow: hidden;
+          pointer-events: none;
         }
 
         .premium-logo {

@@ -1,7 +1,7 @@
 // Animación de Introducción Moderna - JavaScript
 class IntroAnimation {
   constructor() {
-    this.duration = 4500; // Duración total en milisegundos
+    this.duration = 1000; // Duración total en milisegundos
     this.hasShown = false;
     this.init();
   }
