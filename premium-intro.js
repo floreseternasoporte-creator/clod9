@@ -216,7 +216,7 @@ class PremiumIntroAnimation {
       </div>
 
       <div class="premium-logo">Zenvio</div>
-      <div class="premium-tagline">Tu universo de historias te espera</div>
+      <div class="premium-tagline">Tu universo digital te espera</div>
 
       <div class="premium-progress">
         <div class="premium-progress-fill"></div>
@@ -239,8 +239,8 @@ class PremiumIntroAnimation {
     const statusText = document.querySelector('.status-text');
     const messages = [
       'Creando tu experiencia personalizada...',
-      'Cargando historias increíbles...',
-      'Conectando con escritores...',
+      'Cargando contenido increíble...',
+      'Conectando con la comunidad...',
       'Preparando la magia...',
       '¡Bienvenido a Zenvio!'
     ];
