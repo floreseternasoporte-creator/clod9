@@ -2,25 +2,18 @@ const { runVercelHandler } = require('./vercel-adapter');
 const { getFirebaseConfig, firebaseRequest } = require('./firebase-realtime-client');
 
 const allowedRoutes = new Set([
-  'chapters',
   'check-user-limits',
   'community-notes',
-  'delete-story',
   'discover-feed',
   'following',
-  'get-chapters',
-  'get-stories',
   'groq-chat',
   'likes',
   'notes',
   'notifications',
   'placeholder',
-  'scheduled-chapters',
   'send-support-email',
   'trending-tags',
-  'update-story',
   'upload-image',
-  'upload-story',
   'user-stats',
   'users'
 ]);
