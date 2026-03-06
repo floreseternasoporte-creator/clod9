@@ -32,7 +32,7 @@ function handleSearchInput() {
       } else {
         renderSearchInfoList([]);
         clearSearchResults();
-        loadPopularStories();
+        loadPopularContent();
       }
       return;
     }
@@ -44,7 +44,7 @@ function handleSearchInput() {
       ]);
     } else {
       clearSearchResults();
-      loadPopularStories();
+      loadPopularContent();
     }
   }, 350);
 }
@@ -53,7 +53,7 @@ function clearSearchInput() {
   document.getElementById('search-input').value = '';
   document.getElementById('clear-search-btn').classList.add('hidden');
   clearSearchResults();
-  loadPopularStories();
+  loadPopularContent();
 }
 
 function clearSearchResults() {
@@ -244,65 +244,11 @@ async function searchInfoContent(query) {
   await renderSearchInfoList([selectedResult]);
 }
 
-async function getAllStories() {
-  if (typeof window.loadStoriesFromFirebase === 'function') {
-    try {
-      const stories = await window.loadStoriesFromFirebase();
-      if (Array.isArray(stories) && stories.length) {
-        return stories;
-      }
-    } catch (error) {
-      console.error('Error loading stories from Firebase helper:', error);
-    }
-  }
-
-  try {
-    const response = await fetch('/api/get-stories');
-    if (!response.ok) {
-      throw new Error('No se pudo cargar historias');
-    }
-    const data = await response.json();
-    return data.stories || [];
-  } catch (error) {
-    console.error('Error loading stories from Firebase:', error);
-    return [];
-  }
-}
-
 async function searchContent(query) {
   const lowerQuery = normalizeSearchTerm(query);
-  
-  // Buscar historias
-  try {
-    const stories = await getAllStories();
-    const storiesContainer = document.getElementById('search-books-carousel');
-    storiesContainer.innerHTML = '';
-    
-    let foundStories = 0;
-    stories.forEach(story => {
-      const title = normalizeSearchTerm(story.title || '');
-      const author = normalizeSearchTerm(story.username || story.authorName || story.author || '');
-      const synopsis = normalizeSearchTerm(story.synopsis || '');
-      
-      if (title.includes(lowerQuery) || author.includes(lowerQuery) || synopsis.includes(lowerQuery)) {
-        const storyCard = document.createElement('div');
-        storyCard.className = 'cursor-pointer';
-        storyCard.innerHTML = `
-          <img src="${story.coverImage || 'https://via.placeholder.com/150'}" 
-               class="w-full aspect-[3/4] object-cover rounded-lg" 
-               alt="${story.title || 'Historia'}">
-        `;
-        storyCard.onclick = () => openStoryDetail(story);
-        storiesContainer.appendChild(storyCard);
-        foundStories++;
-      }
-    });
-    
-    if (foundStories === 0) {
-      storiesContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">No se encontraron historias</div>';
-    }
-  } catch (error) {
-    console.error('Error buscando historias:', error);
+  const resultsContainer = document.getElementById('search-books-carousel');
+  if (resultsContainer) {
+    resultsContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">Esta sección ya no está disponible.</div>';
   }
   
   // Buscar autores
@@ -383,29 +329,11 @@ async function followUser(userId) {
   }
 }
 
-// Cargar historias populares al abrir búsqueda
-async function loadPopularStories() {
-  try {
-    const stories = await getAllStories();
-    const storiesContainer = document.getElementById('search-books-carousel');
-    storiesContainer.innerHTML = '';
-    
-    stories
-      .sort((a, b) => (b.views || 0) - (a.views || 0))
-      .slice(0, 12)
-      .forEach(story => {
-        const storyCard = document.createElement('div');
-        storyCard.className = 'cursor-pointer';
-        storyCard.innerHTML = `
-          <img src="${story.coverImage || 'https://via.placeholder.com/150'}" 
-               class="w-full aspect-[3/4] object-cover rounded-lg" 
-               alt="${story.title || 'Historia'}">
-        `;
-        storyCard.onclick = () => openStoryDetail(story);
-        storiesContainer.appendChild(storyCard);
-      });
-  } catch (error) {
-    console.error('Error:', error);
+// Sección removida
+async function loadPopularContent() {
+  const resultsContainer = document.getElementById('search-books-carousel');
+  if (resultsContainer) {
+    resultsContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8">Esta sección ya no está disponible.</div>';
   }
 }
 
@@ -416,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (!searchView.classList.contains('hidden')) {
-          loadPopularStories();
+          loadPopularContent();
         }
       });
     });

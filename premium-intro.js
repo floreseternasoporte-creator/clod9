@@ -1,7 +1,7 @@
 // Versión Premium de la Animación de Introducción
 class PremiumIntroAnimation {
   constructor() {
-    this.duration = 5000;
+    this.duration = 1200;
     this.init();
   }
 
@@ -34,6 +34,7 @@ class PremiumIntroAnimation {
           justify-content: center;
           z-index: 10000;
           overflow: hidden;
+          pointer-events: none;
         }
 
         .premium-logo {
@@ -216,7 +217,7 @@ class PremiumIntroAnimation {
       </div>
 
       <div class="premium-logo">Zenvio</div>
-      <div class="premium-tagline">Tu universo de historias te espera</div>
+      <div class="premium-tagline">Tu universo digital te espera</div>
 
       <div class="premium-progress">
         <div class="premium-progress-fill"></div>
@@ -239,8 +240,8 @@ class PremiumIntroAnimation {
     const statusText = document.querySelector('.status-text');
     const messages = [
       'Creando tu experiencia personalizada...',
-      'Cargando historias increíbles...',
-      'Conectando con escritores...',
+      'Cargando contenido increíble...',
+      'Conectando con la comunidad...',
       'Preparando la magia...',
       '¡Bienvenido a Zenvio!'
     ];
