@@ -55,10 +55,9 @@ exports.handler = async (event) => {
         .map((tag) => (tag.startsWith('#') ? tag : `#${tag}`))
     );
 
-    const [notesMap, communityMap, storiesMap, followingMap] = await Promise.all([
+    const [notesMap, communityMap, followingMap] = await Promise.all([
       listByTimestamp('notes', 180),
       listByTimestamp('community', 180),
-      listByTimestamp('stories', 180),
       userId ? getCollection(`following/${userId}`) : Promise.resolve({})
     ]);
 
@@ -67,8 +66,7 @@ exports.handler = async (event) => {
 
     const feed = [
       ...mapFeedItems(notesMap, 'note'),
-      ...mapFeedItems(communityMap, 'community_note'),
-      ...mapFeedItems(storiesMap, 'story')
+      ...mapFeedItems(communityMap, 'community_note')
     ]
       .filter((item) => Boolean(item.timestamp))
       .map((item) => {

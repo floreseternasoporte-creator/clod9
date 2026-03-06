@@ -19,15 +19,14 @@ exports.handler = async (event) => {
 
     const { limit = 20 } = event.queryStringParameters || {};
     const top = Math.max(5, Math.min(Number(limit) || 20, 50));
-    const [notesMap, communityMap, storiesMap] = await Promise.all([
+    const [notesMap, communityMap] = await Promise.all([
       listByTimestamp('notes', 300),
-      listByTimestamp('community', 300),
-      listByTimestamp('stories', 300)
+      listByTimestamp('community', 300)
     ]);
 
     const tagMap = new Map();
 
-    [notesMap, communityMap, storiesMap].forEach((sourceMap) => {
+    [notesMap, communityMap].forEach((sourceMap) => {
       Object.values(sourceMap || {}).forEach((item) => {
         const text = `${item?.content || ''} ${item?.title || ''} ${item?.description || ''}`;
         const uniqueTags = new Set(extractHashtags(text));
