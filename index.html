@@ -255,7 +255,6 @@ body {
   object-fit: cover;
 }
 
-.rating-badge {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -1835,7 +1834,6 @@ body {
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
-              Publicar imagen
             </button>
           </div>
           <button onclick="generateImage()" id="generate-btn" class="w-full bg-[#00A2FF] text-white py-3 rounded-lg font-semibold hover:bg-[#0066CC] transition-all flex items-center justify-center">
@@ -2603,11 +2601,9 @@ body {
       </div>
 </section>
 
-<section id="new-releases-section" class="mb-8">
       <div class="flex justify-between items-center mb-4 px-4">
       <h2 id="new-releases-title" class="text-base font-semibold text-gray-900">Inicio</h2>
       </div>
-      <div id="new-releases" class="flex space-x-4 overflow-x-auto px-4 scrollbar-hide"></div>
 </section>
 
 <script>
@@ -2687,7 +2683,7 @@ body {
 
   <!-- BOTTOM NAVIGATION ESTILO UBER -->
   <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-uber-line transition-all duration-300 z-[100] shadow-uber-header">
-    <div class="grid grid-cols-5 px-2 py-2 gap-1">
+    <div class="grid grid-cols-4 px-2 py-2 gap-1">
       <button id="nav-home" data-section="home" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200 active">
         <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
           <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
@@ -2708,13 +2704,6 @@ body {
           </svg>
         </div>
         <span class="text-xs font-medium">Crear</span>
-      </button>
-      <button id="nav-community" data-section="community" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
-        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-        </svg>
-        <span class="text-xs font-medium">Comunidad</span>
       </button>
       <button id="nav-alerts" data-section="alerts" class="nav-button flex flex-col items-center py-2 px-1 rounded-xl transition-colors duration-200">
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -2769,7 +2758,7 @@ body {
       display: block;
     }
 #search-view,
-    #community-view,
+    
     #creator-hub-view,
     #zenvio-chat-view {
       background-color: #f6f6f6 !important;
@@ -2852,7 +2841,6 @@ body {
         case 'home': openHome(); break;
         case 'search': openSearch(); break;
         case 'create': openCreatorHub(); break;
-        case 'community': openCommunity(); break;
         case 'alerts': openNotifications(); break;
       }
     }
@@ -2935,7 +2923,6 @@ body {
           </div>
           <div class="mt-3 flex flex-wrap gap-2">
             <button onclick="applyChatQuickPrompt('Genera una imagen cinematográfica de una ciudad futurista al atardecer')" class="atenis-quick-chip">Imagen pro</button>
-            <button onclick="applyChatQuickPrompt('Hazme un plan de 5 capítulos para una novela de misterio')" class="atenis-quick-chip">Plan capítulos</button>
           </div>
         </div>
       </div>
@@ -3473,7 +3460,6 @@ function switchSearchTab(tab) {
     infoSection.classList.remove('hidden');
   } else {
   }
-}
 
 function toggleClearButton(inputId, buttonId) {
   const input = document.getElementById(inputId);
@@ -3942,7 +3928,10 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     if (noteCounter) noteCounter.textContent = `${text.length}/280`;
   }
 
+    const originalText = generateBtn.innerHTML;
 
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Generando...';
 
 
 
@@ -4718,107 +4707,379 @@ window.fetchSearchInfoFromWikipedia = async function(query) {
     background-color: #f2f2f2;
   }
 
-  .bg-uber-black {
-    background-color: #111111;
+  .atenis-voice-btn.recording {
+    background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+    box-shadow: 0 0 0 4px rgba(255, 92, 122, 0.2);
+    animation: atenisPulse 1.1s ease-in-out infinite;
   }
 
-  .border-uber-line {
-    border-color: #e6e6e6;
+  @keyframes atenisPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
   }
 
-  .text-uber-black {
-    color: #111111;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  .text-uber-muted {
-    color: #6b7280;
-  }
-
-  .placeholder-uber-muted::placeholder {
-    color: #9ca3af;
-  }
-
-  .shadow-uber-header {
-    box-shadow: 0 1px 0 rgba(17, 17, 17, 0.06);
-  }
-
-  .shadow-uber-chip {
-    box-shadow: 0 2px 8px rgba(17, 17, 17, 0.06);
-  }
-
-  .uber-chip-row::-webkit-scrollbar {
+  /* Scrollbar oculto para tabs */
+  .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
 
-  .uber-chip-row {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
-  .uber-chip {
-    border-radius: 999px;
-    border-color: #e6e6e6;
-    color: #111111;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(17, 17, 17, 0.06);
+  /* Estilos del autor */
+  .author-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    margin-bottom: 12px;
   }
 
-  .uber-chip:hover {
-    border-color: #111111;
-    color: #111111;
+  .author-item img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-right: 16px;
   }
 
-  .uber-chip.active {
-    background: #111111;
-    border-color: #111111;
-    color: #ffffff;
+  /* Ocultar scrollbar pero mantener funcionalidad */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
-  :root {
-    --uber-black: #111111;
-    --uber-surface: #f6f6f6;
-    --uber-field: #f2f2f2;
-    --uber-line: #e6e6e6;
-    --uber-muted: #6b7280;
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+</style>
 
-  body {
-    background-color: var(--uber-surface);
-    color: var(--uber-black);
-  }
+<!-- Script para cambiar entre libros y autores -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        var tab = button.getAttribute('data-tab');
+        document.getElementById('books-section').classList.toggle('hidden', tab !== 'books');
+        document.getElementById('authors-section').classList.toggle('hidden', tab !== 'authors');
+        tabButtons.forEach(function(btn) {
+          btn.classList.remove('text-white', 'border-b-2', 'border-[#ff0050]');
+        });
+        button.classList.add('text-white', 'border-b-2', 'border-[#ff0050]');
+      });
+    });
+  });
+</script>
+<!-- PERFIL PROPIO CON SUBIDA DE FOTO EN TIEMPO REAL -->
+<div id="profile-view" class="fixed inset-0 overflow-y-auto z-40 hidden bg-white text-black scrollbar-hide">
+  <!-- Vista móvil -->
+  <div class="block lg:hidden">
+    <!-- Header limpio -->
+    <div class="sticky top-0 bg-white border-b border-uber-line px-4 py-3 z-10 shadow-uber-header">
+      <div class="flex items-center justify-between">
+        <button onclick="openHome()" class="p-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h2 id="profile-username-header" class="text-base font-semibold text-gray-900">@nombre_usuario</h2>
+        <button onclick="openMenuModal()" class="p-2" aria-label="Configuración">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75h1.5l.45 2.04a6.9 6.9 0 011.62.67l1.74-1.12 1.06 1.06-1.12 1.74c.26.5.48 1.04.64 1.61l2.06.46v1.5l-2.06.46a6.94 6.94 0 01-.64 1.61l1.12 1.74-1.06 1.06-1.74-1.12a6.9 6.9 0 01-1.62.67l-.45 2.04h-1.5l-.45-2.04a6.9 6.9 0 01-1.62-.67l-1.74 1.12-1.06-1.06 1.12-1.74a6.94 6.94 0 01-.64-1.61L3.75 12v-1.5l2.06-.46c.16-.57.38-1.11.64-1.61L5.33 6.69l1.06-1.06 1.74 1.12a6.9 6.9 0 011.62-.67l.5-2.33z"/>
+            <circle cx="12" cy="12" r="2.75" />
+          </svg>
+        </button>
+      </div>
+    </div>
 
-  .bg-gray-50,
-  .bg-gray-100 {
-    background-color: var(--uber-surface) !important;
-  }
+    <!-- Contenido del perfil -->
+    <div class="p-4">
+      <!-- Sección de perfil -->
+      <div class="mb-4">
+        <div class="flex flex-col items-center text-center mb-4">
+          <img id="profile-image" src="https://via.placeholder.com/150" class="w-24 h-24 rounded-full object-cover" style="border: 2px solid #00A2FF;" alt="Foto de perfil">
+          <h2 id="profile-display-name" class="font-semibold text-gray-900 mt-3">Nombre</h2>
+          <p id="profile-username" class="text-sm text-gray-600">@nombre_usuario</p>
+        </div>
 
-  .bg-gray-200,
-  .bg-gray-300 {
-    background-color: var(--uber-field) !important;
-  }
+        <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+          </button>
+          <div class="rounded-xl border border-gray-200 py-2">
+            <div id="profile-notes-count" class="font-semibold">0</div>
+            <div class="text-xs text-gray-500">Notas</div>
+          </div>
+          <button onclick="openMyFollowersModal()" class="rounded-xl border border-gray-200 py-2">
+            <div id="profile-followers" class="font-semibold">0</div>
+            <div class="text-xs text-gray-500">Conexiones</div>
+          </button>
+        </div>
 
-  .border-gray-100,
-  .border-gray-200,
-  .border-gray-300 {
-    border-color: var(--uber-line) !important;
-  }
+        <p id="profile-bio" class="text-sm text-gray-600 mb-3 text-center"></p>
 
-  .text-gray-400 {
-    color: #9ca3af !important;
-  }
+        <div class="flex space-x-2">
+          <button onclick="openQRModal()" class="bg-gray-100 text-black text-sm font-semibold px-4 py-2 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
-  .text-gray-500 {
-    color: var(--uber-muted) !important;
-  }
 
-  .text-gray-600 {
-    color: #4b5563 !important;
-  }
 
-  .text-gray-700,
-  .text-gray-800,
-  .text-gray-900 {
-    color: var(--uber-black) !important;
-  }
+      <div class="border-t border-gray-200 pt-4">
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista desktop inspirada en Inkspired -->
+  <div class="hidden lg:block relative min-h-screen">
+    <!-- Header de perfil con fondo gradiente -->
+    <div class="relative h-64 bg-gradient-to-r from-[#00A2FF] via-[#ff4757] to-[#00A2FF] overflow-hidden">
+      <!-- Patrón de fondo -->
+      <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+
+      <!-- Botón volver y opciones -->
+      <div class="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
+        <button onclick="openHome()" class="text-white font-medium flex items-center hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-lg transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Volver
+        </button>
+
+        <div class="flex items-center space-x-3">
+          <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all" aria-label="Configuración">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75h1.5l.45 2.04a6.9 6.9 0 011.62.67l1.74-1.12 1.06 1.06-1.12 1.74c.26.5.48 1.04.64 1.61l2.06.46v1.5l-2.06.46a6.94 6.94 0 01-.64 1.61l1.12 1.74-1.06 1.06-1.74-1.12a6.9 6.9 0 01-1.62.67l-.45 2.04h-1.5l-.45-2.04a6.9 6.9 0 01-1.62-.67l-1.74 1.12-1.06-1.06 1.12-1.74a6.94 6.94 0 01-.64-1.61L3.75 12v-1.5l2.06-.46c.16-.57.38-1.11.64-1.61L5.33 6.69l1.06-1.06 1.74 1.12a6.9 6.9 0 011.62-.67l.5-2.33z"/>
+              <circle cx="12" cy="12" r="2.75" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Información de perfil centrada -->
+      <div class="absolute bottom-0 left-0 right-0 p-8">
+        <div class="flex items-end space-x-6">
+          <!-- Foto de perfil con marco (SOLO VISUALIZACIÓN) -->
+          <div class="relative">
+
+            <div class="relative block">
+              <img id="profile-image-desktop" src="https://via.placeholder.com/120" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg relative z-0" alt="Foto de perfil">
+            </div>
+
+          </div>
+
+          <!-- Información del usuario -->
+          <div class="flex-1">
+            <div class="flex items-center mb-2">
+              <h1 id="profile-username-desktop" class="text-3xl font-bold text-white mr-3">@nombre_usuario</h1>
+              <button onclick="openMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all" aria-label="Configuración">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75h1.5l.45 2.04a6.9 6.9 0 011.62.67l1.74-1.12 1.06 1.06-1.12 1.74c.26.5.48 1.04.64 1.61l2.06.46v1.5l-2.06.46a6.94 6.94 0 01-.64 1.61l1.12 1.74-1.06 1.06-1.74-1.12a6.9 6.9 0 01-1.62.67l-.45 2.04h-1.5l-.45-2.04a6.9 6.9 0 01-1.62-.67l-1.74 1.12-1.06-1.06 1.12-1.74a6.94 6.94 0 01-.64-1.61L3.75 12v-1.5l2.06-.46c.16-.57.38-1.11.64-1.61L5.33 6.69l1.06-1.06 1.74 1.12a6.9 6.9 0 011.62-.67l.5-2.33z"/>
+              <circle cx="12" cy="12" r="2.75" />
+            </svg>
+              </button>
+            </div>
+            <p id="profile-location-desktop" class="text-white text-opacity-90 mb-4">Ubicación no especificada</p>
+
+            <!-- Estadísticas -->
+            <div class="flex space-x-8">
+              <button onclick="openMyFollowersModal()" class="text-center focus:outline-none hover:opacity-80 transition-opacity">
+                <div id="profile-followers-desktop" class="text-2xl font-bold text-white">0</div>
+                <div class="text-white text-opacity-80 text-sm">conexiones</div>
+              </button>
+              <button onclick="openMyFollowingModal()" class="text-center focus:outline-none hover:opacity-80 transition-opacity">
+                <div id="profile-following-desktop" class="text-2xl font-bold text-white">0</div>
+                <div class="text-white text-opacity-80 text-sm">siguiendo</div>
+              </button>
+              <button onclick="openQRModal()" class="text-center focus:outline-none hover:opacity-80 transition-opacity">
+                <div class="text-2xl font-bold text-white">QR</div>
+                <div class="text-white text-opacity-80 text-sm">código</div>
+              </button>
+              <div class="text-center">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="bg-gray-50 min-h-screen">
+      <!-- Navegación de tabs -->
+      <div class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-6">
+          <nav class="flex space-x-8">
+            </button>
+            <button class="tab-button py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="notes">
+              Notas
+            </button>
+
+          </nav>
+        </div>
+      </div>
+
+      <!-- Contenido de tabs -->
+      <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="flex gap-8">
+          <!-- Contenido principal -->
+          <div class="flex-1">
+
+
+              <div class="flex justify-between items-center mb-6">
+                <div>
+                </div>
+                <button class="bg-gray-300 text-gray-700 px-6 py-3 rounded-xl cursor-not-allowed flex items-center" disabled>
+                  No disponible
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Otros tabs (ocultos por defecto) -->
+            <div id="notes-tab-content" class="tab-content hidden">
+              <h2 class="text-2xl font-bold mb-6">Notas</h2>
+              <p class="text-gray-600">Tus notas y pensamientos publicados en la comunidad</p>
+            </div>
+
+
+          </div>
+
+          <!-- Sidebar derecho -->
+          <div class="w-80">
+            <!-- Estadísticas -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border">
+              <h3 class="font-bold text-gray-900 mb-4">Estadísticas</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600">Total de lecturas</span>
+                  <span id="sidebar-total-views" class="font-bold text-[#00A2FF]">0</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600">Conexiones</span>
+                  <span id="sidebar-followers-count" class="font-bold text-[#00A2FF]">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Funciones para manejar tabs en desktop
+document.addEventListener('DOMContentLoaded', function() {
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabName = button.getAttribute('data-tab');
+
+      // Remover active de todos los botones
+      tabButtons.forEach(btn => {
+        btn.classList.remove('active', 'border-[#00A2FF]', 'text-[#00A2FF]');
+        btn.classList.add('border-transparent', 'text-gray-500');
+      });
+
+      // Agregar active al botón clickeado
+      button.classList.add('active', 'border-[#00A2FF]', 'text-[#00A2FF]');
+      button.classList.remove('border-transparent', 'text-gray-500');
+
+      // Ocultar todos los contenidos
+      tabContents.forEach(content => {
+        content.classList.add('hidden');
+      });
+
+      // Mostrar el contenido correspondiente
+      const targetContent = document.getElementById(tabName + '-tab-content');
+      if (targetContent) {
+        targetContent.classList.remove('hidden');
+
+        // Si es el tab de notas, cargar las notas del usuario
+        if (tabName === 'notes') {
+          loadUserNotes();
+        }
+      }
+    });
+  });
+});
+
+// FUNCIÓN REMOVIDA - La subida de foto solo está disponible en la sección de ajustes
+</script>
+
+<!-- CSS específico para overlay de subida -->
+<style>
+  /* Ocultar scrollbar */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+</style>
+
+<!-- La subida de foto de perfil solo está disponible en la sección de ajustes -->
+
+
+<!-- MODAL DE EDICIÓN DE PERFIL -->
+<div id="profile-edit-modal" class="fixed inset-0 overflow-y-auto z-50 hidden bg-white text-black">
+  <!-- Vista móvil (actual) -->
+  <div class="block lg:hidden p-6">
+    <button onclick="closeProfileEdit()" class="text-[#00A2FF] mb-4 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+      <span>Volver</span>
+    </button>
+    <div class="flex flex-col items-center">
+      <div class="relative">
+        <img id="edit-profile-image-mobile" src="https://via.placeholder.com/150" class="w-24 h-24 rounded-full object-cover border-2 border-[#00A2FF] cursor-pointer" alt="Foto de perfil" onclick="openPhotoOptionsModal()">
+        <input type="file" id="edit-profile-image-input" accept="image/*" class="hidden" onchange="handleEditProfileImageUpload(event)">
+      </div>
+      <!-- Información básica -->
+      <div class="space-y-4 mt-6">
+        <!-- Nombre completo -->
+        <div>
+          <label class="block mb-2 text-sm font-medium text-gray-700">Nombre</label>
+          <input id="edit-name" type="text" class="w-full p-3 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-[#00A2FF] focus:border-transparent transition" placeholder="Tu nombre completo">
+        </div>
+
+        <!-- Nombre de usuario -->
+        <div>
+          <label class="block mb-2 text-sm font-medium text-gray-700">Nombre de usuario</label>
+          <input id="edit-username" type="text" class="w-full p-3 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-[#00A2FF] focus:border-transparent transition" placeholder="@tunombredeusuario">
+          <p class="text-xs text-blue-600 mt-1 flex items-center">
+            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            Solo se puede cambiar cada 7 días
+          </p>
+        </div>
+
+        <!-- Biografía -->
+        <div>
+          <label class="block mb-2 text-sm font-medium text-gray-700">Biografía</label>
+          <textarea id="edit-bio" rows="3" class="w-full p-3 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-[#00A2FF] focus:border-transparent transition resize-none" placeholder="Cuéntanos sobre ti..."></textarea>
+          <p class="text-xs text-gray-500 mt-1">Máximo 150 caracteres</p>
+        </div>
+      </div>
 
   .bg-blue-500,
   .bg-blue-600,
@@ -8945,6 +9206,7 @@ function showLiveNotification(message, type = 'info') {
   #gift-drawer.open {
     bottom: 0;
   }
+</style>
 
   /* Estilo para corazones animados */
   .heart {
@@ -9093,7 +9355,6 @@ function showLiveNotification(message, type = 'info') {
     50% {
       transform: scale3d(1.1, 1.1, 1);
     }
-  }
 
   @keyframes fill {
     100% {
@@ -9233,7 +9494,6 @@ function showLiveNotification(message, type = 'info') {
             <tr>
               <th class="p-4 text-left">Capítulos</th>
               <th class="p-4 text-left">Vistas</th>
-              <th class="p-4 text-left">Rating</th>
               <th class="p-4 text-left">Estado</th>
               <th class="p-4 text-left">Acciones</th>
             </tr>
@@ -9248,7 +9508,6 @@ function showLiveNotification(message, type = 'info') {
       <h3 class="text-lg font-bold mb-4">Insights</h3>
       <div id="insights" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-blue-50 p-4 rounded-lg">
-          <h4 class="font-bold text-blue-700">Mejor hora para publicar</h4>
           <p id="best-time" class="mt-2">Analizando datos...</p>
         </div>
         <div class="bg-green-50 p-4 rounded-lg">
@@ -9271,9 +9530,6 @@ function showLiveNotification(message, type = 'info') {
       <span>Volver</span>
     </button>
 
-    <h2 class="text-2xl font-bold mb-4">Próximas Publicaciones</h2>
-    <div id="scheduled-content" class="space-y-4">
-      <!-- Aquí se mostrarán los capítulos programados -->
     </div>
   </div>
 </div>
